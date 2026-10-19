@@ -1,8 +1,11 @@
 // Central settings. Everything tunable lives here, not scattered across files.
 
 export const DEFAULTS = Object.freeze({
-  // Cloud model id. Confirmed against the live model list in M4 (see DEVLOG.md).
+  // Cloud model id, confirmed against the live model list and benchmarked in M4
+  // (docs/test-runs/model-bench.json, DEVLOG.md). With the default "thinking" this model took
+  // about 12 s per request; thinkingLevel "low" brought a typical request to about 4 s.
   model: 'gemini-3.8-flash',
+  thinkingLevel: 'low',
   apiBaseUrl: 'https://generativelanguage.googleapis.com',
   // Maximum characters sent to the model in one chunk.
   chunkChars: 8000,
@@ -19,10 +22,14 @@ export const DEFAULTS = Object.freeze({
 //  apiKey      - the user's own key, saved from the Options page (FR5)
 //  apiBaseUrl  - test seam only: lets the end-to-end tests point at a local mock server
 //  chunkChars  - test seam only: lets tests force several chunks on a short page
+//  retryBaseDelayMs, requestTimeoutMs - test seams only: let tests exercise retries and
+//                timeouts in milliseconds instead of waiting real seconds
 export const STORAGE_KEYS = Object.freeze({
   apiKey: 'apiKey',
   apiBaseUrl: 'apiBaseUrl',
   chunkChars: 'chunkChars',
+  retryBaseDelayMs: 'retryBaseDelayMs',
+  requestTimeoutMs: 'requestTimeoutMs',
 });
 
 /**
@@ -42,6 +49,10 @@ export async function loadSettings(storageArea) {
   const chunk = Number(stored[STORAGE_KEYS.chunkChars]);
   if (Number.isFinite(chunk) && chunk >= 500) {
     settings.chunkChars = Math.floor(chunk);
+  }
+  for (const name of ['retryBaseDelayMs', 'requestTimeoutMs']) {
+    const value = Number(stored[STORAGE_KEYS[name]]);
+    if (Number.isFinite(value) && value >= 1) settings[name] = Math.floor(value);
   }
   return settings;
 }

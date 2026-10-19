@@ -68,9 +68,12 @@ export function createGeminiEngine(settings, deps = {}) {
     if (!settings.apiKey) throw new AppError(ERROR_CODES.NO_KEY);
 
     const url = `${settings.apiBaseUrl}/v1beta/models/${encodeURIComponent(settings.model)}:generateContent`;
+    const generationConfig = { temperature: settings.temperature };
+    // Without this the model spends many seconds "thinking" before a summary this simple.
+    if (settings.thinkingLevel) generationConfig.thinkingConfig = { thinkingLevel: settings.thinkingLevel };
     const body = JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: settings.temperature },
+      generationConfig,
     });
 
     for (let attempt = 0; attempt <= settings.maxRetries; attempt += 1) {

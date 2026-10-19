@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Late content page</title></head>
+<body>
+  <h1>Weather Station Report</h1>
+  <div id="root"><p>Loading the report...</p></div>
+  <script>
+    // The real text arrives after a delay, like a page that fetches its content with JavaScript.
+    // Use ?delay=milliseconds to control it.
+    const delay = Number(new URLSearchParams(location.search).get('delay') || 500);
+    setTimeout(() => {
+      const root = document.getElementById('root');
+      root.innerHTML = [
+        'The Hill Station weather report for the third week of March shows a steady pattern of cool mornings and warm afternoons.',
+        'Temperatures at dawn averaged eight degrees, rising to nineteen by mid afternoon, with light winds from the west.',
+        'Rainfall was low, with only two short showers recorded on Tuesday and Friday, adding up to six millimetres in total.',
+        'The station keeper noted that the valley fog cleared an hour earlier than in the previous week, which helped the morning ferry schedule.',
+        'Looking ahead, the forecast expects a warmer weekend, with a small chance of thunderstorms on Sunday evening.',
+      ].map((t) => '<p>' + t + '</p>').join('');
+    }, delay);
+  </script>
+</body>
+</html>

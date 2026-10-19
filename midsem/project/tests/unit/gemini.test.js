@@ -12,6 +12,7 @@ const SETTINGS = {
   maxRetries: 2,
   retryBaseDelayMs: 1000,
   temperature: 0.2,
+  thinkingLevel: 'low',
 };
 
 const okBody = (text) => ({ candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP' }] });
@@ -64,6 +65,14 @@ test('sends the key in a header, not in the URL, and returns the text', async ()
   assert.equal(init.headers['x-goog-api-key'], 'test-key-123');
   const body = JSON.parse(init.body);
   assert.match(body.contents[0].parts[0].text, /Some page text/);
+  assert.equal(body.generationConfig.thinkingConfig.thinkingLevel, 'low');
+});
+
+test('no thinking setting means no thinkingConfig is sent', async () => {
+  const fetchImpl = scriptedFetch([jsonResponse(200, okBody('ok'))]);
+  const engine = createGeminiEngine({ ...SETTINGS, thinkingLevel: '' }, { fetchImpl, sleepImpl: noSleep() });
+  await engine.summarizeChunk('t', { total: 1 });
+  assert.equal(JSON.parse(fetchImpl.calls[0].init.body).generationConfig.thinkingConfig, undefined);
 });
 
 test('a one-chunk page uses the final-format prompt, a long page uses the chunk prompt', async () => {

@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-19T23:24:38.157Z",
+  "inputChars": 6952,
+  "runsPerCandidate": 3,
+  "results": [
+    {
+      "label": "gemini-3.8-flash (default thinking)",
+      "run": 1,
+      "status": 200,
+      "ms": 12294,
+      "promptTokens": 1652,
+      "outputTokens": 258,
+      "thinkingTokens": 1657,
+      "outputChars": 1167,
+      "error": null,
+      "sample": "This page outlines the history of coastal lighthouses, tracing their evolution from early fire beacons and ancient towers to advanced optical systems, keeper ro"
+    },
+    {
+      "label": "gemini-3.8-flash (default thinking)",
+      "run": 2,
+      "status": 200,
+      "ms": 11442,
+      "promptTokens": 1652,
+      "outputTokens": 266,
+      "thinkingTokens": 1611,
+      "outputChars": 1238,
+      "error": null,
+      "sample": "This page provides a history of coastal lighthouses, tracing their development from early open fires to advanced lenses and fog signals alongside the daily duti"
+    },
+    {
+      "label": "gemini-3.8-flash (default thinking)",
+      "run": 3,
+      "status": 200,
+      "ms": 12597,
+      "promptTokens": 1652,
+      "outputTokens": 234,
+      "thinkingTokens": 1671,
+      "outputChars": 1072,
+      "error": null,
+      "sample": "This page outlines the history and evolution of lighthouses, from early beacons and construction feats to lighting technologies, keeper responsibilities, and fo"
+    },
+    {
+      "label": "gemini-3.8-flash thinkingLevel=low",
+      "run": 1,
+      "status": 200,
+      "ms": 3881,
+      "promptTokens": 1652,
+      "outputTokens": 312,
+      "thinkingTokens": 0,
+      "outputChars": 1444,
+      "error": null,
+      "sample": "This page provides a history of coastal lighthouses, tracing their evolution from early hilltop fires and ancient towers to modern optical machines, fog signals"
+    },
+    {
+      "label": "gemini-3.8-flash thinkingLevel=low",
+      "run": 2,
+      "status": 200,
+      "ms": 3918,
+      "promptTokens": 1652,
+      "outputTokens": 281,
+      "thinkingTokens": 0,
+      "outputChars": 1364,
+      "error": null,
+      "sample": "This page outlines the history and technological evolution of lighthouses, from early coastal fires to modern optical and sound signals. - The Pharos of Alexan"
+    },
+    {
+      "label": "gemini-3.8-flash thinkingLevel=low",
+      "run": 3,
+      "status": 200,
+      "ms": 12521,
+      "promptTokens": 1652,
+      "outputTokens": 261,
+      "thinkingTokens": 0,
+      "outputChars": 1268,
+      "error": null,
+      "sample": "This page provides a history of lighthouses, tracing their evolution from early open fires to advanced optical and sound systems. - The Pharos of Alexandria wa"
+    },
+    {
+      "label": "gemini-3.5-flash-lite (default)",
+      "run": 1,
+      "status": 200,
+      "ms": 2014,
+      "promptTokens": 1652,
+      "outputTokens": 273,
+      "thinkingTokens": 0,
+      "outputChars": 1147,
+      "error": null,
+      "sample": "This page is a history of lighthouses, tracing their evolution from open fires on hills to advanced optical lens systems and fog signals. - The Pharos of Alexa"
+    },
+    {
+      "label": "gemini-3.5-flash-lite (default)",
+      "run": 2,
+      "status": 200,
+      "ms": 1565,
+      "promptTokens": 1652,
+      "outputTokens": 321,
+      "thinkingTokens": 0,
+      "outputChars": 1396,
+      "error": null,
+      "sample": "This page is a history of lighthouses, tracing their evolution from open fires on the coast to advanced optical lenses, sound signals, and the daily lives of th"
+    },
+    {
+      "label": "gemini-3.5-flash-lite (default)",
+      "run": 3,
+      "status": 200,
+      "ms": 1575,
+      "promptTokens": 1652,
+      "outputTokens": 335,
+      "thinkingTokens": 0,
+      "outputChars": 1418,
+      "error": null,
+      "sample": "This page is about the history and evolution of lighthouses, from early fires on hills to advanced optical lenses, fog signals, and the lives of keepers. - The"
+    },
+    {
+      "label": "gemini-2.5-flash thinkingBudget=0",
+      "run": 1,
+      "status": 200,
+      "ms": 2378,
+      "promptTokens": 1652,
+      "outputTokens": 309,
+      "thinkingTokens": 0,
+      "outputChars": 1441,
+      "error": null,
+      "sample": "This page describes the history and development of lighthouses, from ancient fires to modern optical machines. - The Pharos of Alexandria, built in the third c"
+    },
+    {
+      "label": "gemini-2.5-flash thinkingBudget=0",
+      "run": 2,
+      "status": 200,
+      "ms": 2680,
+      "promptTokens": 1652,
+      "outputTokens": 311,
+      "thinkingTokens": 0,
+      "outputChars": 1422,
+      "error": null,
+      "sample": "This page describes the history and development of lighthouses, from ancient fires to modern optical machines. - The Pharos of Alexandria, built in the third c"
+    },
+    {
+      "label": "gemini-2.5-flash thinkingBudget=0",
+      "run": 3,
+      "status": 200,
+      "ms": 2376,
+      "promptTokens": 1652,
+      "outputTokens": 305,
+      "thinkingTokens": 0,
+      "outputChars": 1420,
+      "error": null,
+      "sample": "This page describes the history and evolution of lighthouses, from ancient fires to modern optical machines. - The Pharos of Alexandria, built in the third cen"
+    }
+  ]
+}
