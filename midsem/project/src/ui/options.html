@@ -1,0 +1,33 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page Summarizer Options</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="options">
+  <h1>Page Summarizer</h1>
+  <p class="lead">Version 1 sends the page text to Google's Gemini API using your own key. Enter it once here.</p>
+
+  <p id="saved-note" class="saved-note" hidden>A key is saved in this browser.</p>
+
+  <label for="api-key">Gemini API key</label>
+  <div class="row">
+    <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key here">
+    <button id="save" type="button" class="primary">Save</button>
+  </div>
+  <p class="hint">
+    Get a free key in <a class="link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+    The key is stored only in this browser (not synced to your Google account) and is sent only to Google's API.
+  </p>
+
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <div id="remove-wrap" class="danger" hidden>
+    <button id="remove" type="button">Remove saved key</button>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
