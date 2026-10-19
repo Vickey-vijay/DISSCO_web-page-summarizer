@@ -1,0 +1,29 @@
+# Secrets: never commit keys
+.env
+.env.*
+*.env.test
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.venv/
+
+# Logs and test output
+*.log
+setup.log
+midsem/project/test-results/
+midsem/project/playwright-report/
+test-output/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+.vscode/
+.idea/
+
+# Local Claude Code state
+.claude/
