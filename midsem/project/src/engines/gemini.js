@@ -30,8 +30,10 @@ function retryAfterMs(response) {
 async function readJson(response) {
   try {
     return await response.json();
-  } catch {
-    return null;
+  } catch (err) {
+    // An abort or timeout while reading the body must still reach the caller.
+    if (err?.name === 'AbortError' || err?.name === 'TimeoutError') throw err;
+    return null; // not JSON: the status code alone decides what happens
   }
 }
 
@@ -74,10 +76,16 @@ export function createGeminiEngine(settings, deps = {}) {
     for (let attempt = 0; attempt <= settings.maxRetries; attempt += 1) {
       if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
 
-      const timeoutSignal = AbortSignal.timeout(settings.requestTimeoutMs);
-      const requestSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+      // Our own timer (not AbortSignal.timeout) so it can be cleared once the answer is in.
+      const timeoutController = new AbortController();
+      const timer = setTimeout(
+        () => timeoutController.abort(new DOMException('Request timed out', 'TimeoutError')),
+        settings.requestTimeoutMs,
+      );
+      const requestSignal = signal ? AbortSignal.any([signal, timeoutController.signal]) : timeoutController.signal;
 
       let response;
+      let data;
       try {
         response = await fetchImpl(url, {
           method: 'POST',
@@ -86,15 +94,16 @@ export function createGeminiEngine(settings, deps = {}) {
           body,
           signal: requestSignal,
         });
+        data = await readJson(response);
       } catch (err) {
         if (signal?.aborted) throw signal.reason ?? err;
-        if (timeoutSignal.aborted) {
+        if (timeoutController.signal.aborted) {
           throw new AppError(ERROR_CODES.TIMEOUT, `no answer within ${settings.requestTimeoutMs} ms`, { cause: err });
         }
         throw new AppError(ERROR_CODES.NETWORK, String(err?.message ?? err), { cause: err });
+      } finally {
+        clearTimeout(timer);
       }
-
-      const data = await readJson(response);
 
       if (response.ok) {
         const text = extractText(data);
