@@ -7,8 +7,11 @@
 # Dependencies and build output
 node_modules/
 dist/
-build/
+midsem/project/build/
+finalsem/project/build/
 .venv/
+__pycache__/
+*.pyc
 
 # Logs and test output
 *.log
