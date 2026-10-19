@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Page Summarizer",
+  "version": "1.0.0",
+  "description": "Summarizes the page you are reading in one click. V1 uses a cloud LLM API with your own key.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Summarize this page",
+    "default_popup": "src/ui/popup.html"
+  },
+  "options_page": "src/ui/options.html",
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"]
+}
