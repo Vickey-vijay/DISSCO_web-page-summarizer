@@ -2,6 +2,14 @@
 
 This guide is for anyone (person or agent) writing chapter text. Follow it exactly; the chapters are compiled by `md2docx.py` into the Word report.
 
+## Plain English, humanized (rule from the project owner)
+- Write so a viva panel member and the client can follow without a computer science background. Short sentences. Everyday words first.
+- The first time a technical term appears, say what it means in a plain phrase in brackets or in the next sentence, for example "a content script (a small program that Chrome runs inside the page you are reading)". After that, use the term.
+- Depth stays. Explain every step, the reason for each choice, what the user sees, and what happens when something fails. Plain words are not a reason to skip detail.
+- Never use these words or phrases: delve, seamless, seamlessly, robust, leverage, game-changer, cutting-edge, "it is important to note", "in today's world", "in conclusion" at the start of a paragraph, "navigate the landscape", "unlock", "empower". No emojis. No dash chains.
+- Sound like a student who did the work: "I" is allowed in the first-person places (for example, "I chose..."), but keep the focus on the system and the evidence.
+- Every technical section ends with a short "What this means in plain words" paragraph.
+
 ## Voice and style
 - Write as the student describing their own project: plain, concrete sentences. Prefer "the extension reads..." and "this project uses..." over "we". Never write "I".
 - Explain every technical term the first time it appears, in one short clause (for example, "a service worker, the background script Chrome runs for an extension").

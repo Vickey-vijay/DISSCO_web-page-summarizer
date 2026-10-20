@@ -1,3 +1,5 @@
+![BITS Pilani logo](../assets/bits-logo.png)
+
 # AI-Powered Web Page Summarizer
 
 **A Chrome Extension with a Cloud Engine (V1) and an In-Browser Local Model (V2)**
@@ -12,7 +14,8 @@
 | Research Area | Applied Natural Language Processing, Browser Extension Engineering, On-Device Inference |
 | Project Carried Out At | [Insert Organization Name & Location] |
 
-**BIRLA INSTITUTE OF TECHNOLOGY & SCIENCE, PILANI**
+**BIRLA INSTITUTE OF TECHNOLOGY & SCIENCE, PILANI (RAJASTHAN)**
+Pilani, Rajasthan 333031
 [Insert Month and Year]
 
 ---
