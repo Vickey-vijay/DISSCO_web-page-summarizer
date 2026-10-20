@@ -1,0 +1,41 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page Summarizer</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup">
+  <header class="bar">
+    <span class="wordmark">Page Summarizer</span>
+    <span class="edition">Version 2 &middot; on this computer</span>
+  </header>
+
+  <main>
+    <p id="page-title" class="page-title" hidden></p>
+
+    <button id="summarize" type="button" class="go">Summarize this page</button>
+
+    <p id="model-line" class="modelline" aria-live="polite">Checking this computer...</p>
+    <p id="gpu-note" class="notice" hidden></p>
+
+    <section id="progress" class="progress" hidden aria-live="polite">
+      <p id="progress-text" class="progress-text"></p>
+      <progress id="progress-bar" max="100" value="0"></progress>
+      <p id="notice" class="notice" hidden></p>
+    </section>
+
+    <section id="error" class="error" hidden role="alert">
+      <p id="error-text"></p>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div id="summary" class="summary"></div>
+      <p id="stats" class="stats"></p>
+    </section>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

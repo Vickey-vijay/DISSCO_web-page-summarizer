@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-20T21:45:39.370Z",
+  "mode": "nvidia-offline",
+  "plan": {
+    "args": [
+      "--force_high_performance_gpu",
+      "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"
+    ],
+    "online": false
+  },
+  "results": [
+    {
+      "mode": "nvidia-offline",
+      "id": "short",
+      "name": "Short article (fixture)",
+      "startedAt": "2026-10-20T21:45:26.333Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about several hundred MB, first use only).",
+      "gpuNote": null,
+      "buttonBefore": "Download model and summarize",
+      "wallSeconds": 1,
+      "timeline": [
+        {
+          "s": 0.2,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.6,
+          "text": "Downloading the model (first time only): 0%"
+        }
+      ],
+      "outcome": "error",
+      "error": {
+        "code": "MODEL_DOWNLOAD_FAILED",
+        "message": "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept.",
+        "detail": "Error: Failed to store https://huggingface.co/mlc-ai/Llama-3.2-1B-Instruct-q4f16_1-MLC/resolve/main/mlc-chat-config.json with error: TypeError: Failed to fetch"
+      }
+    },
+    {
+      "mode": "nvidia-offline",
+      "id": "long",
+      "name": "Long article (fixture)",
+      "startedAt": "2026-10-20T21:45:33.392Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about several hundred MB, first use only).",
+      "gpuNote": null,
+      "buttonBefore": "Download model and summarize",
+      "wallSeconds": 0.5,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        }
+      ],
+      "outcome": "error",
+      "error": {
+        "code": "MODEL_DOWNLOAD_FAILED",
+        "message": "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept.",
+        "detail": "Error: Failed to store https://huggingface.co/mlc-ai/Llama-3.2-1B-Instruct-q4f16_1-MLC/resolve/main/mlc-chat-config.json with error: TypeError: Failed to fetch"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Page Summarizer",
+  "version": "2.0.0",
+  "description": "Summarizes the page you are reading with a small language model that runs inside your browser. No key, no cloud.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Summarize this page",
+    "default_popup": "src/ui/popup.html"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "scripting", "storage", "offscreen", "unlimitedStorage"],
+  "host_permissions": [
+    "https://huggingface.co/*",
+    "https://*.huggingface.co/*",
+    "https://*.hf.co/*",
+    "https://raw.githubusercontent.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

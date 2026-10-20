@@ -33,3 +33,7 @@ desktop.ini
 
 # local setup marker written by setup.bat
 .setup-ok
+
+# downloaded model profiles used by the V2 measurements
+finalsem/project/.model-profile*/
+finalsem/project/.model-profile*-ext/
