@@ -500,9 +500,9 @@ registerFigure('F08_retry_sequence', () => {
     align: 'left',
     lines: [
       'Retries: 3 (maxRetries). Each attempt has its own 25 s timeout.',
-      'Back-off: 2 s, then 4 s, then 8 s. A Retry-After header (max 60 s) overrides it.',
+      'Back-off: 2 s, then 4 s, then 8 s. A wait the service asks for (25 s or less) replaces it.',
       'Retried: HTTP 429, 500, 502, 503, 504. Not retried: 400, 401, 403, timeouts, network.',
-      'After the third retry fails: RATE_LIMIT (429) or SERVICE_ERROR (5xx).',
+      'A wait over 25 s (daily quota) stops at once: QUOTA_EXHAUSTED. After the third retry: RATE_LIMIT or SERVICE_ERROR.',
     ],
   });
   return { svg: finish(H), height: H };
@@ -516,27 +516,28 @@ registerFigure('F09_error_flow', () => {
   text(580, 100, 'Error code', { size: 24, bold: true });
   text(880, 100, 'Message the user sees', { size: 24, bold: true });
   const rows = [
-    ['No API key saved', 'NO_KEY', 'No API key yet. Add your key in Options first.', 'amber'],
-    ['HTTP 401 or 403 (or 400 mentioning the key)', 'INVALID_KEY', 'Your API key was rejected. Check it in Options.', 'amber'],
-    ['HTTP 429 after 3 retries', 'RATE_LIMIT', 'The free tier is busy right now. Wait a minute and try again.', 'red'],
-    ['HTTP 500-504 after retries, or other HTTP errors', 'SERVICE_ERROR', 'The service had a problem. Try again in a moment.', 'red'],
-    ['No answer within 25 s (not retried)', 'TIMEOUT', 'The service took too long to answer. Try again.', 'red'],
-    ['Offline or DNS failure (not retried)', 'NETWORK', 'Cannot reach the service. Check your internet connection.', 'red'],
-    ['HTTP 200 with no text (blocked or empty)', 'EMPTY_OR_BLOCKED', 'The model returned no summary for this page.', 'red'],
+    ['No API key saved', 'NO_KEY', 'No API key yet. Paste it in the Key box.', 'amber'],
+    ['Bad key: HTTP 400, 401 or 403', 'INVALID_KEY', 'Your API key was rejected. Paste a correct key.', 'amber'],
+    ['HTTP 429 after 3 retries', 'RATE_LIMIT', 'The free tier is busy. Wait a minute, then retry.', 'red'],
+    ['HTTP 429, daily quota (wait over 25 s)', 'QUOTA_EXHAUSTED', 'Free-tier limit used up. Try again later.', 'red'],
+    ['HTTP 500-504 after retries', 'SERVICE_ERROR', 'The service had a problem. Try again soon.', 'red'],
+    ['No answer within 25 s', 'TIMEOUT', 'The service took too long. Try again.', 'red'],
+    ['Offline or DNS failure', 'NETWORK', 'Cannot reach the service. Check your internet.', 'red'],
+    ['HTTP 200 with no text', 'EMPTY_OR_BLOCKED', 'The model returned no summary for this page.', 'red'],
     ['Chrome page: chrome://, Web Store', 'RESTRICTED_PAGE', 'Chrome does not allow extensions to read this page.', 'neutral'],
     ['Script injection or extractor error', 'EXTRACT_FAILED', 'Could not read the text of this page.', 'neutral'],
     ['Under 200 characters of text', 'TOO_LITTLE_TEXT', 'This page has too little readable text to summarize.', 'neutral'],
-    ['Worker restarted mid-job, or job over 3 min old', 'INTERRUPTED', 'The summary was interrupted. Press Summarize to try again.', 'neutral'],
+    ['Worker stopped, or job over 3 min old', 'INTERRUPTED', 'The summary was interrupted. Try again.', 'neutral'],
   ];
   rows.forEach(([src, code, msgText, kind], i) => {
-    const y = 130 + i * 78;
-    box(40, y, 500, 74, { kind: 'neutral', lines: [src], align: 'left', pad: 14 });
-    arrow([[540, y + 37], [580, y + 37]], {});
-    box(580, y, 260, 74, { kind, title: code, titleSize: 24, pad: 8 });
-    arrow([[840, y + 37], [880, y + 37]], {});
-    box(880, y, 680, 74, { kind: 'neutral', lines: [msgText], align: 'left', pad: 14 });
+    const y = 128 + i * 70;
+    box(40, y, 500, 62, { kind: 'neutral', lines: [src], align: 'left', pad: 4 });
+    arrow([[540, y + 31], [580, y + 31]], {});
+    box(580, y, 260, 62, { kind, title: code, titleSize: 24, pad: 6 });
+    arrow([[840, y + 31], [880, y + 31]], {});
+    box(880, y, 680, 62, { kind: 'neutral', lines: [msgText], align: 'left', pad: 4 });
   });
-  return { svg: finish(H), height: H };
+  text(40, 985, 'Messages are shortened here. The exact text of every message is in Appendix B of the report.', { size: 22 });  return { svg: finish(H), height: H };
 });
 
 // F10 - engine seam: the contract the pipeline calls; V1 engine solid, V2 engine dashed

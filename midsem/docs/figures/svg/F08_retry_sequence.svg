@@ -39,6 +39,6 @@
 <rect x="40" y="770" width="1520" height="180" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="56" y="809" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retry rules in the code</text>
 <text x="56" y="844.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retries: 3 (maxRetries). Each attempt has its own 25 s timeout.</text>
-<text x="56" y="873.28" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Back-off: 2 s, then 4 s, then 8 s. A Retry-After header (max 60 s) overrides it.</text>
+<text x="56" y="873.28" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Back-off: 2 s, then 4 s, then 8 s. A wait the service asks for (25 s or less) replaces it.</text>
 <text x="56" y="902.3199999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retried: HTTP 429, 500, 502, 503, 504. Not retried: 400, 401, 403, timeouts, network.</text>
-<text x="56" y="931.3599999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">After the third retry fails: RATE_LIMIT (429) or SERVICE_ERROR (5xx).</text></svg>
+<text x="56" y="931.3599999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">A wait over 25 s (daily quota) stops at once: QUOTA_EXHAUSTED. After the third retry: RATE_LIMIT or SERVICE_ERROR.</text></svg>
