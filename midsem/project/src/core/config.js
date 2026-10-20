@@ -1,10 +1,10 @@
 // Central settings. Everything tunable lives here, not scattered across files.
 
 export const DEFAULTS = Object.freeze({
-  // Cloud model id, confirmed against the live model list and benchmarked in M4
-  // (docs/test-runs/model-bench.json, DEVLOG.md). With the default "thinking" this model took
-  // about 12 s per request; thinkingLevel "low" brought a typical request to about 4 s.
-  model: 'gemini-3.8-flash',
+  // Cloud model id, chosen by measurement in M4 (docs/test-runs/model-bench.json,
+  // quota-probe.json, DEVLOG.md). The bigger gemini-3.8-flash allows only 20 free requests a day
+  // and took about 12 s per request; this one answers in about 1 to 2 s and allows 15 per minute.
+  model: 'gemini-3.5-flash-lite',
   thinkingLevel: 'low',
   apiBaseUrl: 'https://generativelanguage.googleapis.com',
   // Maximum characters sent to the model in one chunk.

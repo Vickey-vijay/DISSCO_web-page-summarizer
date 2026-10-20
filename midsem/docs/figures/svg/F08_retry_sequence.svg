@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="980" fill="#ffffff"/><line x1="200" y1="150" x2="200" y2="740" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="700" y1="150" x2="700" y2="740" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="1200" y1="150" x2="1200" y2="740" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="60" y="60" width="280" height="90" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="200" y="111.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Popup</text>
+<rect x="560" y="60" width="280" height="90" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="700" y="96.36" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Service worker</text>
+<text x="700" y="127.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">(engine)</text>
+<rect x="1060" y="60" width="280" height="90" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1200" y="111.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Gemini API</text>
+<path d="M700,230 L1200,230" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="891.47228" y="192" width="117.05543999999999" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="218.61999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle">attempt 1</text>
+<path d="M1200,276 L700,276" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="886.86284" y="238" width="126.27432000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="264.62" font-size="22" fill="#1C1B1A" text-anchor="middle">HTTP 429</text>
+<rect x="730" y="300" width="250" height="60" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="855" y="337" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="218">wait 2 s</text>
+<path d="M700,400 L200,400" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="345.91248" y="362" width="208.17504" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="450" y="388.62" font-size="22" fill="#1C1B1A" text-anchor="middle">notice: retry 1 of 3</text>
+<path d="M700,446 L1200,446" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="891.47228" y="408" width="117.05543999999999" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="434.62" font-size="22" fill="#1C1B1A" text-anchor="middle">attempt 2</text>
+<path d="M1200,492 L700,492" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="886.86284" y="454" width="126.27432000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="480.62" font-size="22" fill="#1C1B1A" text-anchor="middle">HTTP 429</text>
+<rect x="730" y="516" width="250" height="60" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="855" y="553" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="218">wait 4 s</text>
+<path d="M700,610 L200,610" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="345.91248" y="572" width="208.17504" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="450" y="598.62" font-size="22" fill="#1C1B1A" text-anchor="middle">notice: retry 2 of 3</text>
+<path d="M700,656 L1200,656" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="891.47228" y="618" width="117.05543999999999" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="644.62" font-size="22" fill="#1C1B1A" text-anchor="middle">attempt 3</text>
+<path d="M1200,702 L700,702" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="866.3936" y="664" width="167.21280000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="950" y="690.62" font-size="22" fill="#1C1B1A" text-anchor="middle">HTTP 200 OK</text>
+<rect x="40" y="770" width="1520" height="180" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="809" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retry rules in the code</text>
+<text x="56" y="844.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retries: 3 (maxRetries). Each attempt has its own 25 s timeout.</text>
+<text x="56" y="873.28" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Back-off: 2 s, then 4 s, then 8 s. A Retry-After header (max 60 s) overrides it.</text>
+<text x="56" y="902.3199999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">Retried: HTTP 429, 500, 502, 503, 504. Not retried: 400, 401, 403, timeouts, network.</text>
+<text x="56" y="931.3599999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1488">After the third retry fails: RATE_LIMIT (429) or SERVICE_ERROR (5xx).</text></svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="870" viewBox="0 0 1600 870" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="870" fill="#ffffff"/><rect x="40" y="100" width="500" height="660" rx="4" fill="#FBF8F1" stroke="#3F5F2A" stroke-width="2.2"/>
+<rect x="56" y="82" width="268.7604992" height="38" rx="4" fill="#FBF8F1" stroke="#3F5F2A" stroke-width="1.6"/>
+<text x="69" y="108" font-size="24" font-weight="700" fill="#3F5F2A">Reused unchanged</text>
+<rect x="560" y="100" width="500" height="660" rx="4" fill="#FBF8F1" stroke="#8A5A00" stroke-width="2.2"/>
+<rect x="576" y="82" width="144.2449664" height="38" rx="4" fill="#FBF8F1" stroke="#8A5A00" stroke-width="1.6"/>
+<text x="589" y="108" font-size="24" font-weight="700" fill="#8A5A00">Replaced</text>
+<rect x="1080" y="100" width="480" height="660" rx="4" fill="#FBF8F1" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<rect x="1096" y="82" width="279.59402240000003" height="38" rx="4" fill="#FBF8F1" stroke="#6B665C" stroke-width="1.6"/>
+<text x="1109" y="108" font-size="24" font-weight="700" fill="#6B665C">New in V2 (planned)</text>
+<rect x="70" y="150" width="440" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="290" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Extraction</text>
+<text x="290" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Page text from the tab</text>
+<rect x="70" y="272" width="440" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="290" y="311.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Chunker and merger</text>
+<text x="290" y="346.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Split and join text</text>
+<rect x="70" y="394" width="440" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="290" y="433.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Pipeline and errors</text>
+<text x="290" y="468.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Flow and error codes</text>
+<rect x="70" y="516" width="440" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="290" y="555.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Service worker</text>
+<text x="290" y="590.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Job owner, progress</text>
+<rect x="70" y="638" width="440" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="290" y="677.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Popup and formatter</text>
+<text x="290" y="712.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">UI and summary text</text>
+<rect x="590" y="150" width="440" height="100" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="810" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Cloud engine (gemini.js)</text>
+<text x="810" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Replaced by the local engine</text>
+<rect x="590" y="272" width="440" height="100" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="810" y="311.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">API key form (options.js)</text>
+<text x="810" y="346.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Not needed in V2 (open)</text>
+<rect x="590" y="394" width="440" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="810" y="433.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">Prompts (prompts.js)</text>
+<text x="810" y="468.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">Open: may need tuning</text>
+<rect x="590" y="516" width="440" height="100" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="810" y="555.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Cloud settings (config.js)</text>
+<text x="810" y="590.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Model and key go</text>
+<rect x="1100" y="150" width="440" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1320" y="189.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">Model download</text>
+<text x="1320" y="224.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">First run, progress bar</text>
+<rect x="1100" y="272" width="440" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1320" y="311.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">WebGPU and memory check</text>
+<text x="1320" y="346.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">At startup, clear message</text>
+<rect x="1100" y="394" width="440" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1320" y="433.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">Browser cache</text>
+<text x="1320" y="468.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">Keeps weights between runs</text>
+<rect x="1100" y="516" width="440" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1320" y="555.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">LocalEngine (WebLLM)</text>
+<text x="1320" y="590.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">Same two methods</text>
+<text x="40" y="800" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The engine contract is the only seam; the green parts keep their code.</text>
+<text x="40" y="840" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Open (PRD): keep the cloud engine selectable, or local only?</text></svg>

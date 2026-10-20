@@ -43,7 +43,7 @@ function answerFor(info, prompt, special) {
 export async function startMockGemini({ validKey = 'mock-key' } = {}) {
   /** every request received, oldest first */
   const requests = [];
-  let config = { delayMs: 0, failStatus: null, failTimes: 0, special: null };
+  let config = { delayMs: 0, failStatus: null, failTimes: 0, special: null, retryInfo: null };
   let failuresLeft = 0;
 
   const server = http.createServer((req, res) => {
@@ -74,7 +74,8 @@ export async function startMockGemini({ validKey = 'mock-key' } = {}) {
       if (config.delayMs) await new Promise((r) => setTimeout(r, config.delayMs));
       if (config.failStatus && failuresLeft > 0) {
         failuresLeft -= 1;
-        send(config.failStatus, { error: { code: config.failStatus, message: 'mock failure', status: 'UNAVAILABLE' } });
+        const details = config.retryInfo ? [{ '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: config.retryInfo }] : undefined;
+        send(config.failStatus, { error: { code: config.failStatus, message: 'mock failure', status: 'UNAVAILABLE', details } });
         return;
       }
       if (config.special === 'empty') {
@@ -99,9 +100,9 @@ export async function startMockGemini({ validKey = 'mock-key' } = {}) {
     origin: `http://127.0.0.1:${port}`,
     validKey,
     requests,
-    /** Change behaviour. failTimes may be Infinity. special: 'empty' | 'blocked' | 'html' | null */
+    /** Change behaviour. failTimes may be Infinity. special: 'empty' | 'blocked' | 'html' | null. retryInfo: e.g. '7h' or '2s' adds Google's RetryInfo detail to the failure. */
     configure(next) {
-      config = { delayMs: 0, failStatus: null, failTimes: 0, special: null, ...next };
+      config = { delayMs: 0, failStatus: null, failTimes: 0, special: null, retryInfo: null, ...next };
       failuresLeft = config.failTimes;
     },
     reset() {

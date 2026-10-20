@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-20T00:11:17.677Z",
+  "probeMax": 30,
+  "results": [
+    {
+      "model": "gemini-3.5-flash-lite",
+      "okBefore429": 16,
+      "firstError": {
+        "status": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 15, model: gemini-3.5-flash-lite Please retry in 50.102032823s."
+      },
+      "reachedProbeMax": false
+    },
+    {
+      "model": "gemini-2.5-flash-lite",
+      "okBefore429": 11,
+      "firstError": {
+        "status": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 10, model: gemini-2.5-flash-lite Please retry in 33.311729815s."
+      },
+      "reachedProbeMax": false
+    },
+    {
+      "model": "gemini-2.5-flash",
+      "okBefore429": 6,
+      "firstError": {
+        "status": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash Please retry in 22.199716104s."
+      },
+      "reachedProbeMax": false
+    },
+    {
+      "model": "gemini-3.1-flash-lite",
+      "okBefore429": 3,
+      "firstError": {
+        "status": 503,
+        "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+      },
+      "reachedProbeMax": false
+    }
+  ]
+}

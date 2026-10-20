@@ -5,6 +5,7 @@ export const ERROR_CODES = Object.freeze({
   NO_KEY: 'NO_KEY',
   INVALID_KEY: 'INVALID_KEY',
   RATE_LIMIT: 'RATE_LIMIT',
+  QUOTA_EXHAUSTED: 'QUOTA_EXHAUSTED',
   NETWORK: 'NETWORK',
   TIMEOUT: 'TIMEOUT',
   SERVICE_ERROR: 'SERVICE_ERROR',
@@ -18,9 +19,11 @@ export const ERROR_CODES = Object.freeze({
 });
 
 export const USER_MESSAGES = Object.freeze({
-  NO_KEY: 'No API key yet. Add your key in Options first.',
-  INVALID_KEY: 'Your API key was rejected. Check it in Options.',
+  NO_KEY: 'No API key yet. Paste your Gemini key in the Key box and save it.',
+  INVALID_KEY: 'Your API key was rejected. Paste a correct key in the Key box.',
   RATE_LIMIT: 'The free tier is busy right now. Wait a minute and try again.',
+  // {wait} becomes "in about 7 hours" when the service said how long, otherwise "later".
+  QUOTA_EXHAUSTED: 'The free-tier limit for your API key is used up for now. Try again {wait}, or use a different key.',
   NETWORK: 'Cannot reach the service. Check your internet connection.',
   TIMEOUT: 'The service took too long to answer. Try again.',
   SERVICE_ERROR: 'The service had a problem. Try again in a moment.',
@@ -33,11 +36,19 @@ export const USER_MESSAGES = Object.freeze({
   CANCELLED: 'Cancelled.',
 });
 
+/** "about 7 hours", "about 12 minutes", "about a minute" for a wait given in seconds. */
+export function humanizeWait(seconds) {
+  if (seconds < 90) return 'a minute';
+  if (seconds < 3600) return `${Math.round(seconds / 60)} minutes`;
+  const hours = Math.round(seconds / 3600);
+  return hours === 1 ? 'an hour' : `${hours} hours`;
+}
+
 export class AppError extends Error {
   /**
    * @param {keyof typeof ERROR_CODES} code
    * @param {string} [detail] technical detail, for the console only
-   * @param {{cause?: unknown}} [options]
+   * @param {{cause?: unknown, retryAfterSeconds?: number}} [options]
    */
   constructor(code, detail = '', options = {}) {
     super(detail || USER_MESSAGES[code] || code);
@@ -45,10 +56,13 @@ export class AppError extends Error {
     this.code = code;
     this.detail = detail;
     if (options.cause !== undefined) this.cause = options.cause;
+    if (Number.isFinite(options.retryAfterSeconds)) this.retryAfterSeconds = options.retryAfterSeconds;
   }
 
   get userMessage() {
-    return USER_MESSAGES[this.code] ?? USER_MESSAGES.SERVICE_ERROR;
+    const template = USER_MESSAGES[this.code] ?? USER_MESSAGES.SERVICE_ERROR;
+    const wait = this.retryAfterSeconds ? `in about ${humanizeWait(this.retryAfterSeconds)}` : 'later';
+    return template.replace('{wait}', wait);
   }
 }
 

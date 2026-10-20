@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="980" fill="#ffffff"/><rect x="40" y="100" width="760" height="860" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="56" y="82" width="211.09368320000002" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="69" y="108" font-size="24" font-weight="700" fill="#1C1B1A">Service worker</text>
+<rect x="840" y="100" width="720" height="860" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="856" y="82" width="341.82379520000006" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="869" y="108" font-size="24" font-weight="700" fill="#1C1B1A">Tab (injected page script)</text>
+<rect x="80" y="140" width="480" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="320" y="177.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="448">extractFromTab(tabId)</text>
+<text x="320" y="212.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="448">Reads the tab URL first</text>
+<rect x="80" y="276" width="480" height="110" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="320" y="320.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="448">Restricted URL?</text>
+<text x="320" y="355.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="448">yes: RESTRICTED_PAGE</text>
+<rect x="80" y="426" width="480" height="110" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="320" y="470.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="448">Inject the extractor</text>
+<text x="320" y="505.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="448">readability.js, then extract.js</text>
+<rect x="80" y="576" width="480" height="110" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="320" y="620.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="448">Result ok?</text>
+<text x="320" y="655.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="448">no: EXTRACT_FAILED</text>
+<rect x="80" y="726" width="480" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="320" y="763.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="448">Return the text</text>
+<text x="320" y="798.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="448">to the pipeline</text>
+<rect x="900" y="426" width="600" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1200" y="463.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Clone the page</text>
+<text x="1200" y="498.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="568">document.cloneNode(true)</text>
+<rect x="900" y="576" width="600" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1200" y="613.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="568">Readability.parse()</text>
+<text x="1200" y="648.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Main text of the copy</text>
+<rect x="900" y="726" width="600" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1200" y="763.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Convert to text</text>
+<text x="1200" y="798.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Blank lines; short text uses body text</text>
+<rect x="900" y="856" width="600" height="70" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1200" y="898" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Return {title, url, text, method}</text>
+<path d="M320,236 L320,276" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M320,386 L320,426" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="330" y="412" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1230">no</text>
+<path d="M320,536 L320,576" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M320,686 L320,726" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="330" y="712" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1230">yes</text>
+<path d="M560,481 L900,481" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="645.71644" y="462.3" width="168.56712" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="730" y="488.92" font-size="22" fill="#1C1B1A" text-anchor="middle">runs in the tab</text>
+<path d="M1200,522 L1200,576" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1200,672 L1200,726" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1200,822 L1200,856" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M900,891 L820,891 L820,631 L560,631" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="781.9534" y="742.3" width="76.0932" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="820" y="768.92" font-size="22" fill="#1C1B1A" text-anchor="middle">result</text></svg>

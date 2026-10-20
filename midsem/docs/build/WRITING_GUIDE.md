@@ -9,6 +9,13 @@ This guide is for anyone (person or agent) writing chapter text. Follow it exact
 - Short paragraphs (3 to 6 sentences). Use lists and tables when they make a comparison clearer, and a paragraph when reasoning has to be followed.
 - Be honest. State limitations and failures plainly. A weakness stated first is better than one a tutor finds.
 
+## Keep Version 1 simple (instruction from the project owner)
+Version 1 is the simple version: the extension takes the text of the page, sends it to a cloud service (Gemini), gets a summary back and shows it. The V1 documents must read that way.
+- Explain V1 in plain language that a college viva panel and the client can follow: "the extension reads the page text", "it asks the cloud service for a summary", "if the page is long it is split into parts, each part is summarized, and the part summaries are combined".
+- Do NOT explain AI internals in the V1 documents: no tokenization or tokens, context windows, embeddings, attention, transformers, quantization, model weights, GPU inference or prompt-engineering theory. One plain sentence is enough to say what the model is ("a language model hosted by Google that writes summaries"). The only place such topics may appear is a short, clearly marked "What Version 2 adds" section in the remaining-work chapter, in two or three sentences each, because they belong to the Version 2 documents.
+- Engineering topics (extension structure, messages, errors, retries, tests, setup) are fine and expected, but explain each in everyday words and keep every explanation short and concrete.
+- Describe the user interface as it is: a toolbar popup with a Summarize button, an inline Gemini key box, progress text and a numbered summary. Everything happens in the popup; nothing opens in a new tab (the Options page exists but is only a second place to change the key).
+
 ## Facts: where they may come from
 - Every statement about the system must be true of the code in `midsem/project/` as it exists now. Read the source before writing about it. Do not describe a feature that is not there; V2 items must be called "planned for V2".
 - Every number (test counts, timings, sizes, characters, requests, percentages) must come from a file in the repository: `midsem/docs/test-runs/*` (examples, model benchmark, test run reports, live measurements), `DEVLOG.md`, the code, or `midsem/V1_PLAN.md`. If a number is not available, write `[to be measured]` instead of guessing.

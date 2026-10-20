@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="700" viewBox="0 0 1600 700" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="700" fill="#ffffff"/><rect x="40" y="90" width="740" height="520" rx="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<rect x="56" y="72" width="312.29054720000005" height="38" rx="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="1.6"/>
+<text x="69" y="98" font-size="24" font-weight="700" fill="#B4391F">V1 (built): cloud engine</text>
+<rect x="820" y="90" width="740" height="520" rx="4" fill="#FBF8F1" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<rect x="836" y="72" width="343.39143679999995" height="38" rx="4" fill="#FBF8F1" stroke="#6B665C" stroke-width="1.6"/>
+<text x="849" y="98" font-size="24" font-weight="700" fill="#6B665C">V2 (planned): local model</text>
+<rect x="80" y="150" width="280" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="220" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Page text</text>
+<text x="220" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">From the active tab</text>
+<rect x="80" y="300" width="280" height="110" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="220" y="344.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Extension</text>
+<text x="220" y="379.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Pipeline runs here</text>
+<rect x="80" y="480" width="280" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="220" y="519.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">API key</text>
+<text x="220" y="554.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Stored locally</text>
+<rect x="470" y="300" width="290" height="110" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="615" y="344.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="258">Gemini API</text>
+<text x="615" y="379.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="258">Returns the summary</text>
+<rect x="460" y="480" width="310" height="100" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="615" y="519.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="278">Leaves the machine</text>
+<text x="615" y="554.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="278">Text, prompt, key</text>
+<path d="M220,250 L220,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M220,480 L220,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M360,355 L470,355" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="383.5468" y="336.3" width="62.9064" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="415" y="362.92" font-size="22" fill="#1C1B1A" text-anchor="middle">sent</text>
+<path d="M470,400 L360,400" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="860" y="150" width="320" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1020" y="194.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="288">Model download</text>
+<text x="1020" y="229.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="288">First run only</text>
+<rect x="860" y="300" width="320" height="100" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1020" y="339.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="288">Browser cache</text>
+<text x="1020" y="374.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="288">Kept for later runs</text>
+<rect x="1200" y="300" width="320" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1360" y="344.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="288">Local engine</text>
+<text x="1360" y="379.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="288">WebGPU, this computer</text>
+<rect x="1200" y="150" width="320" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1360" y="194.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="288">Page text</text>
+<text x="1360" y="229.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="288">Never leaves the machine</text>
+<rect x="860" y="470" width="660" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1190" y="514.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="628">Nothing leaves after the download</text>
+<text x="1190" y="549.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="628">No key and no network per summary</text>
+<path d="M1020,260 L1020,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M1180,355 L1200,355" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M1360,260 L1360,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<text x="40" y="660" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Left: built and tested in V1. Right: planned for V2 and drawn dashed.</text></svg>

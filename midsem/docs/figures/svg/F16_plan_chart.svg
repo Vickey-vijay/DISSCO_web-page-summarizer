@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="760" fill="#ffffff"/><text x="634" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1228">W1</text>
+<text x="702" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1364">W2</text>
+<text x="770" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1500">W3</text>
+<text x="838" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1484">W4</text>
+<text x="906" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1348">W5</text>
+<text x="974" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1212">W6</text>
+<text x="1042" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1076">W7</text>
+<text x="1110" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="940">W8</text>
+<text x="1178" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="804">W9</text>
+<text x="1246" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="668">W10</text>
+<text x="1314" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="532">W11</text>
+<text x="1382" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="396">W12</text>
+<text x="1450" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="260">W13</text>
+<text x="1518" y="122" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="124">W14</text>
+<line x1="600" y1="134" x2="600" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="668" y1="134" x2="668" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="736" y1="134" x2="736" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="804" y1="134" x2="804" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="872" y1="134" x2="872" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="940" y1="134" x2="940" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1008" y1="134" x2="1008" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1076" y1="134" x2="1076" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1144" y1="134" x2="1144" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1212" y1="134" x2="1212" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1280" y1="134" x2="1280" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1348" y1="134" x2="1348" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1416" y1="134" x2="1416" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1484" y1="134" x2="1484" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<line x1="1552" y1="134" x2="1552" y2="600" stroke="#D9D2C3" stroke-width="1.5"/>
+<text x="40" y="181" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Literature review (W1-2)</text>
+<rect x="604" y="158" width="128" height="34" rx="4" fill="#B4391F"/>
+<text x="40" y="237" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Extension skeleton, extraction (W3-4)</text>
+<rect x="740" y="214" width="128" height="34" rx="4" fill="#B4391F"/>
+<text x="40" y="293" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Chunking, merging, V1 engine (W5-6)</text>
+<rect x="876" y="270" width="128" height="34" rx="4" fill="#B4391F"/>
+<text x="40" y="349" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">V1 testing, midsem (W7)</text>
+<rect x="1012" y="326" width="60" height="34" rx="4" fill="#B4391F"/>
+<text x="40" y="405" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Local model study (W8-9)</text>
+<rect x="1080" y="382" width="128" height="34" rx="4" fill="#6B665C"/>
+<text x="40" y="461" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">In-browser engine (W10-11)</text>
+<rect x="1216" y="438" width="128" height="34" rx="4" fill="#6B665C"/>
+<text x="40" y="517" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Cloud vs local comparison (W12)</text>
+<rect x="1352" y="494" width="60" height="34" rx="4" fill="#6B665C"/>
+<text x="40" y="573" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Final testing, submission (W13-14)</text>
+<rect x="1420" y="550" width="128" height="34" rx="4" fill="#6B665C"/>
+<line x1="1076" y1="134" x2="1076" y2="600" stroke="#8A5A00" stroke-width="2.5" stroke-dasharray="8 6"/>
+<rect x="960.05624" y="614" width="231.88752000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#8A5A00" stroke-width="1.6"/>
+<text x="1076" y="640.62" font-size="22" fill="#1C1B1A" text-anchor="middle">Midsem (end of W7)</text>
+<line x1="1552" y1="134" x2="1552" y2="600" stroke="#1C1B1A" stroke-width="2.5"/>
+<rect x="1338.574" y="614" width="213.426" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1445.287" y="640.62" font-size="22" fill="#1C1B1A" text-anchor="middle">Final (end of W14)</text>
+<rect x="40" y="690" width="40" height="26" rx="4" fill="#B4391F"/>
+<text x="92" y="712" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1468">V1, weeks 1-7 (midsem)</text>
+<rect x="440" y="690" width="40" height="26" rx="4" fill="#6B665C"/>
+<text x="492" y="712" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1068">V2, weeks 8-14 (final)</text></svg>

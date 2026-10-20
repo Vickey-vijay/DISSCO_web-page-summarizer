@@ -34,10 +34,10 @@ Chrome (version 137 and later) no longer lets a script load an extension by itse
 cd midsem\project
 setup.bat --dev          # also installs Playwright and its test browser (needs Node.js 20+)
 npm test                 # unit tests (no browser, no network)
-npm run test:e2e         # browser tests: opens a VISIBLE Chromium window with the extension loaded
+npm run test:e2e         # browser tests: hidden Chromium with the extension loaded (HEADED=1 shows the window)
 ```
 
-- Browser tests use a local mock of the Gemini API, so they are fast and free. Set `HEADLESS=1` to hide the window, `SLOWMO=<ms>` to change the pause between actions.
+- Browser tests use a local mock of the Gemini API, so they are fast and free. They run hidden so they do not disturb your work; set `HEADED=1` to watch (and `SLOWMO=<ms>` to slow it down).
 - Live checks against the real API read the key from the environment variable `Gemini_API` (or a git-ignored `midsem/project/.env.test`). The key is never printed or committed: `node scripts/secret-scan.mjs` checks the repository before every push.
 - `node scripts/live-check.mjs` lists the Gemini models your key can use; `node scripts/model-bench.mjs` compares models and thinking settings.
 - Test-only settings (`apiBaseUrl`, `chunkChars`, `retryBaseDelayMs`, `requestTimeoutMs`) can be put in `chrome.storage.local`; the tests use them to force chunking, retries and timeouts.

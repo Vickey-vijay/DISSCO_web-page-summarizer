@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="760" fill="#ffffff"/><line x1="74" y1="140" x2="74" y2="694" stroke="#6B665C" stroke-width="2"/>
+<line x1="74" y1="174" x2="112" y2="174" stroke="#6B665C" stroke-width="2"/>
+<line x1="74" y1="226" x2="112" y2="226" stroke="#6B665C" stroke-width="2"/>
+<line x1="138" y1="244" x2="138" y2="330" stroke="#6B665C" stroke-width="2"/>
+<line x1="138" y1="278" x2="176" y2="278" stroke="#6B665C" stroke-width="2"/>
+<line x1="138" y1="330" x2="176" y2="330" stroke="#6B665C" stroke-width="2"/>
+<line x1="202" y1="348" x2="202" y2="538" stroke="#6B665C" stroke-width="2"/>
+<line x1="202" y1="382" x2="240" y2="382" stroke="#6B665C" stroke-width="2"/>
+<line x1="202" y1="434" x2="240" y2="434" stroke="#6B665C" stroke-width="2"/>
+<line x1="202" y1="486" x2="240" y2="486" stroke="#6B665C" stroke-width="2"/>
+<line x1="202" y1="538" x2="240" y2="538" stroke="#6B665C" stroke-width="2"/>
+<line x1="74" y1="590" x2="112" y2="590" stroke="#6B665C" stroke-width="2"/>
+<line x1="74" y1="642" x2="112" y2="642" stroke="#6B665C" stroke-width="2"/>
+<line x1="74" y1="694" x2="112" y2="694" stroke="#6B665C" stroke-width="2"/>
+<text x="60" y="130" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1500">Jeffy/</text>
+<text x="124" y="182" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1436">abstract/</text>
+<text x="640" y="182" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Abstract and plan of work</text>
+<text x="124" y="234" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1436">midsem/</text>
+<text x="640" y="234" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">V1 for the midsem review</text>
+<text x="188" y="286" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1372">docs/</text>
+<text x="640" y="286" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Figures, screenshots, test runs</text>
+<text x="188" y="338" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1372">project/</text>
+<text x="640" y="338" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">The extension (load in Chrome)</text>
+<text x="252" y="390" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1308">manifest.json</text>
+<text x="640" y="390" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Manifest V3 entry point</text>
+<text x="252" y="442" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1308">src/</text>
+<text x="640" y="442" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Background, core, engines, UI</text>
+<text x="252" y="494" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1308">tests/</text>
+<text x="640" y="494" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Unit, Playwright, fixtures</text>
+<text x="252" y="546" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1308">scripts/</text>
+<text x="640" y="546" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Live check, benchmark, secret scan</text>
+<text x="124" y="598" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1436">DEVLOG.md</text>
+<text x="640" y="598" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Real problems and fixes</text>
+<text x="124" y="650" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1436">README.md</text>
+<text x="640" y="650" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Setup and status</text>
+<text x="124" y="702" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1436">prd.md</text>
+<text x="640" y="702" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="920">Product requirements</text></svg>

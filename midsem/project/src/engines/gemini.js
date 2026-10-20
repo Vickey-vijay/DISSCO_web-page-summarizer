@@ -20,11 +20,31 @@ const defaultSleep = (ms, signal) =>
     );
   });
 
-/** Seconds from a Retry-After header, if the server sent one. */
-function retryAfterMs(response) {
-  const header = response.headers?.get?.('retry-after');
-  const seconds = Number(header);
-  return Number.isFinite(seconds) && seconds > 0 ? Math.min(seconds, 60) * 1000 : null;
+// A wait longer than this is not a short burst limit but a used-up quota: do not sit and retry.
+// (It also keeps one wait shorter than the time Chrome lets an idle extension worker live.)
+const MAX_RETRY_WAIT_SECONDS = 25;
+
+/** "6h54m7.15s", "41s" or "0.5s" -> seconds, or null if it does not look like a duration. */
+export function parseDurationSeconds(text) {
+  const m = /^\s*(?:(\d+(?:\.\d+)?)h)?\s*(?:(\d+(?:\.\d+)?)m)?\s*(?:(\d+(?:\.\d+)?)s)?\s*$/.exec(String(text ?? ''));
+  if (!m || (!m[1] && !m[2] && !m[3])) return null;
+  return Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0);
+}
+
+/**
+ * How long the server says to wait, in seconds: the Retry-After header, else the RetryInfo
+ * detail Google adds to 429 answers, else the "Please retry in ..." sentence in the message.
+ */
+function serverWaitSeconds(response, body) {
+  const header = Number(response.headers?.get?.('retry-after'));
+  if (Number.isFinite(header) && header > 0) return header;
+  for (const detail of body?.error?.details ?? []) {
+    const parsed = parseDurationSeconds(detail?.retryDelay);
+    if (parsed !== null) return parsed;
+  }
+  // The sentence ends with a full stop ("... retry in 6h54m7.15s."), so match whole number+unit pairs.
+  const sentence = /retry in ((?:\d+(?:\.\d+)?[hms])+)/i.exec(body?.error?.message ?? '');
+  return sentence ? parseDurationSeconds(sentence[1]) : null;
 }
 
 async function readJson(response) {
@@ -122,8 +142,17 @@ export function createGeminiEngine(settings, deps = {}) {
       const code = classifyHttpError(response.status, data);
       const detail = `HTTP ${response.status}${data?.error?.message ? ': ' + data.error.message : ''}`;
 
+      const waitSeconds = serverWaitSeconds(response, data);
+
+      // The service says to come back much later (a daily or hourly quota): retrying in a few
+      // seconds cannot help, so stop now and tell the user how long it will take.
+      if (response.status === 429 && waitSeconds !== null && waitSeconds > MAX_RETRY_WAIT_SECONDS) {
+        throw new AppError(ERROR_CODES.QUOTA_EXHAUSTED, detail, { retryAfterSeconds: waitSeconds });
+      }
+
       if (RETRYABLE_STATUS.has(response.status) && attempt < settings.maxRetries) {
-        const delayMs = retryAfterMs(response) ?? settings.retryBaseDelayMs * 2 ** attempt;
+        // Prefer the wait the server asked for; otherwise back off 1x, 2x, 4x the base delay.
+        const delayMs = waitSeconds !== null ? waitSeconds * 1000 : settings.retryBaseDelayMs * 2 ** attempt;
         onNotice({ type: 'retry', code, attempt: attempt + 1, maxRetries: settings.maxRetries, delayMs });
         await sleep(delayMs, signal);
         continue;

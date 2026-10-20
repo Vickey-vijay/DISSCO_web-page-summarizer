@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="940" fill="#ffffff"/><line x1="110" y1="156" x2="110" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="330" y1="156" x2="330" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="550" y1="156" x2="550" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="770" y1="156" x2="770" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="990" y1="156" x2="990" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="1210" y1="156" x2="1210" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="1430" y1="156" x2="1430" y2="880" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="10" y="60" width="200" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="110" y="114.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">User</text>
+<rect x="230" y="60" width="200" height="96" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="330" y="114.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Popup</text>
+<rect x="450" y="60" width="200" height="96" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="550" y="99.36" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Service</text>
+<text x="550" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">worker</text>
+<rect x="670" y="60" width="200" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="770" y="99.36" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Tab</text>
+<text x="770" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">(extractor)</text>
+<rect x="890" y="60" width="200" height="96" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="990" y="99.36" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Pipeline +</text>
+<text x="990" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">engine</text>
+<rect x="1110" y="60" width="200" height="96" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1210" y="114.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Gemini API</text>
+<rect x="1330" y="60" width="200" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1430" y="99.36" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Storage</text>
+<text x="1430" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">(session)</text>
+<path d="M110,200 L330,200" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="124.53736" y="162" width="190.92528" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="220" y="188.61999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle">click Summarize</text>
+<path d="M330,242 L550,242" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="342.9692" y="204" width="194.0616" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="440" y="230.61999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace">START_SUMMARY</text>
+<path d="M550,284 L1430,284" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="918.927" y="246" width="142.14600000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="990" y="272.62" font-size="22" fill="#1C1B1A" text-anchor="middle">job: running</text>
+<path d="M550,326 L330,326" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="389.40812" y="288" width="101.18375999999999" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="440" y="314.62" font-size="22" fill="#1C1B1A" text-anchor="middle">reply ok</text>
+<path d="M550,368 L770,368" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="573.75624" y="330" width="172.48752" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="660" y="356.62" font-size="22" fill="#1C1B1A" text-anchor="middle">inject extractor</text>
+<path d="M770,410 L550,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="602.12568" y="372" width="115.74864" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="660" y="398.62" font-size="22" fill="#1C1B1A" text-anchor="middle">page text</text>
+<path d="M550,452 L990,452" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="699.59228" y="414" width="140.81544" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="770" y="440.62" font-size="22" fill="#1C1B1A" text-anchor="middle">run pipeline</text>
+<rect x="500" y="490" width="800" height="100" rx="4" fill="none" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="516" y="472" width="237.63161600000004" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="529" y="498" font-size="24" font-weight="700" fill="#1C1B1A">loop: each chunk</text>
+<path d="M990,530 L1210,530" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1017.71228" y="492" width="164.57544" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1100" y="518.62" font-size="22" fill="#1C1B1A" text-anchor="middle">POST chunk i</text>
+<path d="M1210,570 L990,570" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="1007.16284" y="532" width="185.67432000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1100" y="558.62" font-size="22" fill="#1C1B1A" text-anchor="middle">chunk summary</text>
+<rect x="500" y="610" width="800" height="96" rx="4" fill="none" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="516" y="592" width="334.09756160000006" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="529" y="618" font-size="24" font-weight="700" fill="#1C1B1A">alt: more than one chunk</text>
+<path d="M990,650 L1210,650" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1021.6802" y="612" width="156.6396" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1100" y="638.62" font-size="22" fill="#1C1B1A" text-anchor="middle">POST merge</text>
+<path d="M1210,690 L990,690" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="998.58548" y="652" width="202.82904000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1100" y="678.62" font-size="22" fill="#1C1B1A" text-anchor="middle">merged summary</text>
+<path d="M990,746 L550,746" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="680.46548" y="708" width="179.06904000000003" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="770" y="734.62" font-size="22" fill="#1C1B1A" text-anchor="middle">summary, stats</text>
+<path d="M550,788 L1430,788" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="932.12568" y="750" width="115.74864" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="990" y="776.62" font-size="22" fill="#1C1B1A" text-anchor="middle">job: done</text>
+<path d="M1430,830 L330,830" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="799.01908" y="792" width="161.96184000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="880" y="818.62" font-size="22" fill="#1C1B1A" text-anchor="middle">storage event</text>
+<path d="M330,872 L110,872" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="124.52547999999999" y="834" width="190.94904000000002" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="220" y="860.62" font-size="22" fill="#1C1B1A" text-anchor="middle">summary shown</text>
+<text x="40" y="912" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Pipeline and engine run inside the service worker. Dashed = reply or event.</text></svg>

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -8,24 +8,24 @@
 </head>
 <body class="options">
   <h1>Page Summarizer</h1>
-  <p class="lead">Version 1 sends the page text to Google's Gemini API using your own key. Enter it once here.</p>
+  <p class="lead">Version 1 sends the text of the page to Google's Gemini service and shows the summary it sends back. It uses your own key; enter it once, here or in the popup.</p>
 
   <p id="saved-note" class="saved-note" hidden>A key is saved in this browser.</p>
 
   <label for="api-key">Gemini API key</label>
   <div class="row">
     <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key here">
-    <button id="save" type="button" class="primary">Save</button>
+    <button id="save" type="button" class="outline">Save</button>
   </div>
   <p class="hint">
-    Get a free key in <a class="link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+    Get a free key in <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
     The key is stored only in this browser (not synced to your Google account) and is sent only to Google's API.
   </p>
 
   <p id="status" class="status" role="status" aria-live="polite"></p>
 
   <div id="remove-wrap" class="danger" hidden>
-    <button id="remove" type="button">Remove saved key</button>
+    <button id="remove" type="button" class="textbtn">Remove saved key</button>
   </div>
 
   <script type="module" src="options.js"></script>

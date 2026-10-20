@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="800" fill="#ffffff"/><rect x="40" y="100" width="1520" height="200" rx="4" fill="#FBF8F1" stroke="#3F5F2A" stroke-width="2.2"/>
+<rect x="56" y="82" width="340.3401344" height="38" rx="4" fill="#FBF8F1" stroke="#3F5F2A" stroke-width="1.6"/>
+<text x="69" y="108" font-size="24" font-weight="700" fill="#3F5F2A">Reused unchanged in V2</text>
+<rect x="75" y="130" width="270" height="110" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="210" y="174.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="238">Extraction</text>
+<text x="210" y="209.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="238">Text from the tab</text>
+<rect x="370" y="130" width="270" height="110" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="505" y="174.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="238">Chunker</text>
+<text x="505" y="209.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="238">Splits long text</text>
+<rect x="665" y="130" width="270" height="110" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="800" y="174.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="238">Merger</text>
+<text x="800" y="209.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="238">Joins part summaries</text>
+<rect x="960" y="130" width="270" height="110" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1095" y="174.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="238">Pipeline</text>
+<text x="1095" y="209.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="238">Runs the whole flow</text>
+<rect x="1255" y="130" width="270" height="110" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1390" y="174.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="238">UI</text>
+<text x="1390" y="209.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="238">Popup and options</text>
+<rect x="300" y="350" width="1000" height="124" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="800" y="386.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="968">Engine contract</text>
+<text x="800" y="422.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="968">summarizeChunk(text, {title, index, total, signal})</text>
+<text x="800" y="451.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="968">mergeSummaries(parts, {title, signal})</text>
+<path d="M1095,240 L1095,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,240 L800,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="540" width="500" height="110" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="450" y="584.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="468">GeminiEngine (V1)</text>
+<text x="450" y="619.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="468">engines/gemini.js</text>
+<rect x="900" y="540" width="500" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1150" y="584.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="468">LocalEngine (planned V2)</text>
+<text x="1150" y="619.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="468">WebLLM, same two methods</text>
+<path d="M681.4207650273224,474 L555.1912568306011,540" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M918.5792349726776,474 L1044.808743169399,540" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<text x="40" y="700" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Only the engine changes in V2. Everything in the green frame stays as it is.</text>
+<rect x="40" y="740" width="40" height="26" rx="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="92" y="760" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1468">Built in V1 (in code)</text>
+<rect x="337.99920000000003" y="740" width="40" height="26" rx="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="6 4"/>
+<text x="389.99920000000003" y="760" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1170.0008">Planned (V2)</text></svg>

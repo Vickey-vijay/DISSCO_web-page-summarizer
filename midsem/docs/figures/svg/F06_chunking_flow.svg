@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="970" viewBox="0 0 1600 970" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="970" fill="#ffffff"/><rect x="490" y="100" width="620" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="137.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">chunkText(text, maxChars)</text>
+<text x="800" y="172.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">Normalize whitespace first</text>
+<rect x="490" y="225" width="620" height="96" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="800" y="262.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Fits in maxChars?</text>
+<text x="800" y="297.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">yes: the text is one chunk</text>
+<rect x="490" y="350" width="620" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="387.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Split into paragraphs</text>
+<text x="800" y="422.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">Blank lines separate them</text>
+<rect x="490" y="475" width="620" height="96" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="800" y="512.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Paragraph over maxChars?</text>
+<text x="800" y="547.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">Then split at sentence ends</text>
+<rect x="490" y="600" width="620" height="96" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="800" y="637.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Sentence over maxChars?</text>
+<text x="800" y="672.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">Cut at last space or at maxChars</text>
+<rect x="490" y="725" width="620" height="96" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="762.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Pack pieces up to maxChars</text>
+<text x="800" y="797.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">Join with blank lines, in order</text>
+<rect x="490" y="850" width="620" height="96" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="800" y="887.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="588">Return chunks[]</text>
+<text x="800" y="922.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="588">No chunk is empty or too long</text>
+<path d="M800,196 L800,225" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,321 L800,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,446 L800,475" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,571 L800,600" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,696 L800,725" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,821 L800,850" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="812" y="342" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="748">no</text>
+<text x="812" y="592" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="748">no</text>
+<path d="M490,523 L450,523 L450,773 L490,773" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M490,648 L450,648" fill="none" stroke="#1C1B1A" stroke-width="2.4"/>
+<text x="392" y="700" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1168">yes</text></svg>

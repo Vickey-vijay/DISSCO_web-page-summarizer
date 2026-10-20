@@ -1,11 +1,11 @@
-// Launches Playwright's Chromium (headed by default, so you can watch) with the extension loaded.
+// Launches Playwright's Chromium with the extension loaded. It runs hidden (headless) by default so\n// it never disturbs the person working on the machine; set HEADED=1 to watch it in a window.
 //
 // The extension is copied to a temp folder first and the copy's manifest gets one extra host
 // permission, http://127.0.0.1/*. A test cannot click the toolbar icon, so Chrome's "activeTab"
 // grant never happens; the extra permission stands in for it. The product manifest is unchanged.
 // Real activeTab behaviour is covered by the manual Load-unpacked smoke test.
 //
-// Environment: HEADLESS=1 runs without a window, SLOWMO=<ms> sets the delay between actions.
+// Environment: HEADED=1 shows the browser window, SLOWMO=<ms> sets the delay between actions (headed only).
 import { chromium } from 'playwright';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -16,20 +16,23 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(here, '..', '..');
 export const OUTPUT_DIR = path.join(projectRoot, 'test-output');
 
-function stageExtension() {
+function stageExtension({ patchHostPermission = true, extraHostPermissions = [] } = {}) {
   const dir = mkdtempSync(path.join(tmpdir(), 'ps-ext-'));
   for (const name of ['icons', 'src']) cpSync(path.join(projectRoot, name), path.join(dir, name), { recursive: true });
   const manifest = JSON.parse(readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
-  manifest.host_permissions = [...manifest.host_permissions, 'http://127.0.0.1/*'];
+  // false = test the manifest exactly as shipped (used by the activeTab check)
+  if (patchHostPermission) manifest.host_permissions = [...manifest.host_permissions, 'http://127.0.0.1/*', ...extraHostPermissions];
   writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   return dir;
 }
 
 export async function launchExtension({
-  headless = process.env.HEADLESS === '1',
+  headless = process.env.HEADED !== '1',
   slowMo = headless ? 0 : Number(process.env.SLOWMO ?? 120),
+  patchHostPermission = true,
+  extraHostPermissions = [], // live runs on real websites pass ['https://*/*'] here
 } = {}) {
-  const extensionDir = stageExtension();
+  const extensionDir = stageExtension({ patchHostPermission, extraHostPermissions });
   const userDataDir = mkdtempSync(path.join(tmpdir(), 'ps-profile-'));
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -81,14 +84,30 @@ export async function launchExtension({
       await page.bringToFront();
       return bridge.evaluate(async () => (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]?.id ?? null);
     },
-    /** Open the popup page (sized like the real popup) aimed at a given tab. */
+    /**
+     * Open the popup page aimed at a given tab. A test cannot click the toolbar icon, so the page
+     * is opened in a small popup-type window at the right edge of the screen (not as a tab),
+     * which is close to how the real popup looks while you watch the test.
+     */
     async openPopup(tabId) {
-      const popup = await context.newPage();
-      await popup.setViewportSize({ width: 380, height: 560 });
-      await popup.goto(`${base}/src/ui/popup.html?tabId=${tabId}`);
+      const appeared = context.waitForEvent('page');
+      const windowId = await bridge.evaluate(async (url) => {
+        const w = await chrome.windows.create({ url, type: 'popup', width: 400, height: 640, left: Math.max(0, screen.availWidth - 420), top: 90, focused: true });
+        return w.id;
+      }, `${base}/src/ui/popup.html?tabId=${tabId}`);
+      const popup = await appeared;
+      await popup.waitForLoadState('domcontentloaded');
+      // The browser was launched with --window-size, which new windows inherit, so first shrink
+      // the window, then measure the page area and correct for the window frame so the page
+      // area is exactly 380 x 600 like the real popup.
+      const left = await bridge.evaluate(() => Math.max(0, screen.availWidth - 420));
+      const resize = (w, h) => bridge.evaluate(async ([id, ww, hh, l]) => chrome.windows.update(id, { width: ww, height: hh, left: l, top: 90 }), [windowId, w, h, left]);
+      await resize(400, 640);
+      await popup.waitForTimeout(250);
+      const [iw, ih] = await popup.evaluate(() => [window.innerWidth, window.innerHeight]);
+      await resize(Math.max(300, 400 + (380 - iw)), Math.max(300, 640 + (600 - ih)));      await popup.waitForTimeout(150);
       return popup;
-    },
-    async openOptions() {
+    },    async openOptions() {
       const page = await context.newPage();
       await page.setViewportSize({ width: 700, height: 520 });
       await page.goto(`${base}/src/ui/options.html`);

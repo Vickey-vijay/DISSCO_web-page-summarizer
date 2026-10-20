@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="1000" fill="#ffffff"/><text x="40" y="100" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Failure</text>
+<text x="580" y="100" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="980">Error code</text>
+<text x="880" y="100" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="680">Message the user sees</text>
+<rect x="40" y="130" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="172.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">No API key saved</text>
+<path d="M540,167 L580,167" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="130" width="260" height="74" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="710" y="173.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">NO_KEY</text>
+<path d="M840,167 L880,167" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="130" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="172.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">No API key yet. Add your key in Options first.</text>
+<rect x="40" y="208" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="236.20000000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">HTTP 401 or 403 (or 400 mentioning the</text>
+<text x="54" y="265.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">key)</text>
+<path d="M540,245 L580,245" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="208" width="260" height="74" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="710" y="251.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">INVALID_KEY</text>
+<path d="M840,245 L880,245" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="208" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="250.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">Your API key was rejected. Check it in Options.</text>
+<rect x="40" y="286" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="328.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">HTTP 429 after 3 retries</text>
+<path d="M540,323 L580,323" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="286" width="260" height="74" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="710" y="329.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">RATE_LIMIT</text>
+<path d="M840,323 L880,323" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="286" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="328.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">The free tier is busy right now. Wait a minute and try again.</text>
+<rect x="40" y="364" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="392.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">HTTP 500-504 after retries, or other HTTP</text>
+<text x="54" y="421.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">errors</text>
+<path d="M540,401 L580,401" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="364" width="260" height="74" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="710" y="407.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">SERVICE_ERROR</text>
+<path d="M840,401 L880,401" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="364" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="406.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">The service had a problem. Try again in a moment.</text>
+<rect x="40" y="442" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="484.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">No answer within 25 s (not retried)</text>
+<path d="M540,479 L580,479" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="442" width="260" height="74" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="710" y="485.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">TIMEOUT</text>
+<path d="M840,479 L880,479" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="442" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="484.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">The service took too long to answer. Try again.</text>
+<rect x="40" y="520" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="562.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">Offline or DNS failure (not retried)</text>
+<path d="M540,557 L580,557" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="520" width="260" height="74" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="710" y="563.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">NETWORK</text>
+<path d="M840,557 L880,557" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="520" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="562.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">Cannot reach the service. Check your internet connection.</text>
+<rect x="40" y="598" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="640.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">HTTP 200 with no text (blocked or empty)</text>
+<path d="M540,635 L580,635" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="598" width="260" height="74" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="710" y="641.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">EMPTY_OR_BLOCKED</text>
+<path d="M840,635 L880,635" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="598" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="640.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">The model returned no summary for this page.</text>
+<rect x="40" y="676" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="718.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">Chrome page: chrome://, Web Store</text>
+<path d="M540,713 L580,713" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="676" width="260" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="710" y="719.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">RESTRICTED_PAGE</text>
+<path d="M840,713 L880,713" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="676" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="718.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">Chrome does not allow extensions to read this page.</text>
+<rect x="40" y="754" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="796.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">Script injection or extractor error</text>
+<path d="M540,791 L580,791" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="754" width="260" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="710" y="797.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">EXTRACT_FAILED</text>
+<path d="M840,791 L880,791" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="754" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="796.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">Could not read the text of this page.</text>
+<rect x="40" y="832" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="874.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">Under 200 characters of text</text>
+<path d="M540,869 L580,869" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="832" width="260" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="710" y="875.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">TOO_LITTLE_TEXT</text>
+<path d="M840,869 L880,869" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="832" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="874.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">This page has too little readable text to summarize.</text>
+<rect x="40" y="910" width="500" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="54" y="938.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">Worker restarted mid-job, or job over 3 min</text>
+<text x="54" y="967.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="472">old</text>
+<path d="M540,947 L580,947" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="580" y="910" width="260" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="710" y="953.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="244">INTERRUPTED</text>
+<path d="M840,947 L880,947" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="880" y="910" width="680" height="74" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="894" y="952.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="652">The summary was interrupted. Press Summarize to try again.</text></svg>

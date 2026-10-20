@@ -651,3 +651,57 @@ test('T23 a page that needs too many parts is refused before any model call', as
   assert.match(text, /too long/i);
   assert.equal(mock.requests.length, 0, 'no model call may be made for a refused page');
 });
+
+test('T24 daily quota used up (long retry time): stops at once and says how long to wait', async () => {
+  await resetScenario(settings());
+  mock.configure({ failStatus: 429, failTimes: Infinity, retryInfo: '25200s' });
+  const page = await openTarget('article-short.html');
+  const { popup, outcome, text } = await summarize(ext, page, { timeoutMs: 30000 });
+  await ext.shot(popup, 'T24-quota-used-up');
+  assert.equal(outcome, 'error');
+  assert.match(text, /free-tier limit.*used up/i);
+  assert.match(text, /about 7 hours/);
+  assert.equal(mock.requests.length, 1, 'no retries against a quota that will not come back for hours');
+  assert.equal(await popup.locator('#error-options').isVisible(), true, 'offer Options so the user can switch key');
+});
+
+test('T25 key entered inside the popup: no Options page, no new tab, then a summary', async () => {
+  await resetScenario({ apiBaseUrl: mock.origin, retryBaseDelayMs: 50, requestTimeoutMs: 10000 }); // no key saved
+  const page = await openTarget('article-short.html');
+  const tabId = await ext.tabIdOf(page);
+  const pagesBefore = ext.context.pages().length;
+  const popup = await ext.openPopup(tabId);
+
+  // With no key saved, the key box is already open and says what to do.
+  await popup.locator('#key-form:not([hidden])').waitFor({ timeout: 10000 });
+  assert.match(await popup.locator('#key-msg').innerText(), /Paste your Gemini key/);
+
+  // Empty and badly pasted keys are refused with a message.
+  await popup.click('#key-save');
+  assert.match(await popup.locator('#key-msg').innerText(), /Paste a key first/);
+  await popup.fill('#key-input', 'has a space');
+  await popup.click('#key-save');
+  assert.match(await popup.locator('#key-msg').innerText(), /no spaces/);
+
+  // A good key is saved in the browser and the field is cleared.
+  await popup.fill('#key-input', mock.validKey);
+  await popup.click('#key-save');
+  assert.match(await popup.locator('#key-msg').innerText(), /Key saved/);
+  assert.equal(await popup.inputValue('#key-input'), '');
+  const stored = await ext.run(async () => (await chrome.storage.local.get('apiKey')).apiKey);
+  assert.equal(stored, mock.validKey);
+  await ext.shot(popup, 'T25-key-saved-in-popup');
+
+  // The summary works straight away, and nothing else was opened (only the popup window itself).
+  await popup.click('#summarize');
+  const { outcome } = await waitOutcome(popup, 30000);
+  assert.equal(outcome, 'done');
+  assert.equal(mock.requests.length, 1);
+  assert.equal(ext.context.pages().length, pagesBefore + 1, 'no Options tab or other page may open');
+
+  // The saved key can be removed from the same box.
+  if (!(await popup.locator('#key-form').isVisible())) await popup.click('#toggle-key');
+  await popup.click('#key-remove');
+  assert.match(await popup.locator('#key-msg').innerText(), /removed/);
+  assert.equal(await ext.run(async () => (await chrome.storage.local.get('apiKey')).apiKey ?? null), null);
+});

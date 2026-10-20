@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="920" fill="#ffffff"/><rect x="35" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="120" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 1</text>
+<text x="120" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 1</text>
+<rect x="220" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="305" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 2</text>
+<text x="305" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 2</text>
+<rect x="405" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="490" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 3</text>
+<text x="490" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 3</text>
+<rect x="590" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="675" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 4</text>
+<text x="675" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 4</text>
+<rect x="775" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="860" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 5</text>
+<text x="860" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 5</text>
+<rect x="960" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1045" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 6</text>
+<text x="1045" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 6</text>
+<rect x="1145" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1230" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 7</text>
+<text x="1230" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 7</text>
+<rect x="1330" y="580" width="170" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1415" y="619.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="138">Part 8</text>
+<text x="1415" y="654.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="138">call 8</text>
+<rect x="92.5" y="400" width="240" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="212.5" y="439.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="208">Merge 1-2</text>
+<text x="212.5" y="474.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">1 model call</text>
+<rect x="462.5" y="400" width="240" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="582.5" y="439.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="208">Merge 3-4</text>
+<text x="582.5" y="474.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">1 model call</text>
+<rect x="832.5" y="400" width="240" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="952.5" y="439.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="208">Merge 5-6</text>
+<text x="952.5" y="474.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">1 model call</text>
+<rect x="1202.5" y="400" width="240" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1322.5" y="439.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="208">Merge 7-8</text>
+<text x="1322.5" y="474.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">1 model call</text>
+<rect x="267.5" y="250" width="260" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="397.5" y="289.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="228">Merge 1-4</text>
+<text x="397.5" y="324.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="228">1 model call</text>
+<rect x="1007.5" y="250" width="260" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1137.5" y="289.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="228">Merge 5-8</text>
+<text x="1137.5" y="324.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="228">1 model call</text>
+<rect x="617.5" y="110" width="300" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="767.5" y="149.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="268">Final summary</text>
+<text x="767.5" y="184.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">1 model call</text>
+<path d="M145.69444444444446,580 L186.80555555555554,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M279.30555555555554,580 L238.19444444444446,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M515.6944444444445,580 L556.8055555555555,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M649.3055555555555,580 L608.1944444444445,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M885.6944444444445,580 L926.8055555555555,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1019.3055555555555,580 L978.1944444444445,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1255.6944444444443,580 L1296.8055555555557,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1389.3055555555557,580 L1348.1944444444443,500" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M274.1666666666667,400 L335.8333333333333,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M520.8333333333334,400 L459.1666666666667,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1014.1666666666666,400 L1075.8333333333333,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1260.8333333333333,400 L1199.1666666666667,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M527.5,250.8108108108108 L635.3571428571429,210" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1007.5,250.8108108108108 L899.6428571428571,210" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="40" y="720" width="1520" height="110" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="764.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="1488">Total: 15 model calls</text>
+<text x="800" y="799.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1488">8 chunk calls + 7 merge calls (4 + 2 + 1), in 3 merge levels</text>
+<text x="40" y="880" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Example limit: maxChars 1,000; parts of 400 characters, so two fit in one merge.</text></svg>

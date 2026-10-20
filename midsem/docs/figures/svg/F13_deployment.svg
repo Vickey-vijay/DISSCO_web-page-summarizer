@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="730" viewBox="0 0 1600 730" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="730" fill="#ffffff"/><rect x="40" y="90" width="1000" height="500" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="56" y="72" width="464.659712" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="69" y="98" font-size="24" font-weight="700" fill="#1C1B1A">Your computer (Windows, Chrome)</text>
+<rect x="1080" y="90" width="480" height="460" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="1096" y="72" width="175.37384960000006" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1109" y="98" font-size="24" font-weight="700" fill="#1C1B1A">The internet</text>
+<rect x="70" y="150" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="220" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="268">Web page</text>
+<text x="220" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Rendered text</text>
+<rect x="70" y="300" width="300" height="110" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="220" y="344.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="268">Extractor</text>
+<text x="220" y="379.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Injected on demand</text>
+<rect x="440" y="150" width="280" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="580" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Popup</text>
+<text x="580" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Shows progress</text>
+<rect x="440" y="300" width="280" height="120" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="580" y="349.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Service worker</text>
+<text x="580" y="384.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Job, pipeline, engine</text>
+<rect x="440" y="460" width="280" height="90" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="580" y="494.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Session storage</text>
+<text x="580" y="529.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Job record</text>
+<rect x="740" y="150" width="280" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="880" y="189.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Local storage</text>
+<text x="880" y="224.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">API key only</text>
+<rect x="1120" y="260" width="440" height="150" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1340" y="309.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Google Gemini API</text>
+<text x="1340" y="345.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">HTTPS, outside your computer</text>
+<text x="1340" y="374.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">Key sent in a header</text>
+<path d="M220,250 L220,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M370,355 L440,355" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M580,250 L580,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M580,420 L580,460" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M720,340 L1120,320" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="811.61192" y="311.3" width="216.77616" height="37.4" rx="4" fill="#FBF8F1" stroke="#8A5A00" stroke-width="1.6"/>
+<text x="920" y="337.92" font-size="22" fill="#1C1B1A" text-anchor="middle">page text + prompt</text>
+<path d="M1120,380 L720,400" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="862.16132" y="371.3" width="115.67736" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="920" y="397.92" font-size="22" fill="#1C1B1A" text-anchor="middle">summary</text>
+<text x="40" y="648" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Only the page text and the prompt leave the machine in V1, over HTTPS.</text>
+<text x="40" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The key goes in a header, never in the URL.</text></svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="840" fill="#ffffff"/><rect x="60" y="380" width="260" height="110" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="190" y="424.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="228">idle</text>
+<text x="190" y="459.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="228">No record for the tab</text>
+<rect x="360" y="110" width="780" height="230" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="376" y="92" width="119.358656" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="389" y="118" font-size="24" font-weight="700" fill="#1C1B1A">running</text>
+<rect x="400" y="175" width="200" height="90" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="500" y="227" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">extracting</text>
+<rect x="640" y="175" width="220" height="90" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="750" y="227" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="188">summarizing</text>
+<rect x="900" y="175" width="220" height="90" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1010" y="227" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="188">merging</text>
+<path d="M600,220 L640,220" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M860,220 L900,220" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1220" y="110" width="320" height="100" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1380" y="149.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="288">done</text>
+<text x="1380" y="184.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="288">Summary and stats stored</text>
+<rect x="1220" y="400" width="320" height="100" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1380" y="439.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="288">error</text>
+<text x="1380" y="474.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="288">Any AppError code</text>
+<rect x="1220" y="600" width="320" height="110" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1380" y="644.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="288">error: INTERRUPTED</text>
+<text x="1380" y="679.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="288">Worker restarted mid-job</text>
+<rect x="360" y="600" width="460" height="110" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="590" y="644.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">stale (popup view)</text>
+<text x="590" y="679.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="428">No update for 3 min</text>
+<path d="M190,380 L190,220 L360,220" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1140,190 L1220,160" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1140,290 L1220,450" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1140,320 L1220,650" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M550,340 L550,600" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="511.9534" y="451.3" width="76.0932" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="550" y="477.92" font-size="22" fill="#1C1B1A" text-anchor="middle">3 min</text>
+<path d="M820,655 L900,655 L900,340" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="40" y="760" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Summarize again from done or error starts a new run.</text>
+<text x="40" y="800" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Closing the tab deletes its record (back to idle).</text></svg>

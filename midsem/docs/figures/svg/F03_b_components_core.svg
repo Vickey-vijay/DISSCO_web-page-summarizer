@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="660" viewBox="0 0 1600 660" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="660" fill="#ffffff"/><rect x="60" y="300" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="210" y="339.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">pipeline.js</text>
+<text x="210" y="374.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Runs the whole flow</text>
+<rect x="430" y="130" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="580" y="169.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">chunker.js</text>
+<text x="580" y="204.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Splits long text</text>
+<rect x="430" y="300" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="580" y="339.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">errors.js</text>
+<text x="580" y="374.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Codes and messages</text>
+<rect x="430" y="470" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="580" y="509.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">merger.js</text>
+<text x="580" y="544.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Joins part summaries</text>
+<rect x="800" y="300" width="300" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="950" y="339.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">gemini.js</text>
+<text x="950" y="374.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">V1 cloud engine</text>
+<rect x="800" y="470" width="300" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="950" y="509.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="268">prompts.js</text>
+<text x="950" y="544.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="268">Prompt text</text>
+<path d="M318.8235294117647,300 L471.1764705882353,230" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M360,350 L430,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M318.8235294117647,400 L471.1764705882353,470" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M800,350 L730,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M950,400 L950,470" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="60" y="620" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1500">Solid arrow: imports. config.js is used by service-worker.js and options.js (F03_a).</text></svg>

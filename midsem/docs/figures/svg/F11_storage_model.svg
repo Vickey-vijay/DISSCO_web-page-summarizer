@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="680" viewBox="0 0 1600 680" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="680" fill="#ffffff"/><rect x="40" y="90" width="660" height="500" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="56" y="72" width="321.488" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="69" y="98" font-size="24" font-weight="700" fill="#1C1B1A" font-family="Consolas, 'Courier New', monospace">chrome.storage.local</text>
+<rect x="760" y="90" width="800" height="500" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="776" y="72" width="489.6579968" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="789" y="98" font-size="24" font-weight="700" fill="#1C1B1A">chrome.storage.session (job:&lt;tabId&gt;)</text>
+<rect x="70" y="140" width="600" height="140" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="370" y="184.95999999999998" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">apiKey</text>
+<text x="370" y="220.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Saved by Options, read by the worker</text>
+<text x="370" y="249.23999999999998" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Stored unencrypted, on this computer only</text>
+<rect x="70" y="320" width="600" height="140" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="370" y="364.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Test-only seams</text>
+<text x="370" y="400.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">apiBaseUrl, chunkChars, retry, timeout</text>
+<text x="370" y="429.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Written by the tests, never by the UI</text>
+<rect x="790" y="140" width="740" height="250" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1160" y="210.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="708">Job record fields</text>
+<text x="1160" y="246.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="708">status, phase, current, total, parts</text>
+<text x="1160" y="275.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="708">notice, summary, error</text>
+<text x="1160" y="304.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="708">stats, url, title, pageUrl</text>
+<text x="1160" y="333.28000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="708">startedAt, updatedAt</text>
+<rect x="790" y="440" width="350" height="120" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="965" y="489.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="318">Service worker</text>
+<text x="965" y="524.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="318">Writes and deletes</text>
+<rect x="1180" y="440" width="350" height="120" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1355" y="489.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="318">Popup</text>
+<text x="1355" y="524.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="318">Reads on open and change</text>
+<path d="M965,440 L965,390" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="924.98132" y="396.3" width="80.03736" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="965" y="422.92" font-size="22" fill="#1C1B1A" text-anchor="middle">writes</text>
+<path d="M1355,440 L1355,390" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1316.28812" y="396.3" width="77.42376" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1355" y="422.92" font-size="22" fill="#1C1B1A" text-anchor="middle">reads</text>
+<text x="40" y="640" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Local storage survives restarts. Session storage is cleared when the browser closes.</text></svg>

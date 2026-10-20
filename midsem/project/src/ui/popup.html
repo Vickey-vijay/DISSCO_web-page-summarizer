@@ -7,15 +7,26 @@
   <link rel="stylesheet" href="ui.css">
 </head>
 <body class="popup">
-  <header>
-    <h1>Page Summarizer</h1>
-    <a id="open-options" href="#" class="link">Options</a>
+  <header class="bar">
+    <span class="wordmark">Page Summarizer</span>
+    <button id="toggle-key" type="button" class="textbtn" aria-expanded="false">Key</button>
   </header>
 
   <main>
     <p id="page-title" class="page-title" hidden></p>
 
-    <button id="summarize" type="button" class="primary">Summarize this page</button>
+    <button id="summarize" type="button" class="go">Summarize this page</button>
+
+    <section id="key-form" class="keybox" hidden>
+      <label for="key-input">Gemini API key</label>
+      <input id="key-input" type="password" autocomplete="off" spellcheck="false" placeholder="Paste the key here">
+      <div class="keyrow">
+        <button id="key-save" type="button" class="outline">Save key</button>
+        <button id="key-remove" type="button" class="textbtn" hidden>Remove saved key</button>
+      </div>
+      <p id="key-msg" class="keymsg" role="status"></p>
+      <p class="fine">Free key at aistudio.google.com/apikey. It is kept in this browser only.</p>
+    </section>
 
     <section id="progress" class="progress" hidden aria-live="polite">
       <p id="progress-text" class="progress-text"></p>
@@ -25,7 +36,7 @@
 
     <section id="error" class="error" hidden role="alert">
       <p id="error-text"></p>
-      <button id="error-options" type="button" class="secondary" hidden>Open Options</button>
+      <button id="error-options" type="button" class="textbtn" hidden>Open the Options page</button>
     </section>
 
     <section id="result" class="result" hidden>

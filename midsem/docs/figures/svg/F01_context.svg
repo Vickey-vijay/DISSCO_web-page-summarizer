@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="720" fill="#ffffff"/><rect x="440" y="100" width="660" height="500" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="456" y="82" width="209.58202880000002" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="469" y="108" font-size="24" font-weight="700" fill="#1C1B1A">Your computer</text>
+<rect x="40" y="320" width="340" height="130" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="210" y="359.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="308">Web page</text>
+<text x="210" y="395.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="308">Its text is read by the</text>
+<text x="210" y="424.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="308">extension</text>
+<rect x="480" y="150" width="580" height="110" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="770" y="194.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Popup</text>
+<text x="770" y="229.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">You press Summarize and read the result</text>
+<rect x="480" y="320" width="580" height="130" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="770" y="359.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Service worker</text>
+<text x="770" y="395.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Runs the job and calls the API</text>
+<text x="770" y="424.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Writes progress and the result</text>
+<rect x="480" y="490" width="580" height="90" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="770" y="524.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="548">chrome.storage</text>
+<text x="770" y="559.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">API key and job record</text>
+<rect x="1160" y="320" width="400" height="130" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1360" y="374.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="368">Gemini API</text>
+<text x="1360" y="409.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="368">Cloud, outside your computer</text>
+<path d="M380,385 L480,385" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1060,370 L1160,370" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M1160,410 L1060,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M770,260 L770,320" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M770,450 L770,490" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="40" y="640" width="40" height="26" rx="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="92" y="660" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1468">Built in V1 (in code)</text>
+<rect x="337.99920000000003" y="640" width="40" height="26" rx="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="389.99920000000003" y="660" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1170.0008">Outside your computer</text></svg>
