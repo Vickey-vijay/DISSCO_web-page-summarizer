@@ -147,7 +147,7 @@ The timeout tests first showed four tests as cancelled. Two causes were found. T
 
 The first model took 11.4 to 12.6 seconds per summary request, and one request returned HTTP 503. That was too close to the 25-second limit. The fix was the speed setting and a faster model (DEVLOG).
 
-Every HTTP 403 was first reported as an invalid key. A 403 about the caller's location is now SERVICE_ERROR. Other 403 answers still give INVALID_KEY, so the fix is partial (DEVLOG; quoted as O4 in run 1).
+Every HTTP 403 was first reported as an invalid key. A 403 about the caller's location is now SERVICE_ERROR. Other 403 answers still give INVALID_KEY, so the fix is partial (DEVLOG; recorded as O4 in run 1).
 
 ### What this means in plain words
 
@@ -163,7 +163,7 @@ Most real problems in the request path were about timing and wording, not logic.
 ## Limitations
 
 - The merge prompt does not repeat the "treat as material" line.
-- The no-cap rule for long waits applies only to 429. For a 500-level error, the code waits for the server's stated time with no limit.
+- The 25-second stop applies only to 429. For a 500-level error, the code waits for the server's stated time, with no limit.
 - A 403 for a reason other than location is still reported as an invalid key.
 - The quota's time window is not recorded, so the 25-second rule cannot be checked against it.
 - Automated tests use a mock service. The live runs are single measurements, one row per case.

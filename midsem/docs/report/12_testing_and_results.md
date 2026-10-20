@@ -6,7 +6,7 @@ The project was tested at five levels. Each level catches a different kind of mi
 
 - **Unit tests** check small pieces of code one at a time. The network is replaced by a fake, so no request leaves the computer.
 - **Browser scenarios** run the whole extension in a Chromium browser. Chromium is the open-source browser that Chrome is built from. A tool called Playwright drives it from a script. The real Gemini service is replaced by a mock, which is a stand-in server that gives fixed answers.
-- **Setup checks** run the two batch files on copies of the project.
+- **Setup checks** are ten checks that run the two batch files on copies of the project. Chapter 11 lists them.
 - **Live runs** send a few real pages to the real Gemini service, using the developer's own key.
 - **The manual smoke test** is done by hand in real Chrome. Chapter 11 describes it.
 
@@ -33,7 +33,7 @@ The evidence files record three runs. Run 1 recorded 56 passing unit tests, and 
 
 ## Browser scenarios
 
-The browser scenarios load the extension into Playwright's Chromium. A test helper opens the popup in a small window, because the test cannot click the toolbar icon. Six fixture pages, which are saved copies of web pages kept for testing, are served from a local server. The mock Gemini server answers each request and records it. A scenario passes when the popup shows the expected text and the mock received the expected number of requests.
+The scenarios load the extension into Playwright's Chromium and open the popup in a small window, because a test cannot click the toolbar icon. Six fixture pages (saved copies of web pages) are served locally. The mock Gemini server answers each request and records it. A scenario passes when the popup shows the expected text and the mock received the expected requests.
 
 The test copy of the manifest adds one extra permission, for the local test server. The permission that Chrome grants when a user clicks the toolbar icon, called activeTab, is therefore not tested by these scenarios. Chapter 14 returns to this point.
 
@@ -72,13 +72,13 @@ Table: The 28 browser scenarios and their results in run 1 and run 2
 
 The suite holds 28 scenarios: the smoke test plus 27 in `tests/e2e/pipeline.test.js`. Run 2 ran 26 of them, all passing. T24 and T25 were added after run 2. Run 3, the latest record, passed all 28, with none failing (run-3.md).
 
-Three test assertions were corrected during run 1. The test harness was at fault in each case, not the product. T12b used to wait 4 seconds for the late content. Under load, the harness pressed Summarize after the content had already loaded, so the delay was raised to 20 seconds. T20 waited 10 seconds after making the job old, which landed exactly on the 3-minute limit, so the wait was raised to 15 seconds. The text search in T21 matched the page title first, so it was moved to the page body.
+Three test faults were fixed in run 1, all in the harness and not the product. T12b's 4-second delay was too short under load, so it became 20 seconds. T20's 10-second wait landed exactly on the 3-minute limit, so it became 15 seconds. T21's text search matched the page title first, so it now starts at the page body.
 
 **What this means in plain words.** The browser scenarios play out the user's steps in a real browser. They check what the popup shows and how many requests reach the mock service. They prove the extension handles each case, but not how good a real summary is.
 
 ## The first run: four bugs, T19 to T22
 
-The first full run added four scenarios on purpose. Earlier exploratory probes had shown four problems that no test covered. All four failed on the first run. Each failure was a real defect in the product, not a mistake in the test. The bugs were recorded as B1 to B4 in run-1.md.
+The first full run added T19 to T22 on purpose, because earlier probes had found four problems that no test covered. All four failed. Each was a real product defect, recorded as B1 to B4 in run-1.md.
 
 - **B1: Summarize ignored after a page change (T19, medium).** When the tab moved to a new page while the old summary was still running, pressing Summarize left the popup blank. The service worker refused the second job, and the popup hid the running job because its address did not match, and it threw away the refusal. Nothing on the screen explained the problem.
 - **B2: Progress kept showing in an open popup (T20, medium).** A dead job kept showing "Summarizing..." with a disabled button, while the popup stayed open. The popup checked for stale jobs only when it opened or when storage changed. A dead worker writes nothing, so the check never ran.
@@ -93,7 +93,7 @@ One finding from run 1 is not listed as fixed in the log. The merge step can sen
 
 ## Live runs against the real service
 
-Live runs send real pages to the real Gemini service with the developer's key. The scripts read the key but never print it. The runs used a hidden Chromium window with the extension loaded. The test measured the times. The settings were the model gemini-3.5-flash-lite, the "low" thinking setting, and parts of 8,000 characters. The thinking setting controls how much hidden working the model does before it writes an answer. Run 3 notes that these live runs were made before the popup redesign and were not repeated.
+Live runs send real pages to the real Gemini service with the developer's key, which the scripts read but never print. The runs used a hidden Chromium window, the model gemini-3.5-flash-lite, the "low" thinking setting (which limits the hidden working the model does before answering), and parts of 8,000 characters. Run 3 notes that these runs were made before the popup redesign and were not repeated.
 
 Table: The live runs, from live-measurements.md
 
@@ -152,7 +152,7 @@ Table: Benchmark of four settings, three runs each (model-bench.json)
 
 The larger model, with its default thinking, took between 11 and 13 seconds for each request. Its usage data showed far more hidden thinking work than visible answer text, roughly six to seven times as much. Setting the thinking level to "low" cut most runs to under four seconds. One run in three still took 12.5 seconds. The Flash-Lite model was the fastest and the most consistent, between 1.6 and 2.0 seconds. The answers were similar in length across all four settings, so length does not show which answer is better.
 
-The benchmark measured speed and length. It did not measure the quality of the answers, and the quality of the cheaper model was not formally compared with the larger one. The choice therefore rests on measured speed and on the free quota, not on a scored comparison of summaries.
+The benchmark measured speed and length, not answer quality. The cheaper model's answers were not formally compared with the larger model's, so the choice rests on measured speed and the free quota.
 
 Two details need care. DEVLOG.md says six settings were compared, and that the lowest setting was rejected with an error. The saved file holds four settings, so the other two have no saved numbers. The setting the product sends is Flash-Lite with the "low" thinking setting. That exact pairing is not one of the four rows. The live runs did use it. Case L01, a one-request page, took 1.7 seconds.
 
@@ -187,7 +187,7 @@ Source: `midsem/project/src/engines/gemini.js`, lines 149 to 151.
 
 ## Screenshot gallery
 
-The screenshots below come from the test runs. The popup text in the finished-summary panel is the mock's text, not Google's. The quota panel shows a seven-hour wait that the test set in the mock. Each image is followed by a short reading.
+These screenshots come from the test runs. The summary text in panel F is the mock's text, not Google's, and the seven-hour wait in panel J was set by the test.
 
 ### The popup in its states
 

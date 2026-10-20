@@ -2,24 +2,16 @@
 
 ## What this part does and why it exists
 
-The extension is not in the Chrome Web Store. The client installs it from the project folder, using a Chrome feature called Load unpacked. That feature runs an extension straight from a folder on the computer. Two Windows batch files (small scripts that Windows runs line by line) make the job easier. setup.bat checks that Chrome and the project files are ready. run.bat opens the pages the user needs and prints the steps that remain.
+The extension is not in the Chrome Web Store. The client installs it from the project folder with Chrome's Load unpacked feature, which runs an extension straight from a folder. Two Windows batch files (small scripts that Windows runs line by line) make this easier. setup.bat checks that Chrome and the project files are ready. run.bat opens the pages the user needs and prints the remaining steps. The aim is a setup that takes about ten minutes. That time has not been measured on a client laptop: [to be measured].
 
-The aim is a setup that a client can finish in about ten minutes. The project calls this its "10-minute check". That time has not been measured on a client laptop: [to be measured].
-
-## Before you start
-
-- A Windows computer with Google Chrome 116 or newer.
-- The whole project folder, downloaded or cloned from the repository, which is the online copy of the project's code.
-- A free Gemini API key. A key is a secret code that identifies the user to Google's service. The free key comes from aistudio.google.com/apikey.
-
-Node.js is not needed. Only the developer's test tools use it.
+Before you start, the client needs a Windows computer with Google Chrome 116 or newer, the whole project folder, and a free Gemini API key. A key is a secret code that identifies the user to Google's service. The free key comes from aistudio.google.com/apikey. Node.js is not needed, because only the developer's test tools use it.
 
 ## What setup.bat does, step by step
 
 setup.bat writes each check to setup.log in the project folder. It runs four steps.
 
-1. **Finds Chrome.** It looks in the usual install folders, then in the Windows registry, the settings database that Windows keeps. It saves the Chrome path for run.bat. If Chrome is missing, it stops and says where to download it.
-2. **Checks the Chrome version.** Chrome records its version in the registry. Version 116 or newer passes. If the version cannot be read, the script continues with a note. An older Chrome stops the setup. The project files do not record why 116 was chosen. The check is written as separate subroutines, which are named blocks the script jumps to. Chapter 13 explains why.
+1. **Finds Chrome** in the usual install folders, then in the Windows registry, the settings database. It saves the path for run.bat. If Chrome is missing, it says where to download it and stops.
+2. **Checks the version.** Chrome records its version in the registry. Version 116 or newer passes. If the version cannot be read, the script continues with a note. The project files do not record why 116 was chosen. The check is split into subroutines, which are named blocks the script jumps to. Chapter 13 explains why.
 
 Source: `midsem/project/setup.bat`, lines 135 to 143.
 
@@ -35,7 +27,7 @@ if %CHROME_MAJOR% lss 116 goto :cv_old
 exit /b 0
 ```
 
-3. **Checks the extension files.** It runs `scripts/check-extension.ps1`, a PowerShell script. The script reads manifest.json, the file that tells Chrome what the extension is. It checks that the file reads, that it uses Manifest V3 (the current extension format), and that every file it names exists. A partial download fails here, with the missing file's name, instead of failing later inside Chrome.
+3. **Checks the extension files** with `scripts/check-extension.ps1`, a PowerShell script. It reads manifest.json, the file that tells Chrome what the extension is. It checks that the file reads, that it uses Manifest V3 (the current extension format), and that every file it names exists. A partial download fails here, with the missing file's name.
 
 Source: `midsem/project/scripts/check-extension.ps1`, lines 36 to 38.
 
@@ -45,15 +37,15 @@ foreach ($file in ($files | Select-Object -Unique)) {
 }
 ```
 
-4. **Skips developer tools** unless setup is run with `--dev`. That option checks for Node.js 20 or newer, runs npm install, and downloads Playwright's test browser, about 200 MB. Each network step gets three tries.
+4. **Skips developer tools** unless setup is run with `--dev`. That option checks for Node.js 20 or newer, then runs npm install and downloads Playwright's test browser, about 200 MB, with three tries for each network step.
 
-On success, setup.bat writes a marker file called .setup-ok, which holds the Chrome path and the date. It prints SETUP COMPLETE and pauses. run.bat refuses to run without the marker. On failure, the script deletes the marker, prints "What failed" and "How to fix", and names setup.log.
+On success, setup.bat writes a marker file, .setup-ok, holding the Chrome path and the date, then prints SETUP COMPLETE. run.bat refuses to run without the marker. On failure, the script deletes the marker, prints "What failed" and "How to fix", and names setup.log.
 
 **What this means in plain words.** setup.bat is a checklist. It confirms that Chrome is present and new enough, and that the extension folder is complete. If something is wrong, it says what to do.
 
 ## What run.bat does, and why it does not load the extension
 
-run.bat checks the marker, reads the Chrome path, and copies the folder path to the clipboard. It opens two pages: chrome://extensions, where Chrome lists its extensions, and a Wikipedia article about lighthouses to summarize. Then it prints four steps.
+run.bat checks the marker, reads the Chrome path, and copies the folder path to the clipboard. It opens chrome://extensions, the page that lists Chrome's extensions, and a Wikipedia article about lighthouses. Then it prints four steps.
 
 Source: `midsem/project/run.bat`, lines 40 to 44.
 
@@ -65,13 +57,13 @@ timeout /t 2 /nobreak >nul
 start "" "%CHROME%" https://en.wikipedia.org/wiki/Lighthouse
 ```
 
-run.bat cannot load the extension itself. Chrome once had a command-line flag, `--load-extension`, that loaded a folder at start-up. The project tested it. On the developer laptop, the installed Chrome 155 started with the flag, and no extension service worker appeared within eight seconds. A service worker is the background part of an extension. Playwright's bundled Chromium 156 loaded the extension at once. DEVLOG.md cites the Chromium team's April 2025 announcement that branded Chrome from version 137 drops this flag. The check is in `tests/e2e/chrome-flag-check.mjs`. So the client clicks Load unpacked. Step 4 of run.bat still points to Options for the key, but the popup's Key box saves the same key.
+run.bat does not load the extension itself. Chrome once had a command-line flag, `--load-extension`, that loads a folder at start-up. On the developer laptop, the installed Chrome 155 started with that flag, and no extension service worker appeared within eight seconds. A service worker is the background part of an extension. Playwright's bundled Chromium 156 loaded it at once. DEVLOG.md cites the Chromium team's April 2025 announcement that branded Chrome from version 137 drops the flag. The check is `tests/e2e/chrome-flag-check.mjs`. So the client clicks Load unpacked. Step 4 of run.bat still points to Options for the key, but the popup's Key box saves the same key.
 
 **What this means in plain words.** Chrome no longer lets a script load an extension on its own. run.bat does what it can and prints the rest.
 
 ## The ten setup checks
 
-`tests/bat/test-bat-scripts.ps1` runs both batch files on temporary copies of the project. For the success case, a fake Chrome file stands in for the browser. It only writes its arguments to a text file, so no window opens.
+`tests/bat/test-bat-scripts.ps1` runs both batch files on temporary copies of the project. For the success case, a fake Chrome file that only writes its arguments to a text file stands in for the browser.
 
 Table: The ten setup checks and what each proves
 
@@ -88,13 +80,13 @@ Table: The ten setup checks and what each proves
 | B7 | Running --dev without Node.js explains how to install it |
 | B8 | --dev --reset rebuilds the test tools and completes |
 
-Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages need a computer without Chrome, so they are checked only by reading the script. The script's summary line is not saved in the evidence folder. run-3.md says these checks were last run before the popup redesign and must be run again before they are quoted, so the current result is [to be measured].
+Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages are checked only by reading the script. The script's summary line is not saved in the evidence folder. run-3.md says these checks must be run again before they are quoted, so the current result is [to be measured].
 
 **What this means in plain words.** The checks run the real scripts on copies of the project. They confirm the scripts succeed when they should, and fail with a clear message when they should.
 
 ## The manual smoke test in real Chrome
 
-The automated browser tests (chapter 12) cannot click the toolbar icon, and they add an extra permission for the test server. So they do not prove that the unmodified extension installs and works in real Chrome. The file `midsem/docs/MANUAL_SMOKE_TEST.md` covers that in 11 steps. The person runs it on the developer laptop, and again on the client's laptop before the viva.
+The automated browser tests (chapter 12) cannot click the toolbar icon, and they add an extra permission for the test server. So they do not prove that the unmodified extension installs and works in real Chrome. The file `midsem/docs/MANUAL_SMOKE_TEST.md` sets out 11 steps for that. The person runs it on the developer laptop, and again on the client's laptop before the viva.
 
 Table: The manual smoke test, step by step
 
@@ -112,7 +104,7 @@ Table: The manual smoke test, step by step
 | 10 | Replace the key with "wrong", then summarize | A message that the key was rejected |
 | 11 | Put the correct key back | Summaries work again |
 
-Three things need attention before the viva. First, the wording expected in steps 4 and 10 is older than the code. The current messages are "No API key yet. Paste your Gemini key in the Key box and save it." and "Your API key was rejected. Paste a correct key in the Key box." Second, the results column is empty. The report keeps placeholders: [Insert date and result of the developer laptop run] and [Insert client laptop model, Windows version and date of the client run]. Third, the file asks for six screenshots, M01 to M06, and none of them is in the screenshots folder yet.
+Three things need attention before the viva. The wording expected in steps 4 and 10 is older than the code. The current messages are "No API key yet. Paste your Gemini key in the Key box and save it." and "Your API key was rejected. Paste a correct key in the Key box." The results column is empty, so the report keeps placeholders: [Insert date and result of the developer laptop run] and [Insert client laptop model, Windows version and date]. The six screenshots the file asks for, M01 to M06, are not in the screenshots folder yet.
 
 **What this means in plain words.** This is the only check on real Chrome and the real toolbar icon. Its steps are written down, but its results are not recorded yet.
 
@@ -120,22 +112,24 @@ Three things need attention before the viva. First, the wording expected in step
 
 ![Developer loop: write code, unit tests, browser tests, fix and log, retest, and an exit check that leads to documenting and tagging](../figures/F15_dev_loop.png)
 
-**Reading the figure:** The top row runs left to right: write code, unit tests, browser tests. The two dashed boxes on the right, the exploratory agent and the bug list, are planned for milestone M8 and are not in use yet. The bottom row runs right to left: fix and log, retest, then "Exit criteria met?" A "no" sends the work back to Write code. The loop arrow from Retest goes back to the unit tests. A "yes" leads to documenting and tagging v1-midsem.
+**Reading the figure:** The top row runs left to right: write code, unit tests, browser tests. The two dashed boxes on the right, the exploratory agent and the bug list, are planned for milestone M8 and are not in use yet. The bottom row runs right to left: fix and log, retest, then "Exit criteria met?" A "no" sends the work back to Write code, and the loop arrow from Retest goes back to the unit tests. A "yes" leads to documenting and tagging v1-midsem.
+
+**What this means in plain words.** Each change is tested by a script first and then in a browser. Each bug is fixed, written down, and tested again until the agreed finish conditions are met.
 
 ## Installing the extension in about ten minutes
 
 1. Download the project folder, or clone it, and keep all of it together.
-2. Double-click setup.bat and wait for SETUP COMPLETE. If you see SETUP FAILED, read the "How to fix" line, then run setup.bat again.
+2. Double-click setup.bat and wait for SETUP COMPLETE. If you see SETUP FAILED, read the "How to fix" line and run it again.
 3. Double-click run.bat. Chrome opens the extensions page and a sample article. The folder path is already on the clipboard.
-4. On the extensions page, turn on Developer mode, in the top right corner.
+4. On the extensions page, turn on Developer mode in the top right corner.
 5. Click Load unpacked, press Ctrl and V to paste the folder path, then click Select Folder.
-6. Click the puzzle-piece icon in Chrome's toolbar and pin Page Summarizer.
+6. Pin Page Summarizer from the puzzle-piece menu in the toolbar.
 7. Click the Page Summarizer icon. The Key box opens by itself when no key is saved. Paste the Gemini key and click Save key.
 8. Open an article, click the icon, and press Summarize this page.
 
 ## Questions this chapter answers
 
-**Why does run.bat not load the extension itself?** Chrome removed the command-line flag that did this, in branded builds from version 137. A test on Chrome 155 confirmed it, so the client loads the folder by hand with Load unpacked.
+**Why does run.bat not load the extension itself?** Chrome removed the command-line flag that did this, in branded builds from version 137. A test on Chrome 155 confirmed it. So the client loads the folder by hand with Load unpacked.
 
 **What happens if the client's Chrome is too old?** setup.bat stops at step 2 and writes no marker, so run.bat refuses to start until Chrome is updated and setup is run again.
 

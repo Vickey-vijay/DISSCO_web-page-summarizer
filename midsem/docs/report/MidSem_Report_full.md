@@ -1200,7 +1200,7 @@ The timeout tests first showed four tests as cancelled. Two causes were found. T
 
 The first model took 11.4 to 12.6 seconds per summary request, and one request returned HTTP 503. That was too close to the 25-second limit. The fix was the speed setting and a faster model (DEVLOG).
 
-Every HTTP 403 was first reported as an invalid key. A 403 about the caller's location is now SERVICE_ERROR. Other 403 answers still give INVALID_KEY, so the fix is partial (DEVLOG; quoted as O4 in run 1).
+Every HTTP 403 was first reported as an invalid key. A 403 about the caller's location is now SERVICE_ERROR. Other 403 answers still give INVALID_KEY, so the fix is partial (DEVLOG; recorded as O4 in run 1).
 
 ### What this means in plain words
 
@@ -1216,7 +1216,7 @@ Most real problems in the request path were about timing and wording, not logic.
 ## Limitations
 
 - The merge prompt does not repeat the "treat as material" line.
-- The no-cap rule for long waits applies only to 429. For a 500-level error, the code waits for the server's stated time with no limit.
+- The 25-second stop applies only to 429. For a 500-level error, the code waits for the server's stated time, with no limit.
 - A 403 for a reason other than location is still reported as an invalid key.
 - The quota's time window is not recorded, so the 25-second rule cannot be checked against it.
 - Automated tests use a mock service. The live runs are single measurements, one row per case.
@@ -1271,7 +1271,7 @@ The popup shows one state at a time: idle, asking for a key, working, retrying, 
 
 The Key link in the header opens the Key box. The box also opens by itself when no key is saved or when a key problem appears. The reader pastes the key and presses "Save key" or Enter. The box checks the input before saving. An empty box gives "Paste a key first." A key with a space gives "A key has no spaces. Check what you pasted." A good key gives "Key saved. Now press Summarize." The key is stored in `chrome.storage.local`, which keeps it in this browser only.
 
-An earlier version opened the Options page in a new tab. The project owner watched a test run and asked for the product to stay in the popup, because it looked as if it opened tabs (DEVLOG.md, the design change entry). Now nothing opens by itself. The "Open the Options page" link appears only for key problems, and it opens a tab only when the reader presses it.
+An earlier version opened the Options page in a new tab. The project owner watched a test run and said the extension should open in a popup, not in a new tab (DEVLOG.md, the design change entry). Now nothing opens by itself. The "Open the Options page" link appears only for key problems, and it opens a tab only when the reader presses it.
 
 ### What this means in plain words
 
@@ -1454,9 +1454,7 @@ The finished summary waits in the tab's record. Reopening the popup shows it aga
 
 ## What went wrong while building it
 
-The popup's check for a dead job ran only when the popup opened or storage changed. A dead worker writes nothing, so the check never ran. The popup now re-checks every five seconds (DEVLOG, bug B2). The lesson recorded is that a timeout checked only on events never fires when the thing it guards has stopped sending events.
-
-A cleanup handler could not win against a job that kept running. The fix stopped the work as well as the cleanup (DEVLOG, bug B4).
+The popup checked for a dead job only when it opened or storage changed. A dead worker writes nothing, so the check never ran. The popup now re-checks every five seconds (DEVLOG, bug B2). A cleanup handler could not win against a job that kept running, so the fix stopped the work as well as the cleanup (DEVLOG, bug B4).
 
 ## How it was tested
 
@@ -1492,24 +1490,16 @@ The finished record stays in session storage until the tab closes, the browser c
 
 ## What this part does and why it exists
 
-The extension is not in the Chrome Web Store. The client installs it from the project folder, using a Chrome feature called Load unpacked. That feature runs an extension straight from a folder on the computer. Two Windows batch files (small scripts that Windows runs line by line) make the job easier. setup.bat checks that Chrome and the project files are ready. run.bat opens the pages the user needs and prints the steps that remain.
+The extension is not in the Chrome Web Store. The client installs it from the project folder with Chrome's Load unpacked feature, which runs an extension straight from a folder. Two Windows batch files (small scripts that Windows runs line by line) make this easier. setup.bat checks that Chrome and the project files are ready. run.bat opens the pages the user needs and prints the remaining steps. The aim is a setup that takes about ten minutes. That time has not been measured on a client laptop: [to be measured].
 
-The aim is a setup that a client can finish in about ten minutes. The project calls this its "10-minute check". That time has not been measured on a client laptop: [to be measured].
-
-## Before you start
-
-- A Windows computer with Google Chrome 116 or newer.
-- The whole project folder, downloaded or cloned from the repository, which is the online copy of the project's code.
-- A free Gemini API key. A key is a secret code that identifies the user to Google's service. The free key comes from aistudio.google.com/apikey.
-
-Node.js is not needed. Only the developer's test tools use it.
+Before you start, the client needs a Windows computer with Google Chrome 116 or newer, the whole project folder, and a free Gemini API key. A key is a secret code that identifies the user to Google's service. The free key comes from aistudio.google.com/apikey. Node.js is not needed, because only the developer's test tools use it.
 
 ## What setup.bat does, step by step
 
 setup.bat writes each check to setup.log in the project folder. It runs four steps.
 
-1. **Finds Chrome.** It looks in the usual install folders, then in the Windows registry, the settings database that Windows keeps. It saves the Chrome path for run.bat. If Chrome is missing, it stops and says where to download it.
-2. **Checks the Chrome version.** Chrome records its version in the registry. Version 116 or newer passes. If the version cannot be read, the script continues with a note. An older Chrome stops the setup. The project files do not record why 116 was chosen. The check is written as separate subroutines, which are named blocks the script jumps to. Chapter 13 explains why.
+1. **Finds Chrome** in the usual install folders, then in the Windows registry, the settings database. It saves the path for run.bat. If Chrome is missing, it says where to download it and stops.
+2. **Checks the version.** Chrome records its version in the registry. Version 116 or newer passes. If the version cannot be read, the script continues with a note. The project files do not record why 116 was chosen. The check is split into subroutines, which are named blocks the script jumps to. Chapter 13 explains why.
 
 Source: `midsem/project/setup.bat`, lines 135 to 143.
 
@@ -1525,7 +1515,7 @@ if %CHROME_MAJOR% lss 116 goto :cv_old
 exit /b 0
 ```
 
-3. **Checks the extension files.** It runs `scripts/check-extension.ps1`, a PowerShell script. The script reads manifest.json, the file that tells Chrome what the extension is. It checks that the file reads, that it uses Manifest V3 (the current extension format), and that every file it names exists. A partial download fails here, with the missing file's name, instead of failing later inside Chrome.
+3. **Checks the extension files** with `scripts/check-extension.ps1`, a PowerShell script. It reads manifest.json, the file that tells Chrome what the extension is. It checks that the file reads, that it uses Manifest V3 (the current extension format), and that every file it names exists. A partial download fails here, with the missing file's name.
 
 Source: `midsem/project/scripts/check-extension.ps1`, lines 36 to 38.
 
@@ -1535,15 +1525,15 @@ foreach ($file in ($files | Select-Object -Unique)) {
 }
 ```
 
-4. **Skips developer tools** unless setup is run with `--dev`. That option checks for Node.js 20 or newer, runs npm install, and downloads Playwright's test browser, about 200 MB. Each network step gets three tries.
+4. **Skips developer tools** unless setup is run with `--dev`. That option checks for Node.js 20 or newer, then runs npm install and downloads Playwright's test browser, about 200 MB, with three tries for each network step.
 
-On success, setup.bat writes a marker file called .setup-ok, which holds the Chrome path and the date. It prints SETUP COMPLETE and pauses. run.bat refuses to run without the marker. On failure, the script deletes the marker, prints "What failed" and "How to fix", and names setup.log.
+On success, setup.bat writes a marker file, .setup-ok, holding the Chrome path and the date, then prints SETUP COMPLETE. run.bat refuses to run without the marker. On failure, the script deletes the marker, prints "What failed" and "How to fix", and names setup.log.
 
 **What this means in plain words.** setup.bat is a checklist. It confirms that Chrome is present and new enough, and that the extension folder is complete. If something is wrong, it says what to do.
 
 ## What run.bat does, and why it does not load the extension
 
-run.bat checks the marker, reads the Chrome path, and copies the folder path to the clipboard. It opens two pages: chrome://extensions, where Chrome lists its extensions, and a Wikipedia article about lighthouses to summarize. Then it prints four steps.
+run.bat checks the marker, reads the Chrome path, and copies the folder path to the clipboard. It opens chrome://extensions, the page that lists Chrome's extensions, and a Wikipedia article about lighthouses. Then it prints four steps.
 
 Source: `midsem/project/run.bat`, lines 40 to 44.
 
@@ -1555,13 +1545,13 @@ timeout /t 2 /nobreak >nul
 start "" "%CHROME%" https://en.wikipedia.org/wiki/Lighthouse
 ```
 
-run.bat cannot load the extension itself. Chrome once had a command-line flag, `--load-extension`, that loaded a folder at start-up. The project tested it. On the developer laptop, the installed Chrome 155 started with the flag, and no extension service worker appeared within eight seconds. A service worker is the background part of an extension. Playwright's bundled Chromium 156 loaded the extension at once. DEVLOG.md cites the Chromium team's April 2025 announcement that branded Chrome from version 137 drops this flag. The check is in `tests/e2e/chrome-flag-check.mjs`. So the client clicks Load unpacked. Step 4 of run.bat still points to Options for the key, but the popup's Key box saves the same key.
+run.bat does not load the extension itself. Chrome once had a command-line flag, `--load-extension`, that loads a folder at start-up. On the developer laptop, the installed Chrome 155 started with that flag, and no extension service worker appeared within eight seconds. A service worker is the background part of an extension. Playwright's bundled Chromium 156 loaded it at once. DEVLOG.md cites the Chromium team's April 2025 announcement that branded Chrome from version 137 drops the flag. The check is `tests/e2e/chrome-flag-check.mjs`. So the client clicks Load unpacked. Step 4 of run.bat still points to Options for the key, but the popup's Key box saves the same key.
 
 **What this means in plain words.** Chrome no longer lets a script load an extension on its own. run.bat does what it can and prints the rest.
 
 ## The ten setup checks
 
-`tests/bat/test-bat-scripts.ps1` runs both batch files on temporary copies of the project. For the success case, a fake Chrome file stands in for the browser. It only writes its arguments to a text file, so no window opens.
+`tests/bat/test-bat-scripts.ps1` runs both batch files on temporary copies of the project. For the success case, a fake Chrome file that only writes its arguments to a text file stands in for the browser.
 
 Table: The ten setup checks and what each proves
 
@@ -1578,13 +1568,13 @@ Table: The ten setup checks and what each proves
 | B7 | Running --dev without Node.js explains how to install it |
 | B8 | --dev --reset rebuilds the test tools and completes |
 
-Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages need a computer without Chrome, so they are checked only by reading the script. The script's summary line is not saved in the evidence folder. run-3.md says these checks were last run before the popup redesign and must be run again before they are quoted, so the current result is [to be measured].
+Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages are checked only by reading the script. The script's summary line is not saved in the evidence folder. run-3.md says these checks must be run again before they are quoted, so the current result is [to be measured].
 
 **What this means in plain words.** The checks run the real scripts on copies of the project. They confirm the scripts succeed when they should, and fail with a clear message when they should.
 
 ## The manual smoke test in real Chrome
 
-The automated browser tests (chapter 12) cannot click the toolbar icon, and they add an extra permission for the test server. So they do not prove that the unmodified extension installs and works in real Chrome. The file `midsem/docs/MANUAL_SMOKE_TEST.md` covers that in 11 steps. The person runs it on the developer laptop, and again on the client's laptop before the viva.
+The automated browser tests (chapter 12) cannot click the toolbar icon, and they add an extra permission for the test server. So they do not prove that the unmodified extension installs and works in real Chrome. The file `midsem/docs/MANUAL_SMOKE_TEST.md` sets out 11 steps for that. The person runs it on the developer laptop, and again on the client's laptop before the viva.
 
 Table: The manual smoke test, step by step
 
@@ -1602,7 +1592,7 @@ Table: The manual smoke test, step by step
 | 10 | Replace the key with "wrong", then summarize | A message that the key was rejected |
 | 11 | Put the correct key back | Summaries work again |
 
-Three things need attention before the viva. First, the wording expected in steps 4 and 10 is older than the code. The current messages are "No API key yet. Paste your Gemini key in the Key box and save it." and "Your API key was rejected. Paste a correct key in the Key box." Second, the results column is empty. The report keeps placeholders: [Insert date and result of the developer laptop run] and [Insert client laptop model, Windows version and date of the client run]. Third, the file asks for six screenshots, M01 to M06, and none of them is in the screenshots folder yet.
+Three things need attention before the viva. The wording expected in steps 4 and 10 is older than the code. The current messages are "No API key yet. Paste your Gemini key in the Key box and save it." and "Your API key was rejected. Paste a correct key in the Key box." The results column is empty, so the report keeps placeholders: [Insert date and result of the developer laptop run] and [Insert client laptop model, Windows version and date]. The six screenshots the file asks for, M01 to M06, are not in the screenshots folder yet.
 
 **What this means in plain words.** This is the only check on real Chrome and the real toolbar icon. Its steps are written down, but its results are not recorded yet.
 
@@ -1610,22 +1600,24 @@ Three things need attention before the viva. First, the wording expected in step
 
 ![Developer loop: write code, unit tests, browser tests, fix and log, retest, and an exit check that leads to documenting and tagging](../figures/F15_dev_loop.png)
 
-**Reading the figure:** The top row runs left to right: write code, unit tests, browser tests. The two dashed boxes on the right, the exploratory agent and the bug list, are planned for milestone M8 and are not in use yet. The bottom row runs right to left: fix and log, retest, then "Exit criteria met?" A "no" sends the work back to Write code. The loop arrow from Retest goes back to the unit tests. A "yes" leads to documenting and tagging v1-midsem.
+**Reading the figure:** The top row runs left to right: write code, unit tests, browser tests. The two dashed boxes on the right, the exploratory agent and the bug list, are planned for milestone M8 and are not in use yet. The bottom row runs right to left: fix and log, retest, then "Exit criteria met?" A "no" sends the work back to Write code, and the loop arrow from Retest goes back to the unit tests. A "yes" leads to documenting and tagging v1-midsem.
+
+**What this means in plain words.** Each change is tested by a script first and then in a browser. Each bug is fixed, written down, and tested again until the agreed finish conditions are met.
 
 ## Installing the extension in about ten minutes
 
 1. Download the project folder, or clone it, and keep all of it together.
-2. Double-click setup.bat and wait for SETUP COMPLETE. If you see SETUP FAILED, read the "How to fix" line, then run setup.bat again.
+2. Double-click setup.bat and wait for SETUP COMPLETE. If you see SETUP FAILED, read the "How to fix" line and run it again.
 3. Double-click run.bat. Chrome opens the extensions page and a sample article. The folder path is already on the clipboard.
-4. On the extensions page, turn on Developer mode, in the top right corner.
+4. On the extensions page, turn on Developer mode in the top right corner.
 5. Click Load unpacked, press Ctrl and V to paste the folder path, then click Select Folder.
-6. Click the puzzle-piece icon in Chrome's toolbar and pin Page Summarizer.
+6. Pin Page Summarizer from the puzzle-piece menu in the toolbar.
 7. Click the Page Summarizer icon. The Key box opens by itself when no key is saved. Paste the Gemini key and click Save key.
 8. Open an article, click the icon, and press Summarize this page.
 
 ## Questions this chapter answers
 
-**Why does run.bat not load the extension itself?** Chrome removed the command-line flag that did this, in branded builds from version 137. A test on Chrome 155 confirmed it, so the client loads the folder by hand with Load unpacked.
+**Why does run.bat not load the extension itself?** Chrome removed the command-line flag that did this, in branded builds from version 137. A test on Chrome 155 confirmed it. So the client loads the folder by hand with Load unpacked.
 
 **What happens if the client's Chrome is too old?** setup.bat stops at step 2 and writes no marker, so run.bat refuses to start until Chrome is updated and setup is run again.
 
@@ -1642,7 +1634,7 @@ The project was tested at five levels. Each level catches a different kind of mi
 
 - **Unit tests** check small pieces of code one at a time. The network is replaced by a fake, so no request leaves the computer.
 - **Browser scenarios** run the whole extension in a Chromium browser. Chromium is the open-source browser that Chrome is built from. A tool called Playwright drives it from a script. The real Gemini service is replaced by a mock, which is a stand-in server that gives fixed answers.
-- **Setup checks** run the two batch files on copies of the project.
+- **Setup checks** are ten checks that run the two batch files on copies of the project. Chapter 11 lists them.
 - **Live runs** send a few real pages to the real Gemini service, using the developer's own key.
 - **The manual smoke test** is done by hand in real Chrome. Chapter 11 describes it.
 
@@ -1669,7 +1661,7 @@ The evidence files record three runs. Run 1 recorded 56 passing unit tests, and 
 
 ## Browser scenarios
 
-The browser scenarios load the extension into Playwright's Chromium. A test helper opens the popup in a small window, because the test cannot click the toolbar icon. Six fixture pages, which are saved copies of web pages kept for testing, are served from a local server. The mock Gemini server answers each request and records it. A scenario passes when the popup shows the expected text and the mock received the expected number of requests.
+The scenarios load the extension into Playwright's Chromium and open the popup in a small window, because a test cannot click the toolbar icon. Six fixture pages (saved copies of web pages) are served locally. The mock Gemini server answers each request and records it. A scenario passes when the popup shows the expected text and the mock received the expected requests.
 
 The test copy of the manifest adds one extra permission, for the local test server. The permission that Chrome grants when a user clicks the toolbar icon, called activeTab, is therefore not tested by these scenarios. Chapter 14 returns to this point.
 
@@ -1708,13 +1700,13 @@ Table: The 28 browser scenarios and their results in run 1 and run 2
 
 The suite holds 28 scenarios: the smoke test plus 27 in `tests/e2e/pipeline.test.js`. Run 2 ran 26 of them, all passing. T24 and T25 were added after run 2. Run 3, the latest record, passed all 28, with none failing (run-3.md).
 
-Three test assertions were corrected during run 1. The test harness was at fault in each case, not the product. T12b used to wait 4 seconds for the late content. Under load, the harness pressed Summarize after the content had already loaded, so the delay was raised to 20 seconds. T20 waited 10 seconds after making the job old, which landed exactly on the 3-minute limit, so the wait was raised to 15 seconds. The text search in T21 matched the page title first, so it was moved to the page body.
+Three test faults were fixed in run 1, all in the harness and not the product. T12b's 4-second delay was too short under load, so it became 20 seconds. T20's 10-second wait landed exactly on the 3-minute limit, so it became 15 seconds. T21's text search matched the page title first, so it now starts at the page body.
 
 **What this means in plain words.** The browser scenarios play out the user's steps in a real browser. They check what the popup shows and how many requests reach the mock service. They prove the extension handles each case, but not how good a real summary is.
 
 ## The first run: four bugs, T19 to T22
 
-The first full run added four scenarios on purpose. Earlier exploratory probes had shown four problems that no test covered. All four failed on the first run. Each failure was a real defect in the product, not a mistake in the test. The bugs were recorded as B1 to B4 in run-1.md.
+The first full run added T19 to T22 on purpose, because earlier probes had found four problems that no test covered. All four failed. Each was a real product defect, recorded as B1 to B4 in run-1.md.
 
 - **B1: Summarize ignored after a page change (T19, medium).** When the tab moved to a new page while the old summary was still running, pressing Summarize left the popup blank. The service worker refused the second job, and the popup hid the running job because its address did not match, and it threw away the refusal. Nothing on the screen explained the problem.
 - **B2: Progress kept showing in an open popup (T20, medium).** A dead job kept showing "Summarizing..." with a disabled button, while the popup stayed open. The popup checked for stale jobs only when it opened or when storage changed. A dead worker writes nothing, so the check never ran.
@@ -1729,7 +1721,7 @@ One finding from run 1 is not listed as fixed in the log. The merge step can sen
 
 ## Live runs against the real service
 
-Live runs send real pages to the real Gemini service with the developer's key. The scripts read the key but never print it. The runs used a hidden Chromium window with the extension loaded. The test measured the times. The settings were the model gemini-3.5-flash-lite, the "low" thinking setting, and parts of 8,000 characters. The thinking setting controls how much hidden working the model does before it writes an answer. Run 3 notes that these live runs were made before the popup redesign and were not repeated.
+Live runs send real pages to the real Gemini service with the developer's key, which the scripts read but never print. The runs used a hidden Chromium window, the model gemini-3.5-flash-lite, the "low" thinking setting (which limits the hidden working the model does before answering), and parts of 8,000 characters. Run 3 notes that these runs were made before the popup redesign and were not repeated.
 
 Table: The live runs, from live-measurements.md
 
@@ -1788,7 +1780,7 @@ Table: Benchmark of four settings, three runs each (model-bench.json)
 
 The larger model, with its default thinking, took between 11 and 13 seconds for each request. Its usage data showed far more hidden thinking work than visible answer text, roughly six to seven times as much. Setting the thinking level to "low" cut most runs to under four seconds. One run in three still took 12.5 seconds. The Flash-Lite model was the fastest and the most consistent, between 1.6 and 2.0 seconds. The answers were similar in length across all four settings, so length does not show which answer is better.
 
-The benchmark measured speed and length. It did not measure the quality of the answers, and the quality of the cheaper model was not formally compared with the larger one. The choice therefore rests on measured speed and on the free quota, not on a scored comparison of summaries.
+The benchmark measured speed and length, not answer quality. The cheaper model's answers were not formally compared with the larger model's, so the choice rests on measured speed and the free quota.
 
 Two details need care. DEVLOG.md says six settings were compared, and that the lowest setting was rejected with an error. The saved file holds four settings, so the other two have no saved numbers. The setting the product sends is Flash-Lite with the "low" thinking setting. That exact pairing is not one of the four rows. The live runs did use it. Case L01, a one-request page, took 1.7 seconds.
 
@@ -1823,7 +1815,7 @@ Source: `midsem/project/src/engines/gemini.js`, lines 149 to 151.
 
 ## Screenshot gallery
 
-The screenshots below come from the test runs. The popup text in the finished-summary panel is the mock's text, not Google's. The quota panel shows a seven-hour wait that the test set in the mock. Each image is followed by a short reading.
+These screenshots come from the test runs. The summary text in panel F is the mock's text, not Google's, and the seven-hour wait in panel J was set by the test.
 
 ### The popup in its states
 
@@ -1884,21 +1876,21 @@ Case L08 was a long Wikipedia article with the part limit set to 10. The popup r
 
 # Problems and solutions
 
-The project log, DEVLOG.md at the root of the repository, holds 14 entries, and every entry is dated 2026-10-20. The log's rule is that nothing is recorded unless it actually happened. The sections below follow the log's order. Each gives the symptom, the root cause, what was done, and what was learned. M0 to M8 are the stages in the project plan, V1_PLAN.md.
+The project log, DEVLOG.md at the root of the repository, holds 14 entries, all dated 2026-10-20. Its rule is that nothing is recorded unless it actually happened. The sections below follow the log's order. M0 to M8 are the stages in the project plan, V1_PLAN.md.
 
 ## Run.bat cannot load the extension in Chrome 137 and later
 
 **Date and area:** 2026-10-20, run.bat and testing (M0).
 
-**Symptom.** The installed Google Chrome 155, started with a flag that loads a folder, showed no extension service worker within eight seconds. Playwright's bundled Chromium 156 loaded the same extension at once.
+**Symptom.** The installed Google Chrome 155, started with a flag that loads a folder, showed no extension service worker within eight seconds. Playwright's Chromium 156 loaded the same extension at once.
 
-**Root cause.** Chrome 137 removed the `--load-extension` flag from branded builds. Chromium still supports it. The log cites the Chromium team's April 2025 announcement. The check is `tests/e2e/chrome-flag-check.mjs`.
+**Root cause.** Chrome 137 removed the `--load-extension` flag from branded builds. Chromium still supports it. The check is `tests/e2e/chrome-flag-check.mjs`.
 
 **What was done.** run.bat opens chrome://extensions and prints the Load unpacked steps. Automated tests run on Playwright's Chromium.
 
-**What was learned.** Check what a browser flag does on the target machine before building around it. Tests on Chromium do not prove the install path in branded Chrome.
+**What was learned.** Check what a browser flag does on the target machine before building around it.
 
-**What this means in plain words.** The plan had listed this as a risk to confirm, and the check confirmed it. The script now guides the user instead of loading the extension.
+**What this means in plain words.** The plan had listed this as a risk to confirm. The check confirmed it, so the script guides the user instead.
 
 ## Node could not find the unit test folder on Windows
 
@@ -1906,53 +1898,53 @@ The project log, DEVLOG.md at the root of the repository, holds 14 entries, and 
 
 **Symptom.** `node --test tests/unit` failed with "Cannot find module".
 
-**Root cause.** On Windows, Node 22 treated the folder name as a file to load.
+**Root cause.** On Windows, Node 22 treated the folder name as a file.
 
 **What was done.** The npm scripts use a glob, a wildcard pattern that matches file names: `tests/unit/*.test.js`.
 
 **What was learned.** Use a glob for test discovery on Windows.
 
-**What this means in plain words.** The runner treated the folder as a file, so it could not find the tests.
+**What this means in plain words.** The runner looked for a file named after the folder, so it could not find the tests.
 
 ## Four engine tests showed as cancelled
 
 **Date and area:** 2026-10-20, Gemini engine tests (M4).
 
-**Symptom.** After a timeout test, four tests showed as cancelled, and several others failed with an empty-answer error.
+**Symptom.** After a timeout test, four tests showed as cancelled, and others failed with an empty-answer error.
 
-**Root cause.** There were two faults. A timer from `AbortSignal.timeout()` does not keep Node's event loop alive, so the runner could exit early. The event loop is the list of work Node is still waiting for. The test helper also returned one response object several times, but a response body can be read only once.
+**Root cause.** A timer from `AbortSignal.timeout()` does not keep Node's event loop, the list of pending work, alive, so the runner could exit early. The test helper also returned one response object several times, but a response body can be read only once.
 
-**What was done.** The engine uses its own timer and an AbortController, the browser object that cancels a request. The timer is cleared in a finally block, which always runs. The fake fetch returns a copy of the response each time.
+**What was done.** The engine uses its own timer and an AbortController, the browser object that cancels a request. The fake fetch returns a fresh copy of the response each time.
 
-**What was learned.** A flaky-looking test is often a fault in the harness. Check what the fake allows before changing the product. The engine change was still worth keeping.
+**What was learned.** A flaky-looking test is often a harness fault. Check what the fake allows before changing the product.
 
-**What this means in plain words.** The test fake reused one reply, and the runner stopped early. The fake was fixed, and the engine's timer was tidied.
+**What this means in plain words.** The test fake reused one reply, and the runner stopped early. The fake was fixed.
 
 ## The default model was too slow
 
 **Date and area:** 2026-10-20, cloud model choice (M4).
 
-**Symptom.** gemini-3.8-flash answered a two-word prompt in 9.4 seconds. A real summary request of about 7,000 characters took 11.4 to 12.6 seconds, and one request returned HTTP 503, "high demand".
+**Symptom.** gemini-3.8-flash took 9.4 seconds for a two-word prompt, and 11.4 to 12.6 seconds for a real summary. One request returned HTTP 503, "high demand".
 
-**Root cause.** By default the model does hidden thinking before it answers. The usage data showed about six times as much hidden thinking as visible answer. With a 25-second limit and several parts per page, the time was too close to the limit.
+**Root cause.** The model does hidden thinking first by default. The usage data showed about six times as much hidden thinking as visible answer. That was too close to the 25-second limit.
 
-**What was done.** `scripts/model-bench.mjs` timed several settings, and the results are in model-bench.json. A "low" thinking setting cut a typical request to about 3.9 seconds, though one run in three still took 12.5 seconds. The lowest setting was rejected with HTTP 400. Flash-Lite took 1.6 to 2.0 seconds. The 503 is handled by the retry logic.
+**What was done.** `scripts/model-bench.mjs` timed several settings, saved in model-bench.json. A "low" thinking setting cut a typical request to about 3.9 seconds, though one run in three still took 12.5. The lowest setting was rejected with HTTP 400. Flash-Lite took 1.6 to 2.0 seconds. The retry logic handles the 503.
 
-**What was learned.** Measure speed on the real task before changing a model or a timeout. A request setting was the cheapest speed-up. The answer quality of the faster models was not compared, which is a limitation.
+**What was learned.** Measure speed on the real task before changing a model or a timeout. The answer quality of the faster models was not compared, which is a limitation.
 
-**What this means in plain words.** The model thought for too long before answering. A setting reduced the wait, and the default model changed later, as the design-change entry below describes.
+**What this means in plain words.** The model thought too long before answering. A setting reduced the wait, and the default changed later, as the design-change entry below describes.
 
 ## setup.bat stopped with "116 was unexpected at this time"
 
 **Date and area:** 2026-10-20, setup.bat (M7).
 
-**Symptom.** The first real run of setup.bat stopped at step 2 with that message.
+**Symptom.** The first real run stopped at step 2 with that message.
 
-**Root cause.** The Chrome major version was set and compared inside one parenthesised block, a group of commands wrapped in brackets. A batch file reads the whole block first. So the variable was still empty when the comparison was read, and the line was invalid.
+**Root cause.** The Chrome version was set and compared inside one parenthesised block, a group of commands wrapped in brackets. A batch file reads the whole block first, so the variable was still empty.
 
-**What was done.** The checks moved into subroutines that use goto to jump between them. Chapter 11 shows the routine.
+**What was done.** The checks moved into subroutines that use goto. Chapter 11 shows the routine.
 
-**What was learned.** A variable set inside a block cannot be read again in that same block. Run the script for real, because reading it looked fine.
+**What was learned.** A variable set inside a block cannot be read again in that block. Run the script for real, because reading it looked fine.
 
 **What this means in plain words.** The script used a value before it had been set.
 
@@ -1960,39 +1952,39 @@ The project log, DEVLOG.md at the root of the repository, holds 14 entries, and 
 
 **Date and area:** 2026-10-20, setup.bat (M7).
 
-**Symptom.** setup.bat failed with "The system cannot find the batch label specified - check_chrome_version". A label is a named place that a batch file can jump to.
+**Symptom.** setup.bat failed with "The system cannot find the batch label specified - check_chrome_version". A label is a named place a batch file can jump to.
 
-**Root cause.** The edit searched for the text `:find_chrome` to insert a subroutine. The first match was the call line in the main flow, so the subroutine was pasted into the middle of a line.
+**Root cause.** A text search for `:find_chrome` matched the call line in the main flow first. The new subroutine was pasted into the middle of a line.
 
-**What was done.** The whole file was rewritten and saved with Windows line endings, called CRLF. The batch test script caught the fault at once.
+**What was done.** The whole file was rewritten with Windows line endings (CRLF). The batch test script caught the fault at once.
 
-**What was learned.** Do not patch batch files by searching for text. Rewrite the whole file and list its labels afterwards.
+**What was learned.** Do not patch batch files by searching for text. Rewrite them whole.
 
-**What this means in plain words.** An automatic edit put code in the wrong place, so the file was rewritten.
+**What this means in plain words.** An automatic edit put code in the wrong place.
 
 ## The test script could not find run.bat, then hung
 
 **Date and area:** 2026-10-20, bat tests (M7).
 
-**Symptom.** The test reported that run.bat was "not recognized as an internal or external command", although the file was in the folder. Later a test hung.
+**Symptom.** The test reported that run.bat was "not recognized", although the file was in the folder. Later a test hung.
 
-**Root cause.** The Windows command prompt, called cmd, does not search the current folder unless the name starts with `.\`. The hang came from the fake Chrome file, which was opened in a cmd window that never closed.
+**Root cause.** The Windows command prompt does not search the current folder unless the name starts with `.\`. The hang came from a fake Chrome window that never closed.
 
-**What was done.** The tests call `.\setup.bat` and `.\run.bat`. The fake Chrome file ends with `exit`.
+**What was done.** The tests call `.\setup.bat` and `.\run.bat`, and the fake Chrome file ends with `exit`.
 
-**What was learned.** A test harness must clean up the processes it starts. The clipboard step is not tested automatically, because the test must not read or overwrite the user's clipboard.
+**What was learned.** A test harness must clean up the processes it starts. The clipboard step is not tested, because the test must not touch the user's clipboard.
 
-**What this means in plain words.** Windows did not look where the test expected, and a test window was left open.
+**What this means in plain words.** Windows looked in the wrong place, and a test window was left open.
 
 ## Popup ignored a second Summarize (T19, bug B1)
 
 **Date and area:** 2026-10-20, popup and service worker (M8, bug B1).
 
-**Symptom.** The tab moved to another page while a summary was running. Pressing Summarize on the new page did nothing, and the popup stayed blank (test T19).
+**Symptom.** The tab moved to another page mid-summary. Pressing Summarize did nothing, and the popup stayed blank.
 
-**Root cause.** The service worker, which is the extension's background part, allowed one job per tab and replied "already running". The popup ignored that reply. It also hid any job whose address differed from the page.
+**Root cause.** The service worker, the extension's background part, allowed one job per tab and replied "already running". The popup ignored that reply and hid the running job.
 
-**What was done.** Each job now has an id. If the tab moved to another page, the old job is stopped and replaced, and its late writes are dropped. The popup reads the reply and shows the current job or an error.
+**What was done.** Each job has an id. A job for a changed page is stopped and replaced, and its late writes are dropped. The popup shows the current job or an error.
 
 **What was learned.** Every refusal must reach the user. A silent "no" looks like a broken button.
 
@@ -2002,13 +1994,13 @@ The project log, DEVLOG.md at the root of the repository, holds 14 entries, and 
 
 **Date and area:** 2026-10-20, popup (M8, bug B2).
 
-**Symptom.** With the popup open, a job whose service worker had died kept showing "Summarizing..." and a disabled button.
+**Symptom.** With the popup open, a job whose worker had died kept showing "Summarizing..." past three minutes.
 
-**Root cause.** The popup checked whether a job was stale only when it opened and when stored data changed. A dead worker writes nothing, so nothing triggered the check.
+**Root cause.** The popup checked for stale jobs only on open and on storage changes. A dead worker writes nothing.
 
-**What was done.** The popup redraws its last job every five seconds. A job older than three minutes now shows as interrupted.
+**What was done.** The popup redraws its last job every five seconds.
 
-**What was learned.** A timeout that is checked only on events never fires once the thing it guards stops sending events.
+**What was learned.** A timeout checked only on events never fires once the events stop.
 
 **What this means in plain words.** The popup waited for news that never came. Now it checks by itself.
 
@@ -2018,9 +2010,9 @@ The project log, DEVLOG.md at the root of the repository, holds 14 entries, and 
 
 **Symptom.** The model received "QuarterRevenueMargin" and "Q14.5M12%". The summary still looked normal.
 
-**Root cause.** The text reader treated table rows as blocks but not their cells. Minified pages, which have their spaces removed, had no gap between cells.
+**Root cause.** The text reader treated table rows as blocks but not their cells. Minified pages, with spaces removed, had no gap between cells.
 
-**What was done.** A cell that follows another cell in its row now gets " | " before it, and each row is one line. The first fix made every row a separate paragraph, and test T21 caught that too.
+**What was done.** A cell after another cell in its row now gets " | " before it, and each row is one line. The first fix made every row a paragraph, which T21 also caught.
 
 Source: `midsem/project/src/content/extract.js`, line 38.
 
@@ -2028,21 +2020,21 @@ Source: `midsem/project/src/content/extract.js`, line 38.
       if (CELL_TAGS.has(tag) && node.previousElementSibling) out.push(' | ');
 ```
 
-**What was learned.** Silent corruption is worse than a visible error. Test with the markup that real sites produce.
+**What was learned.** Silent corruption is worse than a visible error. Test with the markup real sites produce.
 
-**What this means in plain words.** The gaps between cells were lost, so the numbers ran together.
+**What this means in plain words.** The gaps between cells were lost, so numbers ran together.
 
 ## A closed tab's job record stayed behind (T22, bug B4)
 
 **Date and area:** 2026-10-20, service worker (M8, bug B4).
 
-**Symptom.** After a tab closed mid-job, a record with the full summary stayed in `chrome.storage.session`, which is Chrome's temporary storage for an extension.
+**Symptom.** After a tab closed mid-job, a record with the full summary stayed in `chrome.storage.session`, Chrome's temporary storage for an extension.
 
-**Root cause.** The handler that runs on tab close deleted the record. But the job kept running, and its queued writes created the record again.
+**Root cause.** The close handler deleted the record, but the job kept running, and its queued writes created it again.
 
-**What was done.** Closed tabs are now remembered, and their jobs are stopped. A write is applied only if the stored record still belongs to the job writing it.
+**What was done.** Closed tabs are remembered and their jobs stopped. A write applies only if the stored record still belongs to that job.
 
-**What was learned.** A cleanup handler cannot win against work that is still running. Stop the work as well.
+**What was learned.** A cleanup cannot win against work that is still running. Stop the work too.
 
 **What this means in plain words.** The cleanup ran first, then the unfinished job wrote the record back.
 
@@ -2050,27 +2042,27 @@ Source: `midsem/project/src/content/extract.js`, line 38.
 
 **Date and area:** 2026-10-20, review of test findings (M8).
 
-**Symptom.** The notes from the test review listed three risks that had no failing test. There was no limit on how many parts one page could need. Two popups clicked at once might start a double job. Every HTTP 403 was reported as a rejected key.
+**Symptom.** The review listed three risks with no failing test: no limit on parts per page, a possible double start, and every 403 reported as a rejected key.
 
-**Root cause.** These were missing guards, not defects that had been seen.
+**Root cause.** Missing guards, not defects that had been seen.
 
-**What was done.** A page-length limit was added, with a default of 30 parts, the error code TOO_LONG, and test T23. A per-tab start lock was added. A 403 about the caller's location is treated as a service problem. The options page Save button no longer squeezes the key field.
+**What was done.** A 30-part limit (error TOO_LONG, test T23), a per-tab start lock, and a location-related 403 treated as a service problem.
 
-**What was learned.** A free key makes one huge page a real cost risk, so the limit is part of error handling, not an extra feature.
+**What was learned.** A free key makes one huge page a real cost risk, so a limit is part of error handling.
 
-**What this means in plain words.** Three things could go wrong without any test failing. Each now has a guard.
+**What this means in plain words.** Three things could go wrong without any test failing, and each now has a guard.
 
 ## The design changed after the owner's feedback
 
 **Date and area:** 2026-10-20, design change after owner feedback (M8).
 
-**Symptom.** The owner watched a test run and asked for four changes. The extension should open in a popup or side panel, not a new tab. V1 should stay simple. The interface looked as if an AI had made it. Tests should be hidden and use cheap models.
+**Symptom.** The owner watched a test run and asked for four changes: a popup rather than a new tab, a simpler V1, an interface that did not look AI-made, and hidden tests that use cheap models.
 
-**Root cause.** The test harness opened the popup as a browser tab, because a test cannot click the toolbar icon. The Options page also opened as a tab. So the product seemed to open tabs. The first interface used a common blue, rounded-card look.
+**Root cause.** The test harness opened the popup as a browser tab, and Options opened as a tab, so the product seemed to open tabs. The first interface used a common blue look.
 
-**What was done.** The key can be pasted inside the popup. The harness opens the popup as a small popup window. The interface and icon were redrawn in a printed-page style, with one red accent and numbered points. Browser tests run hidden unless HEADED=1 is set. The default model became gemini-3.5-flash-lite, which the log calls the cheap model.
+**What was done.** The key can be pasted inside the popup. The harness opens a small popup window. The interface was redrawn in a printed-page style. Browser tests run hidden unless HEADED=1 is set. The default model became gemini-3.5-flash-lite.
 
-**What was learned.** Watching the test exposed a mismatch. The harness showed something the product does not do, so the harness was fixed to show the truth.
+**What was learned.** The harness showed something the product does not do. The harness was fixed to show the truth.
 
 **What this means in plain words.** The test view did not match the real product, so it was changed to match.
 
@@ -2080,23 +2072,23 @@ Source: `midsem/project/src/content/extract.js`, line 38.
 
 **Symptom.** A prompt test reported that the page text came before the "start" marker.
 
-**Root cause.** The instruction line also names both markers. The test used `indexOf`, which finds the first mention, and that was in the instructions.
+**Root cause.** The instruction line also names both markers. The test used `indexOf`, which finds the first mention.
 
-**What was done.** The test uses `lastIndexOf`, which finds the last mention. The prompt itself was not changed.
+**What was done.** The test uses `lastIndexOf`. The prompt was not changed.
 
-**What was learned.** A marker repeated inside the instructions makes a position check ambiguous.
+**What was learned.** A marker repeated in the instructions makes a position check ambiguous.
 
-**What this means in plain words.** The check looked at the wrong mention of the marker. The prompt was fine.
+**What this means in plain words.** The check read the wrong mention of the marker. The prompt was fine.
 
 ## Questions this chapter answers
 
-**Which problem changed the design the most?** The owner's feedback changed the interface and the test view. The Chrome 137 finding changed how run.bat works. Both are recorded in the log.
+**Which problem changed the design the most?** The owner's feedback changed the interface and the test view. The Chrome 137 finding changed how run.bat works.
 
-**Who found the problems, the product or the tests?** The browser tests found four silent faults in the product (T19 to T22). The test review found three missing guards. Several entries were faults in the test harness itself.
+**Who found the problems, the product or the tests?** The browser tests found four silent faults in the product (T19 to T22). Several other entries were faults in the test harness.
 
-**Why do three entries concern batch files?** A batch file reads a whole block before running it, and the Windows command prompt does not search the current folder for commands. Entries 5 and 7 come from those facts. Entry 6 came from a text-based edit that put code in the wrong place.
+**Why do three entries concern batch files?** A batch file reads a whole block before running it, and cmd does not search the current folder. Entries 5 and 7 come from those facts. Entry 6 came from a text-based edit.
 
-**Were the product bugs visible to the user?** No. All four browser bugs failed silently: a blank popup, a stuck progress display, corrupted text, and a stale record. Each fix made the popup answer every press, re-check open jobs, stop work for closed tabs, or separate table cells.
+**Were the product bugs visible to the user?** No. All four browser bugs failed silently, with a blank popup, a stuck progress display, corrupted text, or a stale record.
 
 
 <div style="page-break-after: always"></div>
@@ -2105,64 +2097,62 @@ Source: `midsem/project/src/content/extract.js`, line 38.
 
 ## The honest limits of Version 1
 
-These are the limits the report states plainly, so that they are known before anyone finds them.
+These limits are stated plainly, so they are known before anyone finds them.
 
-1. **The browser scenarios use a mock service.** The 28 scenarios run against a stand-in server with fixed answers. They show how each case is handled, such as retries and error messages. They do not show how good a real summary is. Only seven pages reached the real service in the live runs.
-2. **The tests use Chromium, not the client's Chrome.** The tests use Playwright's Chromium, with an extra permission for the local test server. The real toolbar path, which uses the activeTab permission, is covered only by the manual smoke test, and that test has not been recorded yet.
-3. **Only one cloud provider.** Version 1 calls Google's Gemini service and no other. The engine is one file, `gemini.js`.
-4. **Only one language of pages, in practice English.** The prompts and the popup text are in English. No page in another language was tested.
-5. **No pages behind a login.** The extension reads what the open tab shows. No login-only page was tested, and the requirements list such pages as a risk.
-6. **The free quota can run out.** The quota probe found limits of 5 to 15 requests, depending on the model, and the error text gives no period. When the quota is used up, summaries stop until it resets. The popup then opens the Key box and shows an Options button.
-7. **The 30-part limit.** A page that needs more than 30 parts is refused before any request. With the default part size of 8,000 characters, that is about 240,000 characters of page text. The limit protects the free quota, but very long pages get no summary at all.
-8. **The key is stored without encryption.** The extension keeps the key in its local storage in this browser, and it does not encrypt it. The key is not synced to the Google account, which is good. But anyone who can read this Windows account's Chrome profile folder could read the key.
-9. **Chrome versions and Windows.** setup.bat requires Chrome 116 or newer. The records cover only Chrome 155 on the developer laptop and Chromium 156 for the tests. The setup and run scripts are Windows batch files. The client's Chrome version is [Insert client laptop Chrome version].
-10. **Summary quality is not scored.** No one rated the summaries against the source text, and the speed benchmark did not compare answer quality.
-11. **Page text can still steer the model.** The prompt tells the model that page text is material to summarize, not instructions. The code comment says this limits the risk but does not remove it. The popup shows replies as plain text, so markup in a reply does not run (test T14).
-12. **A rare merge case.** When part summaries are very long, the merge step can send all of them in one request. With the default settings this needs summaries of about 4,000 characters or more, so it is unlikely. The log does not list it as fixed.
+1. **Mock-tested scenarios.** The 28 browser scenarios run against a stand-in service with fixed answers. They show how each case is handled, but not how good a real summary is. Only seven pages reached the real service in the live runs.
+2. **Chromium, not the client's Chrome.** The tests use Playwright's Chromium with an extra permission for the test server. The real toolbar path, which uses the activeTab permission, is covered only by the manual smoke test, and that test is not yet recorded.
+3. **One cloud provider.** Version 1 calls Google's Gemini service only, through one engine file, `gemini.js`.
+4. **One language of pages, in practice English.** The prompts and popup text are in English. No page in another language was tested.
+5. **No pages behind a login.** The extension reads what the open tab shows. No login-only page was tested. The requirements list such pages as a risk.
+6. **The free quota.** The quota probe found limits of 5 to 15 requests, depending on the model, and the error text gives no period. When the quota runs out, summaries stop until it resets. The popup then opens the Key box and an Options button.
+7. **The 30-part limit.** A page needing more than 30 parts is refused. At 8,000 characters per part, that is about 240,000 characters. The limit protects the quota, but very long pages get no summary.
+8. **Unencrypted key.** The key sits in the extension's local storage in this browser and is not encrypted. It is not synced to the Google account. Anyone who can read this Windows account's Chrome profile folder could read it.
+9. **Chrome versions and Windows.** setup.bat requires Chrome 116 or newer. The records cover only Chrome 155 on the developer laptop and Chromium 156 for the tests. The scripts work only on Windows. The client's Chrome version is [Insert client laptop Chrome version].
+10. **Quality not scored.** No one rated the summaries against the source, and the speed benchmark did not compare answer quality.
+11. **Page text can still steer the model.** The prompt says page text is material, not instructions. The code comment says this limits the risk but does not remove it. Markup in replies is shown as text (test T14).
+12. **A rare merge case.** Very long part summaries can be merged in one request. With default settings this needs summaries of about 4,000 characters or more, so it is unlikely. The log does not list it as fixed.
 
-Source for limit 8: `midsem/project/src/ui/options.js`, line 39. The popup's Key box makes the same call.
+For limit 8, the key is saved by this call in the Options page (the popup's Key box makes the same call). Source: `midsem/project/src/ui/options.js`, line 39.
 
 ```javascript
   await chrome.storage.local.set({ [STORAGE_KEYS.apiKey]: key });
 ```
 
-**What this means in plain words.** Version 1 works for the cases its tests cover. Its evidence comes from a stand-in service and a handful of live pages. The client should be told which parts are proven and which are not.
+**What this means in plain words.** Version 1 works for the cases its tests cover. Its evidence comes from a stand-in service and a few live pages. The client should be told which parts are proven and which are not.
 
 ## What Version 2 would add
 
 Version 2 is not built. It is the plan for the final semester.
 
-Version 2 keeps the same popup and the same way of reading a page. The change is where the summary comes from. In Version 2, the summarizing model runs inside the browser on the user's own computer. The model downloads once, on first use, with a progress bar, and the browser keeps it for later use. No API key is needed. The page text never leaves the computer, and summaries work with no internet connection once the download is complete.
+Version 2 keeps the same popup and the same way of reading the page. The change is where the summary comes from. The summarizing model runs inside the browser on the user's own computer. It downloads once, on first use, with a progress bar, and the browser keeps it for later use. No API key is needed. Page text never leaves the computer, and summaries work offline once the download is done.
 
-Everything else stays the same. The extension still reads the main text, splits long text into parts, joins the part summaries, and shows progress and error messages. The new work is the download, a check that the computer can run the model, the stored copy, and a local engine. The local engine gives the same two kinds of answer that the cloud engine gives now.
+Everything else stays. The extension still reads the main text, splits long text, joins the part summaries, and shows progress and errors. The new work is the download, a check that the computer can run the model, the stored copy, and a local engine that gives the same two kinds of answer as the cloud engine.
 
-The requirements expect a small local model to write less good summaries than a large cloud model. The first download is large, and the browser and computer must meet certain requirements. The size of the gap in speed, quality and memory is [to be measured] in the final work. One design question is still open: whether the cloud engine stays selectable in Version 2, or whether Version 2 runs only on the computer.
+The requirements expect a small local model to write less good summaries than a large cloud model. The first download is large, and the computer needs enough graphics support and memory. The size of the gap in speed, quality and memory is [to be measured]. One design question is still open: whether the cloud engine stays selectable.
 
 ### The plan for the remaining weeks
 
 ![Plan chart: eight pieces of work across 14 weeks, with Version 1 in weeks 1 to 7 and Version 2 in weeks 8 to 14](../figures/F16_plan_chart.png)
 
-**Reading the figure:** The chart has one bar for each piece of work, laid out across 14 weeks. The red bars are Version 1, from week 1 to week 7, and a dashed line marks the midsem at the end of week 7. The grey bars are Version 2, from week 8 to week 14. The local model study takes weeks 8 and 9, and the in-browser engine takes weeks 10 and 11. The cloud-versus-local comparison takes week 12, and final testing and submission take weeks 13 and 14. This is the plan, not a record of progress.
+**Reading the figure:** Each bar is one piece of work across 14 weeks. The red bars are Version 1, weeks 1 to 7, and a dashed line marks the midsem at the end of week 7. The grey bars are Version 2, weeks 8 to 14. The local model study takes weeks 8 and 9, the in-browser engine takes weeks 10 and 11, the cloud-versus-local comparison takes week 12, and final testing and submission take weeks 13 and 14. This is the plan, not a record of progress.
 
 ### What stays the same
 
 ![What is reused, replaced and new in Version 2, in three columns](../figures/F19_reuse_v1_v2.png)
 
-**Reading the figure:** The figure has three columns. The green column lists five parts that are reused unchanged: the extraction, the chunker and merger, the pipeline and its errors, the service worker, and the popup with its summary formatting. The orange column lists what is replaced: the cloud engine, the API key form (not needed in Version 2), and the cloud settings, where the model and key are set. A prompts box sits in the same column with a dashed border, marked as possibly needing tuning. The grey dashed column lists what is new: the model download with its progress bar, a check that the browser and memory can run the model, the browser cache, and a local engine with the same two methods. The footer says that the engine contract is the only seam, the one place where the two versions meet.
+**Reading the figure:** The green column lists five parts reused unchanged: extraction, the chunker and merger, the pipeline and its errors, the service worker, and the popup with its formatting. The orange column lists what is replaced: the cloud engine, the API key form, which Version 2 does not need, and the cloud settings. A dashed prompts box in that column is marked as possibly needing tuning. The grey dashed column lists what is new: the model download, a check that the browser and memory can run the model, the browser cache, and a local engine with the same two methods. The footer says the engine contract is the only seam between the two versions.
 
 **What this means in plain words.** Most of the work carries over. Only the part that writes the summary is swapped for a version that runs on the user's computer.
 
 ## Questions this chapter answers
 
-**What would break first in a live demonstration?** The free quota would. Each free key allows a limited number of requests in a period, and a demonstration that summarizes many pages in a row can use them up. The popup then shows the used-up message and waits for the service to reset the quota. The probe results in chapter 12 show the limits.
+**What would break first in a live demonstration?** The free quota. A demonstration that summarizes many pages in a row can use up a free key. The popup then shows the used-up message until the quota resets.
 
-**Why is the key stored without encryption?** The extension has to read the key each time it makes a request, and Version 1 has no server to hold it. The key stays in this browser and is not synced to the Google account. Stronger storage is not part of Version 1, and the report states this as a limit.
+**Why is the key stored without encryption?** The extension reads the key on every request, and Version 1 has no server to hold it. The key stays in this browser and is not synced to the Google account. Stronger storage is not part of Version 1, and the report states this as a limit.
 
-**Is Version 2 built?** No. It is planned for the final semester, in weeks 8 to 14 of the plan.
+**Is Version 2 built?** No. It is planned for weeks 8 to 14 of the final semester.
 
-**What does Version 2 reuse?** It reuses the extraction, splitting, merging, progress display, error messages and popup. Only the engine that writes the summary changes.
-
-**What has not been tested yet?** The manual smoke test has not been recorded on the client's laptop. The quality of the summaries has not been scored. Other Chrome versions and pages behind a login have not been tested.
+**What has not been tested yet?** The manual smoke test is not recorded on either laptop. The summaries have not been scored for quality. Other Chrome versions and pages behind a login have not been tested.
 
 
 <div style="page-break-after: always"></div>

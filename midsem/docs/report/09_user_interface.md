@@ -30,7 +30,7 @@ The popup shows one state at a time: idle, asking for a key, working, retrying, 
 
 The Key link in the header opens the Key box. The box also opens by itself when no key is saved or when a key problem appears. The reader pastes the key and presses "Save key" or Enter. The box checks the input before saving. An empty box gives "Paste a key first." A key with a space gives "A key has no spaces. Check what you pasted." A good key gives "Key saved. Now press Summarize." The key is stored in `chrome.storage.local`, which keeps it in this browser only.
 
-An earlier version opened the Options page in a new tab. The project owner watched a test run and asked for the product to stay in the popup, because it looked as if it opened tabs (DEVLOG.md, the design change entry). Now nothing opens by itself. The "Open the Options page" link appears only for key problems, and it opens a tab only when the reader presses it.
+An earlier version opened the Options page in a new tab. The project owner watched a test run and said the extension should open in a popup, not in a new tab (DEVLOG.md, the design change entry). Now nothing opens by itself. The "Open the Options page" link appears only for key problems, and it opens a tab only when the reader presses it.
 
 ### What this means in plain words
 

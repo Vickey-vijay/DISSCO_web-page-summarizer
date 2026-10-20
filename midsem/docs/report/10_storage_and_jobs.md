@@ -114,9 +114,7 @@ The finished summary waits in the tab's record. Reopening the popup shows it aga
 
 ## What went wrong while building it
 
-The popup's check for a dead job ran only when the popup opened or storage changed. A dead worker writes nothing, so the check never ran. The popup now re-checks every five seconds (DEVLOG, bug B2). The lesson recorded is that a timeout checked only on events never fires when the thing it guards has stopped sending events.
-
-A cleanup handler could not win against a job that kept running. The fix stopped the work as well as the cleanup (DEVLOG, bug B4).
+The popup checked for a dead job only when it opened or storage changed. A dead worker writes nothing, so the check never ran. The popup now re-checks every five seconds (DEVLOG, bug B2). A cleanup handler could not win against a job that kept running, so the fix stopped the work as well as the cleanup (DEVLOG, bug B4).
 
 ## How it was tested
 

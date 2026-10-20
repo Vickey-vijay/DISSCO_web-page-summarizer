@@ -30,3 +30,6 @@ desktop.ini
 
 # Local Claude Code state
 .claude/
+
+# local setup marker written by setup.bat
+.setup-ok

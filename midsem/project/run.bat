@@ -51,7 +51,7 @@ echo   2. Click "Load unpacked", paste this folder path (it is already on your c
 echo      and press Select Folder:
 echo         %EXT%
 echo   3. Click the puzzle-piece icon in Chrome and pin "Page Summarizer".
-echo   4. Right-click the Page Summarizer icon, choose Options, paste your Gemini API key
+echo   4. Click the Page Summarizer icon, paste your Gemini API key in the Key box, then Save key
 echo      (free key: https://aistudio.google.com/apikey) and click Save.
 echo.
 echo Then open any article, click the Page Summarizer icon and press "Summarize this page".

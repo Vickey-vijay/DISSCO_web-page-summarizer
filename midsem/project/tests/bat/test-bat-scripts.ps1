@@ -57,7 +57,7 @@ try {
     Start-Sleep -Seconds 5
     $seen = if (Test-Path "$d\fake-chrome-args.txt") { Get-Content "$d\fake-chrome-args.txt" -Raw } else { '' }
     Check 'B3' 'run.bat opens chrome://extensions and a sample article' (($seen -match 'chrome://extensions') -and ($seen -match 'wikipedia.org/wiki/Lighthouse')) "args seen: $seen"
-    Check 'B3b' 'run.bat prints the four load steps' (($r.Output -match 'Developer mode') -and ($r.Output -match 'Load unpacked') -and ($r.Output -match 'Options')) $r.Output
+    Check 'B3b' 'run.bat prints the four load steps' (($r.Output -match 'Developer mode') -and ($r.Output -match 'Load unpacked') -and ($r.Output -match 'Key box')) $r.Output
     $runOut = $r.Output
 
     # B4: a damaged project (manifest.json removed) fails with a plain message and no marker
