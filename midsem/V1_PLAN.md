@@ -69,9 +69,11 @@ A popup closes the moment the user clicks elsewhere, which would kill a multi-ch
 One small interface, so V2 swaps the implementation and nothing else:
 
 ```
-summarizeChunk(text, { signal })  -> Promise<string>
-mergeSummaries(parts, { signal }) -> Promise<string>
+summarizeChunk(text, { title, index, total, signal }) -> Promise<string>   // total === 1 returns the final-format summary
+mergeSummaries(parts, { title, signal })               -> Promise<string>
 ```
+
+*(As built: the context object carries the page title and the chunk position so the prompt can say "part 2 of 5", and a one-chunk page is summarized directly in the final format with no merge call.)*
 
 ### 3.4 Error handling (FR8)
 
@@ -79,8 +81,11 @@ mergeSummaries(parts, { signal }) -> Promise<string>
 |---|---|---|---|
 | NO_KEY | No key saved | "Add your API key in Options first" + button to open Options | stop |
 | INVALID_KEY | Provider rejects the key | "Your API key was rejected. Check it in Options." | stop |
-| RATE_LIMIT | HTTP 429 | "The free tier is busy, retrying in N s" | retry with back-off, then stop with a message |
-| NETWORK | Offline / DNS / timeout | "Cannot reach the service. Check your connection." | stop |
+| RATE_LIMIT | HTTP 429 | While retrying the popup shows "The service is busy. Trying again in N s (attempt x of y)". After the retries: "The free tier is busy right now. Wait a minute and try again." | retry with back-off, then stop with a message |
+| NETWORK | Offline / DNS failure | "Cannot reach the service. Check your internet connection." | stop |
+| TIMEOUT | No answer within the request timeout (added during the build, was grouped with NETWORK in this plan) | "The service took too long to answer. Try again." | stop |
+| SERVICE_ERROR | HTTP 5xx after retries, or any other unexpected HTTP error (added during the build) | "The service had a problem. Try again in a moment." | retry 5xx, then stop |
+| EXTRACT_FAILED, INTERRUPTED, CANCELLED | Extractor returned nothing; the service worker was stopped mid-job; cancelled (CANCELLED exists in the code but V1 has no cancel button) | plain-English messages in `core/errors.js` | stop |
 | TOO_LITTLE_TEXT | Fewer than ~200 characters extracted (threshold tunable) | "This page has too little readable text to summarize." | stop |
 | RESTRICTED_PAGE | `chrome://`, Web Store, etc. cannot be scripted | "Chrome does not allow extensions on this page." | stop |
 | EMPTY_OR_BLOCKED | Provider returns nothing or a safety block | "The model returned no summary for this page." | stop |
@@ -129,7 +134,8 @@ DISSCO_web-page-summarizer/
         lib/readability.js            vendored
         core/{config,chunker,merger,pipeline,errors,prompts}.js
         engines/gemini.js
-        ui/{popup,options}.{html,js,css}
+        background/extract-tab.js     (injects the extractor into the tab)
+        ui/{popup,options}.{html,js}, ui/ui.css, ui/summary-format.js
       tests/{unit,e2e,fixtures}/
     docs/
       figures/              diagram sources + PNGs

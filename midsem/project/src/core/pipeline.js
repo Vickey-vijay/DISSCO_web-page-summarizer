@@ -37,6 +37,9 @@ export async function runPipeline({ extract, engine, settings, signal, onProgres
 
   const chunks = chunkText(text, settings.chunkChars);
   const total = chunks.length;
+  if (settings.maxChunks && total > settings.maxChunks) {
+    throw new AppError(ERROR_CODES.TOO_LONG, `${total} parts needed, the limit is ${settings.maxChunks}`);
+  }
   let calls = 0;
 
   onProgress({ phase: 'summarizing', current: 0, total });

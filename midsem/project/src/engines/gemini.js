@@ -39,6 +39,8 @@ async function readJson(response) {
 
 function classifyHttpError(status, body) {
   const message = body?.error?.message ?? '';
+  // A 403 about the caller's region is not a bad key; say "service problem" instead.
+  if (status === 403 && /location|region|country/i.test(message)) return ERROR_CODES.SERVICE_ERROR;
   if (status === 401 || status === 403) return ERROR_CODES.INVALID_KEY;
   if (status === 400 && /api key/i.test(message)) return ERROR_CODES.INVALID_KEY;
   if (status === 429) return ERROR_CODES.RATE_LIMIT;

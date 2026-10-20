@@ -7,10 +7,13 @@
 (() => {
   const SKIP_TAGS = new Set(['script', 'style', 'noscript', 'template', 'svg', 'canvas', 'iframe']);
   const BLOCK_TAGS = new Set([
-    'address', 'article', 'aside', 'blockquote', 'dd', 'details', 'div', 'dl', 'dt', 'figcaption',
-    'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav',
-    'ol', 'p', 'pre', 'section', 'table', 'tr', 'ul',
+    'address', 'article', 'aside', 'blockquote', 'caption', 'dd', 'details', 'div', 'dl', 'dt',
+    'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li',
+    'main', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul',
   ]);
+  // Table rows are single lines and cells are separated by " | ", so "Q1" "4.5M" "12%" do not
+  // fuse into "Q14.5M12%" when the markup has no whitespace between the cells.
+  const CELL_TAGS = new Set(['td', 'th']);
 
   // Turns an HTML fragment into text with a blank line between blocks, so the chunker
   // later sees real paragraphs. DOMParser builds an inert document: no scripts run and
@@ -32,8 +35,10 @@
       }
       const block = BLOCK_TAGS.has(tag);
       if (block) out.push('\n\n');
+      if (CELL_TAGS.has(tag) && node.previousElementSibling) out.push(' | ');
       for (const child of node.childNodes) walk(child);
       if (block) out.push('\n\n');
+      if (tag === 'tr') out.push('\n');
     };
     walk(doc.body);
     return out.join('');

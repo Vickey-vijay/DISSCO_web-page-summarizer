@@ -1,10 +1,14 @@
 // Owns the summarizing job so it keeps running after the popup closes.
 // The popup only sends START_SUMMARY and then reads the job record from chrome.storage.session.
 // Every progress write is an extension API call, which also keeps Chrome from stopping the worker.
+//
+// One job per tab. Each job has an id: a job that has been replaced (the tab went to another
+// page) or whose tab was closed is aborted, and anything it still tries to write is dropped.
 
 import { loadSettings } from '../core/config.js';
 import { AppError, describeError, ERROR_CODES, toAppError } from '../core/errors.js';
 import { runPipeline } from '../core/pipeline.js';
+import { samePage } from '../core/url.js';
 import { createGeminiEngine } from '../engines/gemini.js';
 import { extractFromTab } from './extract-tab.js';
 
@@ -14,22 +18,29 @@ const jobKey = (tabId) => `job:${tabId}`;
 const STALE_MS = 3 * 60 * 1000;
 const bootTime = Date.now();
 
-// Writes for one tab are queued so progress updates can never arrive out of order.
-const queues = new Map();
-function writeJob(tabId, patch) {
+const queues = new Map(); // tabId -> promise chain, so writes for one tab stay in order
+const controllers = new Map(); // tabId -> {jobId, controller} of the running job
+const closedTabs = new Set(); // tab ids are never reused within a browser session
+const starting = new Set(); // tabs whose job is being created right now
+
+/** Merge a patch into the job record, but only if the record still belongs to this job. */
+function writeJob(tabId, jobId, patch) {
+  if (closedTabs.has(tabId)) return Promise.resolve();
   const key = jobKey(tabId);
   const prev = queues.get(tabId) ?? Promise.resolve();
   const next = prev
     .catch(() => {})
     .then(async () => {
-      const current = (await chrome.storage.session.get(key))[key] ?? {};
+      if (closedTabs.has(tabId)) return;
+      const current = (await chrome.storage.session.get(key))[key];
+      if (!current || current.jobId !== jobId) return; // replaced by a newer job, or removed
       await chrome.storage.session.set({ [key]: { ...current, ...patch, updatedAt: Date.now() } });
     });
   queues.set(tabId, next);
   return next;
 }
 
-async function runJob(tabId) {
+async function runJob(tabId, jobId, signal) {
   try {
     const settings = await loadSettings(chrome.storage.local);
     if (!settings.apiKey) throw new AppError(ERROR_CODES.NO_KEY);
@@ -37,7 +48,7 @@ async function runJob(tabId) {
     const engine = createGeminiEngine(settings, {
       onNotice: (notice) => {
         console.warn(LOG, 'retrying', notice);
-        void writeJob(tabId, { notice });
+        void writeJob(tabId, jobId, { notice });
       },
     });
 
@@ -45,10 +56,11 @@ async function runJob(tabId) {
       extract: () => extractFromTab(tabId),
       engine,
       settings,
-      onProgress: (p) => void writeJob(tabId, { ...p, notice: null }),
+      signal,
+      onProgress: (p) => void writeJob(tabId, jobId, { ...p, notice: null }),
     });
 
-    await writeJob(tabId, {
+    await writeJob(tabId, jobId, {
       status: 'done',
       phase: 'done',
       notice: null,
@@ -61,36 +73,58 @@ async function runJob(tabId) {
     console.log(LOG, 'done', result.stats);
   } catch (err) {
     const info = describeError(err);
+    if (info.code === ERROR_CODES.CANCELLED) {
+      console.log(LOG, 'job cancelled (page changed or tab closed)');
+      return; // nobody is waiting for this job any more
+    }
     console.warn(LOG, 'failed', info.code, info.detail);
-    await writeJob(tabId, { status: 'error', phase: 'error', notice: null, error: info });
+    await writeJob(tabId, jobId, { status: 'error', phase: 'error', notice: null, error: info });
+  } finally {
+    if (controllers.get(tabId)?.jobId === jobId) controllers.delete(tabId);
   }
 }
 
 async function startJob(tabId) {
-  const key = jobKey(tabId);
-  const existing = (await chrome.storage.session.get(key))[key];
-  if (existing?.status === 'running' && Date.now() - (existing.updatedAt ?? 0) < STALE_MS) {
-    return { ok: false, reason: 'already_running' };
+  if (starting.has(tabId)) return { ok: false, reason: 'already_running' };
+  starting.add(tabId);
+  try {
+    const key = jobKey(tabId);
+    const existing = (await chrome.storage.session.get(key))[key];
+    const tab = await chrome.tabs.get(tabId).catch(() => null);
+    const url = tab?.url ?? null;
+
+    const alive = existing?.status === 'running' && Date.now() - (existing.updatedAt ?? 0) < STALE_MS;
+    if (alive && (!url || !existing.url || samePage(existing.url, url))) {
+      return { ok: false, reason: 'already_running' }; // same page: the popup shows its progress
+    }
+    // The tab moved to another page while an old job was running: drop the old job.
+    if (alive) controllers.get(tabId)?.controller.abort();
+
+    const jobId = crypto.randomUUID();
+    const controller = new AbortController();
+    controllers.set(tabId, { jobId, controller });
+    await chrome.storage.session.set({
+      [key]: {
+        jobId,
+        status: 'running',
+        phase: 'extracting',
+        current: 0,
+        total: 0,
+        notice: null,
+        summary: null,
+        error: null,
+        stats: null,
+        url,
+        title: tab?.title ?? null,
+        startedAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    });
+    void runJob(tabId, jobId, controller.signal); // not awaited: the popup gets its answer at once
+    return { ok: true };
+  } finally {
+    starting.delete(tabId);
   }
-  const tab = await chrome.tabs.get(tabId).catch(() => null);
-  await chrome.storage.session.set({
-    [key]: {
-      status: 'running',
-      phase: 'extracting',
-      current: 0,
-      total: 0,
-      notice: null,
-      summary: null,
-      error: null,
-      stats: null,
-      url: tab?.url ?? null,
-      title: tab?.title ?? null,
-      startedAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  });
-  void runJob(tabId); // not awaited: the popup gets its answer immediately
-  return { ok: true };
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -104,6 +138,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
+  closedTabs.add(tabId);
+  controllers.get(tabId)?.controller.abort();
+  controllers.delete(tabId);
   queues.delete(tabId);
   void chrome.storage.session.remove(jobKey(tabId));
 });
@@ -115,9 +152,12 @@ async function sweepOrphans() {
   const all = await chrome.storage.session.get(null);
   for (const [key, job] of Object.entries(all)) {
     if (key.startsWith('job:') && job?.status === 'running' && (job.updatedAt ?? 0) < bootTime) {
-      const tabId = Number(key.slice(4));
       console.warn(LOG, 'marking orphaned job as interrupted', key);
-      await writeJob(tabId, { status: 'error', phase: 'error', error: describeError(new AppError(ERROR_CODES.INTERRUPTED)) });
+      await writeJob(Number(key.slice(4)), job.jobId, {
+        status: 'error',
+        phase: 'error',
+        error: describeError(new AppError(ERROR_CODES.INTERRUPTED)),
+      });
     }
   }
 }

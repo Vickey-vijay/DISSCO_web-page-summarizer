@@ -5,6 +5,7 @@
 // Test seam: ?tabId=123 makes the popup target that tab instead of the active tab, because an
 // automated test cannot click the toolbar icon.
 
+import { samePage } from '../core/url.js';
 import { parseSummary } from './summary-format.js';
 
 const $ = (id) => document.getElementById(id);
@@ -25,6 +26,7 @@ const els = {
 
 const STALE_MS = 3 * 60 * 1000;
 let tab = null;
+let lastJob = null; // kept so an open popup can notice a dead job without a storage event
 
 async function getTargetTab() {
   const forced = Number(new URLSearchParams(location.search).get('tabId'));
@@ -79,13 +81,8 @@ function formatStats(stats) {
   return `${parts} · ${calls} · ${seconds} s`;
 }
 
-// Same page ignoring the #fragment, so in-page links do not hide a finished summary.
-function samePage(a, b) {
-  const strip = (u) => String(u).split('#')[0];
-  return strip(a) === strip(b);
-}
-
 function render(job) {
+  lastJob = job ?? null;
   const stale = job && job.status === 'running' && Date.now() - (job.updatedAt ?? 0) > STALE_MS;
   const sameUrl = !job?.url || !tab.url || samePage(job.url, tab.url);
   const live = job && sameUrl && !stale ? job : null;
@@ -104,7 +101,7 @@ function render(job) {
 
   if (live.status === 'running') {
     els.progressText.textContent = progressLabel(live);
-    const known = live.phase === 'summarizing' && live.total > 0;
+    const known = live.phase === 'summarizing' && live.total > 0 && !live.notice;
     if (known) {
       els.progressBar.max = live.total;
       els.progressBar.value = live.current;
@@ -148,7 +145,23 @@ async function init() {
     els.button.disabled = true;
     show(els.error, false);
     show(els.result, false);
-    await chrome.runtime.sendMessage({ type: 'START_SUMMARY', tabId: tab.id });
+    let reply = null;
+    try {
+      reply = await chrome.runtime.sendMessage({ type: 'START_SUMMARY', tabId: tab.id });
+    } catch {
+      /* handled below */
+    }
+    if (reply?.ok) return; // the job record will arrive through the storage listener
+    if (reply?.reason === 'already_running') {
+      // This page is already being summarized: show its progress instead of a blank popup.
+      const stored = await chrome.storage.session.get(jobKey());
+      render(stored[jobKey()]);
+      return;
+    }
+    els.errorText.textContent = 'Could not start the summary. Try again.';
+    show(els.errorOptions, false);
+    show(els.error, true);
+    els.button.disabled = false;
   });
   $('open-options').addEventListener('click', (e) => {
     e.preventDefault();
@@ -161,6 +174,10 @@ async function init() {
   });
   const stored = await chrome.storage.session.get(jobKey());
   render(stored[jobKey()]);
+  // An open popup re-checks every few seconds, so a job whose worker died stops looking busy.
+  setInterval(() => {
+    if (lastJob) render(lastJob);
+  }, 5000);
 }
 
 init();

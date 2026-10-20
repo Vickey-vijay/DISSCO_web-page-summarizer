@@ -11,6 +11,9 @@ export const DEFAULTS = Object.freeze({
   chunkChars: 8000,
   // Pages with less readable text than this are not summarized (FR8).
   minTextChars: 200,
+  // A page that would need more parts than this is refused, so one huge page cannot burn through
+  // the free-tier quota (30 parts of 8,000 characters is about 240,000 characters).
+  maxChunks: 30,
   requestTimeoutMs: 25000,
   // Retries for rate limits (429) and server errors (5xx).
   maxRetries: 3,
@@ -22,14 +25,15 @@ export const DEFAULTS = Object.freeze({
 //  apiKey      - the user's own key, saved from the Options page (FR5)
 //  apiBaseUrl  - test seam only: lets the end-to-end tests point at a local mock server
 //  chunkChars  - test seam only: lets tests force several chunks on a short page
-//  retryBaseDelayMs, requestTimeoutMs - test seams only: let tests exercise retries and
-//                timeouts in milliseconds instead of waiting real seconds
+//  retryBaseDelayMs, requestTimeoutMs, maxChunks - test seams only: let tests exercise retries,
+//                timeouts and the page-length limit in milliseconds and small pages
 export const STORAGE_KEYS = Object.freeze({
   apiKey: 'apiKey',
   apiBaseUrl: 'apiBaseUrl',
   chunkChars: 'chunkChars',
   retryBaseDelayMs: 'retryBaseDelayMs',
   requestTimeoutMs: 'requestTimeoutMs',
+  maxChunks: 'maxChunks',
 });
 
 /**
@@ -50,7 +54,7 @@ export async function loadSettings(storageArea) {
   if (Number.isFinite(chunk) && chunk >= 500) {
     settings.chunkChars = Math.floor(chunk);
   }
-  for (const name of ['retryBaseDelayMs', 'requestTimeoutMs']) {
+  for (const name of ['retryBaseDelayMs', 'requestTimeoutMs', 'maxChunks']) {
     const value = Number(stored[STORAGE_KEYS[name]]);
     if (Number.isFinite(value) && value >= 1) settings[name] = Math.floor(value);
   }
