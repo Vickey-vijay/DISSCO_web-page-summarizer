@@ -80,7 +80,7 @@ Table: The ten setup checks and what each proves
 | B7 | Running --dev without Node.js explains how to install it |
 | B8 | --dev --reset rebuilds the test tools and completes |
 
-Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages are checked only by reading the script. The script's summary line is not saved in the evidence folder. run-3.md says these checks must be run again before they are quoted, so the current result is [to be measured].
+Three things are not covered. The clipboard step is not tested, because the test must not touch the user's clipboard. The "Chrome missing" and "Chrome too old" messages are checked only by reading the script. The check was run again after the last wording change to run.bat, and all 10 checks passed (10 of 10, on 20 October 2026, recorded in run-3.md). Its full output is not saved as a file, so the result is written here from the run.
 
 **What this means in plain words.** The checks run the real scripts on copies of the project. They confirm the scripts succeed when they should, and fail with a clear message when they should.
 
