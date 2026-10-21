@@ -1297,15 +1297,15 @@ Yes. The question went to a stronger model in writing before building, with a st
 
 ## What this part does and why it exists
 
-The model runs on the graphics card through WebGPU, a browser feature that lets web code run calculations on the card instead of the processor. Two conditions stop the model from running at all. The browser may have no WebGPU, or the card may lack the 16-bit math that the model's shader programs need (the feature is called `shader-f16`). The check looks for both before any download starts. The popup can then explain the problem, instead of downloading about 695 MB and failing at the end.
+The model runs on the graphics card through WebGPU. Two conditions stop it from running at all: the browser has no WebGPU, or the card lacks the 16-bit math that the model's shader programs need (`shader-f16`). The check looks for both before any download starts. The popup can then explain the problem, instead of downloading about 695 MB and failing at the end. Chapter 3 explains WebGPU and `shader-f16` in plain terms.
 
-The check also picks the model. The project uses two 4-bit models from WebLLM's list: Llama 3.2 1B as the primary, and SmolLM2 360M as the fallback. Three inputs decide between them: a saved answer from an earlier failure, the memory the browser reports, and whether the card is built into the processor.
+The check also chooses the model. The project uses two 4-bit models from WebLLM's list: Llama 3.2 1B as the primary, and SmolLM2 360M as the fallback. Three inputs decide between them: a saved answer from an earlier failure, the memory the browser reports, and whether the card is built into the processor.
 
-Three files hold this logic. `src/core/gpu-check.js` contains pure functions that the Node tests can call with any input. `src/core/config.js` lists the two models. `src/engines/local.js` runs the check and the choice. The check itself runs in the offscreen page (`src/offscreen/offscreen.js`), because the model will run there too.
+The check runs in the offscreen page (`src/offscreen/offscreen.js`), where the model runs. Its pure functions live in `src/core/gpu-check.js`, and the engine that makes the choice is `src/engines/local.js`.
 
 ## What the check looks at
 
-The check asks four questions in order. Does the browser have `navigator.gpu`? Does it return an adapter, which is the card Chrome will use? Does that adapter list `shader-f16`? And what are the vendor and architecture labels?
+The check asks four questions in order: is `navigator.gpu` there, does the browser return an adapter (the card Chrome will use), does that adapter list `shader-f16`, and what are its vendor and architecture labels?
 
 `src/core/gpu-check.js`
 ```js
@@ -1315,23 +1315,9 @@ export function evaluateGpu({ hasGpuApi, adapter }) {
   if (!adapter.features.has('shader-f16')) {
     return { ok: false, code: ERROR_CODES.NO_SHADER_F16, detail: 'adapter has no shader-f16 feature' };
   }
-  const info = adapter.info ?? {};
-  return { ok: true, f16: true, vendor: String(info.vendor ?? ''), architecture: String(info.architecture ?? '') };
-}
 ```
 
-The offscreen page makes the adapter request with the high-performance preference. The code comment says this is the same request WebLLM makes, so the check describes the card that WebLLM will use.
-
-`src/offscreen/offscreen.js`
-```js
-async function requestAdapter() {
-  if (!navigator.gpu) return null;
-  // The same request WebLLM makes, so we report the card WebLLM will actually use.
-  return navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-}
-```
-
-The built-in test is one line in the same file.
+The offscreen page asks for the adapter with the high-performance preference. The code comment says this is the same request WebLLM makes, so the check describes the card WebLLM will use. The built-in test is one line:
 
 `src/offscreen/offscreen.js`
 ```js
@@ -1339,32 +1325,11 @@ The built-in test is one line in the same file.
         integrated: gpu.vendor.toLowerCase() === 'intel' && /gen/i.test(gpu.architecture),
 ```
 
-The clean runs show Chrome reporting the built-in chip as `intel` with architecture `gen-12lp`, and the separate chip as `nvidia` with `ampere` (`v2-local-intel.json` and `v2-local-nvidia-offline.json`). The test separates them on those labels. It recognises only Intel by name, so a built-in AMD or Apple chip would count as a full card.
+Chrome reported the built-in chip as `intel` with architecture `gen-12lp`, and the separate chip as `nvidia` with `ampere` (`v2-local-intel.json` and `v2-local-nvidia-offline.json`). The rule recognises Intel by name only.
 
-**What this means in plain words.** The check asks Chrome three yes-or-no questions and reads two labels. The labels decide whether the card counts as built into the processor.
+**What this means in plain words.** The check asks Chrome three yes-or-no questions and reads two labels. The labels decide whether the card is built into the processor.
 
 ## How the model is chosen
-
-`src/core/config.js` lists the two models. The figures are WebLLM's `vram_required_MB` values, which are graphics memory, not download size.
-
-`src/core/config.js`
-```js
-export const MODELS = Object.freeze({
-  primary: Object.freeze({ id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC', label: 'Llama 3.2 1B', vramMB: 879 }),
-  fallback: Object.freeze({ id: 'SmolLM2-360M-Instruct-q4f16_1-MLC', label: 'SmolLM2 360M', vramMB: 376 }),
-});
-```
-
-`src/core/gpu-check.js`
-```js
-export function chooseModel({ deviceMemoryGB, override } = {}) {
-  if (override === 'fallback') return MODELS.fallback;
-  if (typeof deviceMemoryGB === 'number' && deviceMemoryGB < 8) return MODELS.fallback;
-  return MODELS.primary;
-}
-```
-
-The rules run in the order below. The fourth is applied inside the engine, because it needs the answer from the card check.
 
 Table: The rules that choose the model, in the order they run
 
@@ -1375,39 +1340,40 @@ Table: The rules that choose the model, in the order they run
 | 3 | Anything else | `chooseModel` | Llama 3.2 1B |
 | 4 | Primary chosen, card is built-in Intel, no override saved | `checkStatus` in `src/engines/local.js` | SmolLM2 360M, reason `integrated-graphics` |
 
-The memory rule is coarse. Chrome rounds `navigator.deviceMemory` and caps it at 8, as the comment in `gpu-check.js` says. A laptop with 15.7 GB, such as the developer laptop, reports 8 and passes. The threshold comes from the decision record (DECISIONS D1, item 3).
+`src/core/gpu-check.js`
+```js
+export function chooseModel({ deviceMemoryGB, override } = {}) {
+  if (override === 'fallback') return MODELS.fallback;
+  if (typeof deviceMemoryGB === 'number' && deviceMemoryGB < 8) return MODELS.fallback;
+  return MODELS.primary;
+}
+```
+
+Chrome rounds `navigator.deviceMemory` and caps it at 8, as the comment in `gpu-check.js` says. The developer laptop, with 15.7 GB, reports 8 and passes. The threshold comes from the decision record (DECISIONS D1, item 3). The 879 MB and 376 MB figures in `config.js` are graphics memory, not download sizes.
 
 **What this means in plain words.** The choice uses an earlier failure, the memory the browser reports, and whether the card is built into the processor. The memory input cannot tell an 8 GB laptop from a 16 GB one.
 
 ## The check inside the engine
 
-The engine asks the page first and only then decides what to download. The built-in rule lives in `checkStatus`.
+The engine asks the page first, and only then decides what to download.
 
 `src/engines/local.js`
 ```js
-    async checkStatus() {
       let status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
       if (status.gpu?.integrated && engine.model.id === MODELS.primary.id && !settings.modelOverride) {
         engine.model = MODELS.fallback;
         engine.modelSwitchReason = 'integrated-graphics';
         status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
       }
-      engine.status = status;
-      return status;
-    },
 ```
 
-On the Intel path the page is asked twice, because the stored flag and the size depend on which model is named. If the reader's override is already saved, the model is already the small one, and the rule does not run.
+On the Intel path the page is asked twice, because the stored flag and the size depend on the model named. The rule does not run when an override is already saved. `prepare()` calls `checkStatus()` before any download. An error from the page becomes an `AppError` with the same code (`fromWire`), so the job stops before a download is requested. Chapter 9 explains the messages between the engine and the page.
 
-`prepare()` calls `checkStatus()` before any download. If the page returns an error, `call()` turns it into an `AppError` with the same code, through `fromWire` in `src/core/errors.js`. The job stops before a download is requested.
-
-**What this means in plain words.** The engine asks the page what the card can do before it decides what to download. A failed check stops the job before anything is downloaded.
+**What this means in plain words.** The engine asks what the card can do before it decides what to download. A failed check stops the job before anything is downloaded.
 
 ## What the popup says for each outcome
 
-The popup shows the result of the check in the model line under the title, and it enables or disables the button.
-
-Table: What the reader sees for each outcome of the check
+Table: What the reader sees for each outcome
 
 | Outcome | Code | Model line (exact text) | Button |
 |---|---|---|---|
@@ -1419,39 +1385,16 @@ Table: What the reader sees for each outcome of the check
 | Check fails for another reason | SERVICE_ERROR | `Something went wrong inside the extension. Try again.` | Enabled |
 | Answer not yet received | none | `Checking this computer...` | No change |
 
-The size in the first row is an estimate. If it cannot be read, the popup writes "about several hundred MB" instead. The note for built-in graphics reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.`
-
-Only the two blocking codes disable the button. The code comment in `popup.js` gives the reason: a computer without WebGPU or 16-bit math cannot run the model at all, while other failures may be temporary.
-
-After every job ends, success or error, the popup asks for the model state once more. The model line and the button then follow the saved choice.
-
-`src/ui/popup.js`
-```js
-/** After a job ends the model line may be out of date (downloaded now, or switched to the smaller model). */
-function refreshModelLineOnce(job) {
-  if (refreshedFor === job.jobId) return;
-  refreshedFor = job.jobId;
-  void loadModelState();
-}
-```
+If the size cannot be read, the first row says "about several hundred MB". The built-in note reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.` Only the two blocking codes disable the button, because the code comment says other failures may be temporary. After every job ends, success or error, the popup asks for the model state once more, so the model line follows the saved choice.
 
 **What this means in plain words.** Two messages stop the button. Every other failure leaves it open, and the model line is brought up to date when a job ends.
 
 ## The retry with the small model, and why the choice is saved
 
-If the primary model fails with an out-of-memory error or a load error, the engine tries the small model once. One line lists the codes that trigger this.
+Only two codes trigger the retry: `GPU_MEMORY` and `MODEL_LOAD_FAILED`. The catch block in `prepare()` makes the switch and records it.
 
 `src/engines/local.js`
 ```js
-// A failed load with the primary model is retried once with the smaller one.
-const RETRY_WITH_FALLBACK = new Set([ERROR_CODES.GPU_MEMORY, ERROR_CODES.MODEL_LOAD_FAILED]);
-```
-
-The catch block in `prepare()` makes the switch and records it.
-
-`src/engines/local.js`
-```js
-      } catch (err) {
         if (!(err instanceof AppError) || !RETRY_WITH_FALLBACK.has(err.code) || engine.model.id !== MODELS.primary.id) throw err;
         // The primary model did not fit or would not start: remember that and try the small one.
         await onFallback();
@@ -1459,35 +1402,17 @@ The catch block in `prepare()` makes the switch and records it.
         engine.modelSwitchReason = err.code;
 ```
 
-The service worker supplies `onFallback`, which writes the override to `chrome.storage.local`.
+The service worker's `onFallback` writes `modelOverride: 'fallback'` to `chrome.storage.local`. The retry happens at most once: a failure of the small model is thrown, and no third try follows. A download failure is not in the list, so a dropped connection never switches the model. The unit test "a download failure is not retried with another model" checks this.
 
-`src/background/service-worker.js`
-```js
-    onFallback: () => chrome.storage.local.set({ modelOverride: 'fallback' }),
-```
+The choice is saved for three reasons. The save happens before the small model is tried, so the choice stays even if SmolLM2 also fails (browser test V11). Local storage lasts across restarts. And every later popup and job reads the override in `loadSettings`, so the big model is not tried again.
 
-The retry happens at most once. The condition checks that the primary model is in use, so a failure of the small model is thrown and no third try follows. A download failure is not in the list, so a dropped connection never switches the model. The unit test "a download failure is not retried with another model" checks this.
+**What the reader sees after a switch.** A finished summary made by the small model after a `GPU_MEMORY` or `MODEL_LOAD_FAILED` error shows a notice under the result. The notice reads: "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The popup works this out from the job's stats. A switch caused by built-in graphics shows no notice, because that case already has the graphics note.
 
-The choice is saved for three reasons visible in the code. The save happens before the small model is tried, so the choice stays even if SmolLM2 also fails (browser test V11). Storage in `chrome.storage.local` lasts across restarts, which session storage would not. And every later popup and job reads the override in `loadSettings`, so the big model is not tried again.
+**Before the fix.** Earlier builds showed no notice. The only sign of the switch was the model's name in the stats line, and after two failed models the model line still showed the main model as "Not downloaded yet" (DEVLOG, 2026-10-21, "V2 popup: silent fallback"; chapter 15 tells this story).
 
-**What the reader sees after a switch.** A finished summary made by the small model after a memory or load failure now carries a notice under the result. The notice is computed in the popup from the job's stats, and it is shown only for `GPU_MEMORY` and `MODEL_LOAD_FAILED`. A switch caused by built-in graphics does not show it, because that case already has the graphics note.
+**Still true after the fix.** No code path clears `modelOverride`, so the only way back is to clear the stored settings. A `MODEL_LOAD_FAILED` with no link to memory also saves the choice, and the notice then says the model "did not fit" even when memory may not be the cause.
 
-`src/ui/popup.js`
-```js
-/** Tells the user when the summary was made by the smaller model after the main one failed. */
-function switchNotice(reason) {
-  if (reason === 'GPU_MEMORY' || reason === 'MODEL_LOAD_FAILED') {
-    return 'The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed.';
-  }
-  return null;
-}
-```
-
-**Before the fix.** Earlier builds drew no notice. The only sign of the switch was the model's name in the stats line, and the model line after two failed models still showed the main model as "Not downloaded yet". The developer log records both (DEVLOG, 2026-10-21, "V2 popup: silent fallback").
-
-**Still true after the fix.** No code path clears `modelOverride`, so the only way back is to clear the extension's stored settings. A `MODEL_LOAD_FAILED` that has nothing to do with memory also saves the choice, and the notice then says the model "did not fit" even though memory may not be the cause.
-
-**What this means in plain words.** When the big model does not fit, the extension switches once, remembers the switch, and now tells the reader. The memory lasts until the stored settings are cleared, and the notice does not offer a way to undo it.
+**What this means in plain words.** When the big model does not fit, the extension switches once, remembers the switch, and tells the reader. The memory lasts until the stored settings are cleared.
 
 ## Design decisions
 
@@ -1495,18 +1420,16 @@ Table: Design decisions for the card check and the model choice
 
 | Decision | Options considered | Choice | Why the others were rejected | Trade-off accepted |
 |---|---|---|---|---|
-| Built-in Intel graphics | Refuse; use the 1B model anyway; use the small model with a note | Small model with a note | The 1B model wrote about 2 tokens a second on Intel in a speed test (DEVLOG only). A refusal leaves the reader with nothing (DECISIONS D3) | Weaker answers on Intel; the rule covers Intel only |
-| Memory | Always the 1B model; `navigator.deviceMemory` below 8 | Below 8 uses the small model | The browser caps the value at 8, so a 16 GB machine looks like an 8 GB one | Machines with 8 GB or more are not separated |
-| Failure during load | Fail at once; retry once and save | Retry once, save, and show a notice | The decision record asks for one more try with the small model, and a memory of it (DECISIONS D1, item 3) | The saved choice has no undo |
-| Where the choice is kept | Session storage; local storage | `chrome.storage.local` | Session storage ends with the browser, so the failure would repeat after a restart | Lasts until the stored settings are cleared |
+| Built-in Intel graphics | Refuse; the 1B model anyway; the small model with a note | Small model with a note | The 1B model wrote about 2 tokens a second on Intel in a speed test (DEVLOG only). A refusal leaves the reader with nothing (DECISIONS D3) | Weaker answers on Intel; the rule covers Intel only |
+| Memory | Always the 1B model; `navigator.deviceMemory` below 8 | Below 8 uses the small model | The browser caps the value at 8, so 16 GB looks like 8 GB | Machines with 8 GB or more are not separated |
+| Failure during load | Fail at once; retry once and save | Retry once, save and show a notice | The decision record asks for one more try and a memory of it (DECISIONS D1, item 3) | The saved choice has no undo |
+| Where the choice is kept | Session storage; local storage | `chrome.storage.local` | Session storage ends with the browser, so the failure would repeat | Lasts until the stored settings are cleared |
 
-**What this means in plain words.** Each choice trades simplicity or speed against a clear limit. The clearest trade is on Intel: a weaker model that finishes is better than a refusal.
+**What this means in plain words.** Each choice trades simplicity or speed for a clear limit. The clearest trade is on Intel: a weaker model that finishes beats a refusal.
 
 ## Worked example: the developer laptop
 
-The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H, 15.7 GB of memory, Intel built-in graphics, an NVIDIA RTX 3050 with 6 GB, and Chrome 155 (DECISIONS D1). Chrome chooses which chip a page uses. The check reports the chip that Chrome gave, and the model follows from that report.
-
-Two clean runs on this laptop show both outcomes. The first used Chrome's default. The second started Chrome with `--force_high_performance_gpu`. The numbers come from the files named in the first column.
+The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H, 15.7 GB of memory, Intel built-in graphics, an NVIDIA RTX 3050 with 6 GB, and Chrome 155 (DECISIONS D1). Chrome chooses the chip. The check reports the chip Chrome gave, and the model follows from that report.
 
 Table: The same laptop with two graphics chips, and the same short article
 
@@ -1515,117 +1438,80 @@ Table: The same laptop with two graphics chips, and the same short article
 | Default Chrome (`v2-local-intel.md`) | none | `intel`, `gen-12lp` | applies | SmolLM2 360M | about 204 MB, 81 s | 199.2 s | 4 to 5 tokens a second |
 | Forced card (`v2-local-nvidia-cold-first-attempt.md`) | `--force_high_performance_gpu` | `nvidia`, `ampere` | does not apply | Llama 3.2 1B | about 695 MB, 158.3 s | 196.8 s | 47 tokens a second |
 
-On the default run, the rule chose SmolLM2 and the popup showed the note. The summary started at 123.1 seconds and ended at 199.2 seconds, so the built-in chip took about 76 seconds for one part. On the forced run the summary took about 3.7 seconds for the same article. The download was smaller on the built-in path, so the two first-use totals are close, and the gap appears only after the download.
+On the default run the summary started at 123.1 seconds and ended at 199.2 seconds, so the built-in chip took about 76 seconds for one part. On the forced run the same article took about 3.7 seconds. The download was smaller on the built-in path, so the two first-use totals are close. The gap appears after the download.
 
-Chrome did not choose the separate card by default. The developer log records that Chromium picked the Intel chip even when the code asked for the high-performance card, and that the flag changed the choice (DEVLOG, 2026-10-21, "V2 speed on the graphics card"). The setup offers an opt-in setting for the separate card (`setup.bat --gpu`, DECISIONS D4). That setting now prints a plain message if the Windows change fails, and setup carries on. The check cannot correct the browser's choice, because it reports only what Chrome selected.
+Chrome picked the built-in chip by default, even when the code asked for the high-performance card. The flag changed the choice (DEVLOG, 2026-10-21; chapter 15 tells this). The opt-in setting `setup.bat --gpu` moves Chrome to the separate card (DECISIONS D4). It prints a plain message if the Windows change fails, and setup carries on. In one speed test the 1B model wrote about 2 tokens a second on the built-in chip (DEVLOG only, no run file). In the saved clean runs the separate card wrote 34 to 53 tokens a second, and each value is the last request of its job.
 
-The 1B model wrote about 2 tokens a second on the built-in chip in one speed test (DEVLOG only, no run file). The writing speeds in the saved clean runs are 34 to 53 tokens a second on the separate card, and each value is the last request of its job.
-
-**What this means in plain words.** On this laptop the browser decides which chip runs the model. The same article took about 76 seconds on the built-in chip and about 3.7 seconds on the separate card, once the download was finished.
+**What this means in plain words.** On this laptop the browser decides which chip runs the model. The same article took about 76 seconds on the built-in chip and about 3.7 seconds on the separate card, once the download was done.
 
 ## Figures
 
-The first figure is the flow of `prepare()`. As drawn, it reads from top to bottom. The card check comes first, then the WebGPU and 16-bit math question, which sends a "no" straight to a stop with the message and a disabled button. A "yes" leads to the model choice. The box lists three reasons for SmolLM2: built-in graphics, under 8 GB of memory, or a saved fallback. The load step downloads if the model is not stored. A `GPU_MEMORY` or `MODEL_LOAD_FAILED` error with the 1B model saves the fallback and retries once with SmolLM2. Any other error, for example `MODEL_DOWNLOAD_FAILED`, stops with its message and no retry. A second failure also stops. The drawing says the warm-up takes about 30 seconds the first time, and the footnote gives the sizes, about 695 MB for the 1B model and about 204 MB for SmolLM2.
-
 ![Flow of prepare(): check the card, pick the model, download if not stored, load, warm up, and retry once with the small model after a memory or load error](../figures/V04_model_preparation.png)
 
-The second figure compares the two chips of the developer laptop.
+Reading the figure: the flow runs from top to bottom. A "no" on WebGPU or 16-bit math stops at a message and a disabled button. A "yes" leads to the model choice, with SmolLM2 chosen for built-in graphics, under 8 GB of memory, or a saved fallback. A `GPU_MEMORY` or `MODEL_LOAD_FAILED` error with the 1B model saves the fallback and retries once. Other errors, such as `MODEL_DOWNLOAD_FAILED`, stop with their message.
 
 ![Two graphics chips in one laptop: Chrome's default choice and the forced choice, with the speed measured for each](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: the default path goes from Chrome to the built-in Intel graphics, which Chrome used by default on this laptop. Its box gives the measured 4 to 5 tokens a second for SmolLM2 360M, with a short article taking 199.2 seconds on first use. The separate path goes to the NVIDIA RTX 3050 with 6 GB. Its box gives 34 to 53 tokens a second for Llama 3.2 1B, with the short article taking 15.3 seconds stored and offline. The figure shows two ways to reach the separate card: a Windows setting by hand, and `setup.bat --gpu`, which it describes as opt-in and tested only against a test registry key. The undo command in the drawing includes `-ChromePath`. The script now finds Chrome itself, so that option is not needed.
+Reading the figure: the default path goes to the built-in Intel chip, with the measured 4 to 5 tokens a second for SmolLM2 and 199.2 seconds for the short article. The separate path goes to the NVIDIA RTX 3050, with 34 to 53 tokens a second for the 1B model and 15.3 seconds for the short article when stored and offline. The drawing shows the Windows setting and `setup.bat --gpu` as the two ways to reach the separate card. Its undo line lists `-ChromePath`, which the script no longer needs.
 
 ## Screenshots
 
-The first screenshot is a real model screenshot taken before the marker fix.
-
 ![Real model, before the marker fix: the popup after a short article on the built-in Intel chip, with the Intel note and the marker at the start of the summary](../screenshots/v2-intel-short-popup.png)
 
-Reading the screenshot: the button reads "Download model and summarize". The model line reads "Model: SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)." The shaded note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The first line of the summary is the prompt marker `<<<PAGE TEXT START>>>`. This screenshot and the Intel run file (`v2-local-intel.json`) were recorded before the fix. The fix strips the markers from every answer (see the next paragraph), so a new run no longer shows them.
-
-The small model copied the markers from the prompt into its answer, and the short-article summary of that run contains both `<<<PAGE TEXT START>>>` and `<<<PAGE TEXT END>>>`. The long-article summary from the same run does not. The fix is `stripPageMarkers()` in `src/core/prompts.js`, called on every answer in `src/engines/local.js`. Two unit tests cover it. The model line in the picture still says "Not downloaded yet". The picture was most likely taken as the summary appeared, before the refresh that follows a finished job had completed.
-
-The next four screenshots are pretend model screenshots, made with the mock engine.
-
-![Pretend model: the note under the model line when the card is built-in Intel. The size shows about 300 MB, the pretend model's own figure](../screenshots/ui-09-intel-note.png)
-
-Reading the screenshot: the model line reads "Model: SmolLM2 360M. Not downloaded yet (about 300 MB, first use only).", and the Intel note sits in its shaded box below it. The 300 MB is the pretend model's fixed value, not the 204 MB of the real run.
-
-![Pretend model: the popup after the card reports no WebGPU, with the button greyed out and the WebGPU message in red](../screenshots/ui-10-no-webgpu.png)
-
-Reading the screenshot: the button is greyed out and reads "Summarize this page". The red text reads "Chrome cannot use your graphics card for the model (WebGPU is not available). Open chrome://gpu to check." No model line is shown.
-
-![Pretend model: the popup after the card lacks 16-bit math, with the button greyed out](../screenshots/ui-11-no-shader-f16.png)
-
-Reading the screenshot: the button is greyed out, and the red text reads "Your graphics card does not support the 16-bit math this model needs, so this computer cannot run Version 2."
+Reading the screenshot: the summary begins with the prompt marker `<<<PAGE TEXT START>>>`, and the Intel note sits under the model line, which reads "Not downloaded yet (about 204 MB)". The picture and the Intel run file were recorded before the fix. The fix, `stripPageMarkers()` in `src/core/prompts.js`, removes the markers from every answer. The long-article summary from the same run had no markers.
 
 ![Pretend model: the popup after the primary model ran out of memory, with the summary finished on SmolLM2 360M and the switch notice under the result](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
-Reading the screenshot: the model line reads "Model: SmolLM2 360M. Downloaded, runs on this computer." Under the result, the notice reads "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." A summary of three points follows, and the stats line reads "1 part · 1 request · 2.3 s · SmolLM2 360M".
+Reading the screenshot: the notice under the result tells the reader that the smaller model wrote the summary. The model line reads "Model: SmolLM2 360M. Downloaded, runs on this computer." The stats line reads "1 part · 1 request · 2.3 s · SmolLM2 360M".
 
 ![Pretend model: both models ran out of memory, with the error text and the model line now naming the small model that the saved switch chose](../screenshots/ui-13-out-of-memory-all.png)
 
-Reading the screenshot: the error reads "The graphics card ran out of memory. Close other heavy tabs or programs and try again." The model line reads "Model: SmolLM2 360M. Not downloaded yet (about 300 MB, first use only)." and the button reads "Download model and summarize", enabled. The model line names SmolLM2 because the saved switch chooses it, so the line is current after a failed job. Before the fix it still named the main model.
+Reading the screenshot: the error reads "The graphics card ran out of memory. Close other heavy tabs or programs and try again." The model line names SmolLM2 because the saved switch chooses it, and the button is enabled. Before the fix the model line still named the main model.
 
-## Failure cases and how each is handled
+## Failure cases
 
-Table: Failures in the card check and the model choice
+Table: Failures in this part that the choice depends on
 
-| Failure | Where it is caught | What the reader sees | What happens to the choice |
-|---|---|---|---|
-| `navigator.gpu` missing, or no adapter | `evaluateGpu` | No WebGPU message; button disabled | Nothing downloaded, nothing saved |
-| Adapter without `shader-f16` | `evaluateGpu` | No 16-bit math message; button disabled | Nothing saved |
-| `requestAdapter()` throws | Offscreen page catch | Generic message; button enabled | Nothing saved. The code reports `SERVICE_ERROR`, not `NO_WEBGPU` |
-| Primary model out of memory | `prepare()` catch | Summary finished by SmolLM2, with the switch notice | Saved as `fallback` |
-| Both models out of memory | Second error is thrown | Out-of-memory message; model line names SmolLM2 | Still saved as `fallback` (browser test V11) |
-| Primary model fails to load | `prepare()` catch | Summary finished by SmolLM2, with the notice that says "did not fit" | Saved as `fallback` |
-| Download stops | Not in the retry list | Download message; button enabled | Nothing saved (browser test V12) |
-| Built-in Intel card | Built-in rule | Note under the model line | Not saved; the rule runs again unless the override is already saved |
+| Failure | What happens to the choice |
+|---|---|
+| `requestAdapter()` throws | Nothing saved. The code reports `SERVICE_ERROR`, not `NO_WEBGPU` |
+| Both models out of memory | Still saved as `fallback` (browser test V11) |
+| Download stops | Not retried; nothing saved (browser test V12) |
 
-**What this means in plain words.** Most failures stop with a message that names the cause. Only two of them change the saved choice, and both move it towards the smaller model. A switch now shows a notice.
+Chapter 12 explains how each code reaches the reader, including the no-WebGPU and download cases.
+
+**What this means in plain words.** Most failures stop with a message that names the cause. Only two of them change the saved choice, and both move it towards the smaller model.
 
 ## What went wrong while building it
 
-The developer log records these problems in this part (DEVLOG, 2026-10-21).
+The developer log tells the stories behind this part (chapter 15). The main ones are the browser's choice of chip, the lowercase vendor name that the popup printed as it was, the silent fallback, and the copied page markers. On the built-in chip the 1B model's first answer took 36 seconds (DEVLOG, 2026-10-21), and the Intel run took 199.2 seconds, as the worked example shows. A word such as "room" inside an error text once counted as out of memory. Only the whole word "oom" counts now (DEVLOG, 2026-10-21, "V2 review while writing the report", item 3).
 
-- The 1B model decoded about 2 tokens a second on the built-in chip in a speed test, and the first answer took 36 seconds. The cause was the browser's choice of chip. The fix was the built-in rule and the note, plus the opt-in setting for the separate chip ("V2 speed on the graphics card").
-- The popup printed the vendor as `intel`, in lower case, because WebGPU reports vendors in lower case. Browser test V09 found it, and `vendorName()` in `popup.js` now maps the known names ("V2 browser tests: graphics note").
-- The Intel run finished the short article in 199.2 seconds. The log says the weak chip "is not an error, so it gets a note and a smaller model, not a refusal" ("V2 real-model runs on Intel graphics").
-- The switch was silent. The popup now shows the notice, and the model line is refreshed when a job ends ("V2 popup: silent fallback").
-- The copied page markers reached the summary. The fix is in ("V2 summaries", the marker row).
-- A word such as "room" inside an engine error text was treated as out of memory. Only the whole word "oom" counts now, with a unit test ("V2 review while writing the report", item 3).
-
-**What this means in plain words.** The largest surprise was that the browser, not the code, chose the slow chip. The silent switch and the copied markers were both visible only to a reader who looked closely, and both now show up on screen or in the output.
+**What this means in plain words.** The biggest surprise was that the browser, not the code, chose the slow chip. The silent switch and the copied markers were visible only to a careful reader, and both now show on screen or are removed from the output.
 
 ## How it was tested
 
-The unit tests in `tests/unit/gpu-and-errors.test.js` cover the check: "no WebGPU API at all is NO_WEBGPU", "an adapter without shader-f16 is NO_SHADER_F16", "a small machine (under 8 GB) or an earlier failure chooses the smaller model", "mapInitProgress never says downloading when the model is already stored", and "the word 'room' is not an out-of-memory error". The unit tests in `tests/unit/local-engine.test.js` cover the engine, including "integrated graphics switches to the small model before loading" and "a primary model that runs out of graphics memory is retried once with the small one, and remembered". The unit tests in `tests/unit/small.test.js` and `tests/unit/local-engine.test.js` cover the marker removal.
+The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engine.test.js` cover the check, the choice and the retry. The browser tests in `tests/e2e/pipeline.test.js` use the pretend model: V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 70 tests and the browser suite 26. The real card was checked only on the developer laptop.
 
-The browser tests in `tests/e2e/pipeline.test.js` use the pretend model. Scenario V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and it checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 70 tests and the browser suite has 26. The real-model runs are the clean runs in `finalsem/docs/test-runs/`, and they show the Intel and NVIDIA outcomes above. The real card was tested only on the developer laptop.
-
-**What this means in plain words.** The rules are tested with unit tests and the pretend model. The real card was checked only on one laptop.
+**What this means in plain words.** The rules are checked by unit tests and by the pretend model. The real card was checked on one laptop only.
 
 ## Limitations
 
 - The built-in rule recognises Intel by name only. A built-in AMD or Apple chip would count as a full card, and the reader would get no warning.
 - The memory rule works only below 8 GB, because the browser caps the value. No run on a 4 GB machine is recorded, so the threshold is not measured [to be measured].
-- The small model's answers are weaker. The merge step can repeat the prompt's own preamble ("These are summaries of consecutive parts of one web page"), and small models make factual slips. The marker fix does not cover this, and it is listed as a limit of a 1B model (DEVLOG, "V2 summaries").
-- The saved choice has no undo, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
+- The small model's answers are weaker. The merge step can repeat the prompt's own preamble, and small models make factual slips. Chapter 10 covers how good the summaries are.
+- No code path clears `modelOverride`, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
 - The client's laptop has not been tested (DECISIONS D1, last paragraph).
 
 ## Questions this chapter answers
 
 **Does the check choose the graphics chip?**
-No. The check reports the chip that Chrome gives the page. On the developer laptop Chrome chose the built-in Intel chip by default, and the separate NVIDIA chip only after the browser was started with the flag. The check turns that report into a model and a message.
+No. The check reports the chip that Chrome gives the page. On the developer laptop Chrome chose the built-in Intel chip by default, and the separate chip only after the browser was started with the flag. The check turns that report into a model and a message.
 
 **Why does a built-in Intel chip get the small model instead of an error?**
-The 1B model wrote about 2 tokens a second on the Intel chip in a speed test, while SmolLM2 wrote 4 to 5 tokens a second in the clean run. A slow answer that finishes is better than a refusal. The extension keeps the feature and adds a note.
+The 1B model wrote about 2 tokens a second on the Intel chip in a speed test, and SmolLM2 wrote 4 to 5 tokens a second in the clean run. A slow answer that finishes is better than a refusal, so the extension keeps the feature and adds a note.
 
 **Why is the choice saved after an out-of-memory failure?**
-The choice is written to `chrome.storage.local` before the small model is tried. Every later job then starts with the small model instead of failing again with the large one. The reader is told about the switch by a notice, and no code path clears the choice, so it lasts until the stored settings are cleared.
-
-**What happens on a computer without WebGPU?**
-The popup shows the message for `NO_WEBGPU` and disables the button. Nothing is downloaded and nothing is saved, because the check returns before the model is loaded.
+The choice is written to `chrome.storage.local` before the small model is tried. Every later job then starts with the small model instead of failing again with the large one. The reader is told about the switch by a notice, and nothing clears the choice, so it lasts until the stored settings are cleared.
 
 **Can a laptop with 4 GB of memory run the 1B model?**
 Not under the code's rule. Chrome reports 4, which is below 8, so the small model is chosen. The threshold comes from the decision record, and no run on a 4 GB machine is recorded, so its result is [to be measured].
@@ -1637,369 +1523,199 @@ Not under the code's rule. Chrome reports 4, which is below 8, so the small mode
 
 ## What this part does and why it exists
 
-The first time a reader presses the button, the model has to arrive on the laptop. The 1B model is about 695 MB of weights, and it also needs a graphics library and a tokenizer. The download and the load take most of the waiting. After that the model stays in the browser, so later summaries start in seconds.
+The first time a reader presses the button, the model has to arrive on the laptop. The 1B model is about 695 MB of weights, and it also needs a graphics library and a tokenizer. The download and the load take most of the waiting. After that the model stays in the browser, so later summaries start in seconds. The offscreen page asks WebLLM to download and load the model, and the service worker writes the progress into the job record that the popup reads. The only outside traffic is that first download. Chapter 5 walks through the first use step by step, and chapter 3 explains the model file and where it is kept.
 
-The work is split between two pages. The offscreen page (`src/offscreen/offscreen.js`) asks WebLLM to download and load the model, and it sends progress messages. The service worker writes those messages into the job record that the popup reads. WebLLM is the library copied into `src/lib/web-llm.js`. Nothing in the project makes a cloud call, so the only outside traffic is the first download.
+## The first-use phases
 
-## The first-use steps, one by one
+Table: First use on the NVIDIA chip, from the clean cold run
 
-The table lists the steps of a first summary. Its timings come from the clean cold run on the NVIDIA chip (`v2-local-nvidia-cold-first-attempt.md`). The segment times follow the timeline stamps used in the figure.
+| Phase | Starts (s) | Ends (s) | Seconds |
+|---|---|---|---|
+| Read and check | 0 | 0.5 | 0.5 |
+| Download | 0.5 | 158.8 | 158.3 |
+| Load into the card | 158.8 | 162.6 | 3.8 |
+| Warm-up | 162.6 | 193.1 | 30.5 |
+| Summary | 193.1 | 196.8 | 3.7 |
 
-Table: The first-use steps with the timings from the clean cold run
-
-| Step | What happens in the code | Seconds in the run |
-|---|---|---|
-| 1. Read and check | The page text is extracted, and `LOCAL_STATUS` asks the page about the card and whether the model is stored | 0 to 0.5 (0.5 s) |
-| 2. Download | WebLLM fetches the weights and the graphics library, and reports progress | 0.5 to 158.8 (158.3 s) |
-| 3. Load | The model is put into the graphics card | 158.8 to 162.6 (3.8 s) |
-| 4. Warm up | One token is written, so the graphics programs compile before the first real part | 162.6 to 193.1 (30.5 s) |
-| 5. Summarize | The one part is summarized and the result is shown | 193.1 to 196.8 (3.7 s) |
-
-The engine also reports its own load time: 192,580 ms from the start of the load to the end of the warm-up. That is the `Load (ms)` value in the run file. The load starts right after the card check, so the figure is the download, the load and the warm-up together.
-
-**What this means in plain words.** A first summary has five steps. The download is about 80 percent of the wait on this laptop, so most of the time goes to the network and the disk.
-
-Figure: the first-use run as one timeline.
+The full 32-row timeline, with the label the popup showed at each change, is in `docs/test-runs/v2-local-nvidia-cold-first-attempt.md`. The engine reports 192,580 ms from the start of the load to the end of the warm-up, which is the `Load (ms)` value in that file.
 
 ![Horizontal timeline of the first-use run: download, loading into the card, warm-up and summary, with seconds from the clean cold run](../figures/V09_cold_timeline.png)
 
-Reading the figure: the drawing is one horizontal timeline of 196.8 seconds. The first 0.5 seconds are the read and check. The download is the widest block, labelled 158.3 seconds from 0 to 100 percent. The load is labelled 3.8 seconds, the warm-up 30.5 seconds, and the summary 3.7 seconds. Four stamps are written under the bar: the button press, the download done at 158.8 seconds with loading running from 21 to 100 percent, the warm-up starting at 162.6 seconds, and the summary shown at 196.8 seconds. A footnote says that a "Loading 0%" line at 5.1 seconds, during the download, is not drawn.
+Reading the figure: the timeline is 196.8 seconds long, and the download is the widest block at 158.3 seconds from 0 to 100 percent. The load, the warm-up and the summary follow as 3.8, 30.5 and 3.7 seconds. A footnote says that a "Loading 0%" line at 5.1 seconds, during the download, is not drawn.
 
-## How download progress becomes the percentages the reader sees
+**What this means in plain words.** A first summary has five steps. The download is about 80 percent of the wait on this laptop, so most of the time goes to the network and the disk.
 
-WebLLM reports its progress through a callback. The code turns each report into a phase and a whole percentage before sending it on. Since the label fix, the offscreen page also checks whether the model is stored before the load starts, and it passes that answer to the mapping.
+## How download progress becomes the percentages
+
+WebLLM reports its progress through a callback. Since the label fix, the offscreen page first checks whether the model is stored, and it passes that answer to the mapping.
 
 `src/offscreen/offscreen.js`
 ```js
         const wasCached = await hasModelInCache(modelId, APP_CONFIG).catch(() => false);
-        const worker = new Worker(new URL('./engine-worker.js', import.meta.url), { type: 'module' });
-        engine = await CreateWebWorkerMLCEngine(worker, modelId, {
-          appConfig: APP_CONFIG,
+        ...
           initProgressCallback: (report) => emitProgress(mapInitProgress(report, { cached: wasCached })),
-        });
 ```
 
 `src/core/gpu-check.js`
 ```js
-export function mapInitProgress(report, { cached = false } = {}) {
-  const text = String(report?.text ?? '');
-  const fraction = Math.max(0, Math.min(1, Number(report?.progress) || 0));
-  // "Start to fetch params" and "Fetching param cache[...]" both mean the download is happening.
-  // But WebLLM also says "fetch" at the start of a load from the browser's own storage; when the
-  // model is already stored, nothing is downloaded, so it is always "loading".
   const phase = !cached && /fetch/i.test(text) ? 'downloading' : 'loading';
-  return { phase, percent: Math.round(fraction * 100), text };
-}
 ```
 
-The path has five steps. `mapInitProgress` clamps WebLLM's fraction to the range 0 to 1 and rounds it to a whole percentage. For a model that is not stored, the phase is "downloading" when the text contains "fetch", and "loading" otherwise. For a stored model the phase is always "loading". The offscreen page sends the result as a `MODEL_PROGRESS` message. The service worker writes the phase, the percentage and the text into the job record in `chrome.storage.session`. The popup re-renders on that change and shows a label such as "Downloading the model (first time only): 32%".
+The mapping clamps WebLLM's fraction to the range 0 to 1 and rounds it to a whole percentage. For a model that is not stored, the phase is "downloading" when the text contains "fetch", and "loading" otherwise. For a stored model the phase is always "loading". The offscreen page sends the result as a `MODEL_PROGRESS` message, and the service worker writes it into the job record. The popup turns that record into a label such as "Downloading the model (first time only): 32%". The run files do not say whether WebLLM's fraction counts bytes or files, so what the percentage measures is [to be measured].
 
-The timeline table below is the full cold run. That run had no stored model, so the mapping it shows is the same before and after the label fix. The script read the label every 0.4 seconds, so a label shown for less than that may be missing.
+**Before the label fix.** In the clean offline run, which read a model already stored, the popup showed "Downloading the model (first time only): 0%" at 3.9 seconds, for about 0.8 seconds. Any WebLLM text containing "fetch" counted as a download, and WebLLM uses that word when it reads a stored model too. The stored check before the load fixed it, and the unit test "mapInitProgress never says downloading when the model is already stored" covers it (DEVLOG, 2026-10-21, "V2 popup wording"; chapter 15 tells this).
 
-Table: Progress timeline of the clean cold run, in the order the popup showed it
+**Still true after the fix.** For a model that is not stored, the phase still depends on WebLLM's words. The cold run shows a "Loading ... 0%" line at 5.1 seconds, during the download, and the reason is [to be measured].
 
-| Seconds | Label shown in the popup | Percent |
-|---|---|---|
-| 0.1 | Reading the page... | |
-| 0.5 | Downloading the model (first time only) | 0 |
-| 5.1 | Loading the model into the graphics card | 0 |
-| 21.9 | Downloading the model (first time only) | 7 |
-| 48.6 | Downloading the model (first time only) | 11 |
-| 49.0 | Downloading the model (first time only) | 15 |
-| 49.5 | Downloading the model (first time only) | 18 |
-| 81.1 | Downloading the model (first time only) | 23 |
-| 82.4 | Downloading the model (first time only) | 32 |
-| 106.7 | Downloading the model (first time only) | 36 |
-| 107.5 | Downloading the model (first time only) | 45 |
-| 109.2 | Downloading the model (first time only) | 64 |
-| 124.6 | Downloading the model (first time only) | 67 |
-| 129.2 | Downloading the model (first time only) | 71 |
-| 131.7 | Downloading the model (first time only) | 76 |
-| 133.0 | Downloading the model (first time only) | 80 |
-| 139.2 | Downloading the model (first time only) | 85 |
-| 139.6 | Downloading the model (first time only) | 87 |
-| 150.4 | Downloading the model (first time only) | 91 |
-| 150.8 | Downloading the model (first time only) | 95 |
-| 158.0 | Downloading the model (first time only) | 100 |
-| 158.8 | Loading the model into the graphics card | 21 |
-| 159.2 | Loading the model into the graphics card | 30 |
-| 159.6 | Loading the model into the graphics card | 41 |
-| 160.1 | Loading the model into the graphics card | 50 |
-| 160.5 | Loading the model into the graphics card | 61 |
-| 160.9 | Loading the model into the graphics card | 70 |
-| 161.3 | Loading the model into the graphics card | 85 |
-| 161.7 | Loading the model into the graphics card | 96 |
-| 162.2 | Loading the model into the graphics card | 100 |
-| 162.6 | Warming up the model (first time can take about 30 seconds) | |
-| 193.1 | Summarizing... | |
-
-The percentage rises inside each phase, and the phase changes at 100 percent. The run files do not say whether WebLLM's fraction counts bytes or files, so what the percentage measures is [to be measured].
-
-**Before the label fix.** In the clean offline run, which read a model already stored in the browser, the popup showed "Downloading the model (first time only): 0%" at 3.9 seconds, between two "Loading" lines, for about 0.8 seconds. The cause was that any WebLLM text containing "fetch" counted as a download, and WebLLM also uses that word when it reads a stored model. The fix is the cached check above, with a unit test named "mapInitProgress never says downloading when the model is already stored". The developer log records the finding (DEVLOG, 2026-10-21, "V2 popup wording").
-
-**Still true after the fix.** For a model that is not stored, the phase still depends on WebLLM's words. The cold run shows a "Loading ... 0%" line at 5.1 seconds, during the download, and the label stays "loading" for that sample. The repository does not record WebLLM's full text for that report, so the reason is [to be measured].
-
-**What this means in plain words.** The percentages are WebLLM's own fraction, turned into whole numbers. The label is now chosen by checking the store first, so a stored model is never shown as a download. A model that is not stored still relies on WebLLM's wording.
+**What this means in plain words.** The percentages are WebLLM's fraction, turned into whole numbers. The label now checks the store first, so a stored model is never shown as a download. A model that is not stored still relies on WebLLM's wording.
 
 ## The size shown before the download
 
-The popup states the download size before the reader presses the button. The size comes from the model's own file list.
+The popup states the download size before the reader presses the button. The code reads the model's own file list from Hugging Face.
 
 `src/offscreen/offscreen.js`
 ```js
-async function estimateDownloadMB(modelId) {
-  const record = APP_CONFIG.model_list.find((m) => m.model_id === modelId);
-  if (!record) return null;
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(`${record.model}/resolve/main/ndarray-cache.json`, { signal: controller.signal });
-    clearTimeout(timer);
-    if (!res.ok) return null;
-    const json = await res.json();
     const bytes = (json.records ?? []).reduce((sum, r) => sum + (Number(r.nbytes) || 0), 0);
-    return bytes > 0 ? Math.round(bytes / 1e6) : null;
-  } catch {
-    return null;
-  }
-}
 ```
 
-The function fetches `ndarray-cache.json` from the model's page on Hugging Face and adds up the byte counts of its records, in decimal megabytes. The request stops after 8 seconds, and any failure returns null. The popup then writes "about several hundred MB".
+The function fetches `ndarray-cache.json` and adds up the byte counts of its records, in decimal megabytes. The request stops after 8 seconds, and any failure returns null, so the popup writes "about several hundred MB" instead. The file lists only the weights. The library and the tokenizer are not in the sum, and their sizes are not recorded in the repository. The real runs showed about 695 MB for the main model and about 204 MB for SmolLM2. The 879 MB in `config.js` is graphics memory, not a download size.
 
-The file lists only the weights. The library and the tokenizer are not in the sum, and their sizes are not recorded in the repository. The popup showed about 695 MB for the main model and about 204 MB for SmolLM2 in the real runs. The 879 in `config.js` is graphics memory, so the reader should not expect a 879 MB download.
+**What this means in plain words.** The size shown is the total of the weight files, read from the model's own list, without the small library and tokenizer files.
 
-**What this means in plain words.** The size shown is the total of the weight files, read from the model's own list. It leaves out the small library and tokenizer files.
+## Storage in IndexedDB, and the stored check
 
-## Storage in IndexedDB, and how the stored model is found
-
-The model is kept in IndexedDB, the browser's built-in database for web apps. WebLLM's default store, Cache Storage, failed inside the offscreen page, so the project switched stores.
+The model is kept in IndexedDB, because WebLLM's default store, Cache Storage, failed inside the offscreen page. The first try stopped with `UnknownError: Failed to execute 'open' on 'CacheStorage'`, while IndexedDB had about 10.7 GB of quota (DEVLOG, 2026-10-21, "V2 spike: model cache"). The setting is one line.
 
 `src/offscreen/offscreen.js`
 ```js
-// Cache Storage fails inside an offscreen page ("Unexpected internal error"), IndexedDB works,
-// so the model is stored in IndexedDB. (Found by a spike; see DEVLOG.md.)
 const APP_CONFIG = { ...prebuiltAppConfig, cacheBackend: 'indexeddb' };
 ```
 
-The developer log records the failure: the first try stopped with `UnknownError: Failed to execute 'open' on 'CacheStorage'`, while IndexedDB had about 10.7 GB of quota (DEVLOG, 2026-10-21). DECISIONS D2 adds that the extension asks for `unlimitedStorage`, so the browser does not delete the model when disk space runs low.
-
-The status call checks whether the model is stored.
-
-`src/offscreen/offscreen.js`
-```js
-    const cached = await hasModelInCache(modelId, APP_CONFIG).catch(() => false);
-```
-
-WebLLM's `hasModelInCache` looks at the weights only. In `src/lib/web-llm.js` it calls `hasTensorInCache` with the scope `"webllm/model"` on the same backend. The library is kept in a separate scope, `"webllm/wasm"`, through `fetchWithCache`.
-
-`src/lib/web-llm.js`
-```js
-            const wasmCache = libExports$2.createArtifactCache("webllm/wasm", getCacheOptions(this.appConfig));
-```
-
-`src/lib/web-llm.js`
-```js
-            return yield wasmCache.fetchWithCache(wasmUrl, "arraybuffer", (_a = this.reloadController) === null || _a === void 0 ? void 0 : _a.signal);
-```
-
-This explains the offline result: the weights and the library are both in IndexedDB, so a load with no network succeeds. If the check throws, the `catch` treats the model as not stored, and the popup offers the download again. The stored copy lives in the browser profile. The test runs keep that profile in a fixed folder (`.model-profile` in `scripts/local-run.mjs`).
+The stored check looks at the weights only, in the scope `webllm/model`. The graphics library is kept in a separate scope, `webllm/wasm`. Both are in IndexedDB, so a load with no network succeeds, which is what the offline runs show. If the check throws, the model counts as not stored and the popup offers the download again. The test runs keep the browser profile in a fixed folder (`.model-profile` in `scripts/local-run.mjs`). Chapter 9 explains the manifest permissions behind the download, including `unlimitedStorage`.
 
 Figure: what is stored, where, and for how long.
 
 ![What is stored where and for how long: model files in IndexedDB, the job record in session storage, settings in local storage, and the loaded model in graphics memory](../figures/V10_storage.png)
 
-Reading the figure: the drawing is a table with four stores. The model files are in IndexedDB, about 695 MB for Llama 3.2 1B and about 204 MB for SmolLM2. They are kept between runs, no code deletes them, and `unlimitedStorage` asks the browser not to delete them when disk space runs low. The job record is in `chrome.storage.session` under a key per tab, and it lasts until the browser closes or its tab closes. The settings are in `chrome.storage.local`, kept across restarts, and `modelOverride` becomes `fallback` after a failed load. The loaded model is in graphics memory inside the offscreen page, and it is freed when the page closes, which is five minutes after the last message or when the browser closes. The drawing's memory figures, 879 MB and 376 MB, are WebLLM's graphics memory needs, not download sizes. The footnote says that Version 2 stores no API key.
+Reading the figure: the drawing is a table of four stores. The model files stay in IndexedDB, about 695 MB for Llama 3.2 1B and about 204 MB for SmolLM2, and no code deletes them. The job record lasts until the browser or its tab closes, and the loaded model is freed five minutes after the last message. Version 2 stores no API key.
 
-**What this means in plain words.** The model is kept in the browser's own database, and the library sits beside it. The stored check reads only the weights, and a failed check reads as "not stored".
+**What this means in plain words.** The model lives in the browser's own database, and the library sits beside it. A stored check that fails is read as "not stored".
 
-## The warm-up after loading, and why it is there
+## The warm-up after loading
 
-After the load, the page writes one token before it reports success. The code comment gives the reason.
+After the load, the page writes one token before it reports success, so the slow first answer happens while the popup explains it.
 
 `src/offscreen/offscreen.js`
 ```js
-        // The first answer compiles the graphics-card programs (about half a minute on a slow
-        // card). Do it now, with a message, so the first real part does not look frozen.
         emitProgress({ phase: 'loading', percent: 100, text: 'Warming up the model (first time only)' });
         await engine.chat.completions.create({ messages: [{ role: 'user', content: 'Say ok.' }], max_tokens: 1, temperature: 0 });
 ```
 
-The first answer on a graphics card compiles the programs the model runs. Running a one-token answer during the load moves that wait to a point where the popup can explain it. The popup shows "Warming up the model (first time can take about 30 seconds)...", with an empty bar, because no measured progress exists during the compile.
+The first answer on a graphics card compiles the programs the model runs. The popup shows "Warming up the model (first time can take about 30 seconds)...", with an empty bar. The code comment and the message say "first time only", but the code runs the warm-up on every load into a fresh offscreen page. The timings are about 30.5 seconds on the cold NVIDIA run, about 39.4 seconds on the Intel run, about 0.5 seconds on the clean offline run and about 0.4 seconds on the after-fix offline run. The offline runs use the same profile as the cold run, and the reason for the short offline warm-up is [to be measured].
 
-The code comment and the message say "first time only", but the code runs the warm-up on every load into a fresh offscreen page. The timings differ by case: about 30.5 seconds on the cold NVIDIA run, about 39.4 seconds on the Intel run, about 0.5 seconds on the clean offline run, and about 0.4 seconds on the after-fix offline run. The offline runs use the same profile as the cold run (`scripts/local-run.mjs`). The repository does not say where the compiled programs are kept between sessions, so the reason for the short offline warm-up is [to be measured].
+**What this means in plain words.** The extension runs one tiny answer right after loading. The short warm-ups later are measured, and their cause is not.
 
-**What this means in plain words.** The extension runs one tiny answer right after loading, so the slow first answer happens while the popup is still explaining what it is doing. The short warm-ups later are measured, and their cause is not.
+## The second use and the two offline runs
 
-## Why the second use is fast, and the two offline runs
+After the first use, the model is in IndexedDB, so a later summary needs only the card check, a load from the stored copy and the warm-up. Two clean offline runs show this. The first was made before the label fix and has the wrong "Downloading" line. The second was made after the fix, with nothing else running. The table below puts them side by side, once.
 
-After the first use, the model is in IndexedDB. A later summary runs three short steps: the card check, a load from the stored copy, and the warm-up. Two clean offline runs show this. The first (`v2-local-nvidia-offline.md`) was made before the label fix and has the wrong "Downloading" line. The second (`v2-local-nvidia-offline-after-label-fix.md`) was made after the fix, with nothing else running, and has no such line. The two runs are otherwise the same case: the same laptop, outside websites blocked, and the same two fixture articles.
+Table: The two clean offline runs, before and after the label fix (same laptop, outside websites blocked)
 
-Table: First use and later use, measured in the test runs
+| Offline run (test-run file) | Popup label | Load in page (ms) | Warm-up | Short article: total | Summary step | Writing speed, short and long | Long article: total |
+|---|---|---|---|---|---|---|---|
+| Before the label fix (`v2-local-nvidia-offline.md`) | "Downloading ... 0%" at 3.9 s, about 0.8 s | 6,890 | 8.1 to 8.6 s | 15.3 s | about 6.7 s | 40 and 42 tokens a second | 16.5 s |
+| After the label fix (`v2-local-nvidia-offline-after-label-fix.md`) | None | 11,621 | 13.1 to 13.5 s | 17.7 s | about 4.2 s | 65 and 45 tokens a second | 16 s |
 
-| Run (test-run file) | Model stored at start | Download | Load in the page (ms) | Warm-up | Short article, total | Writing speed |
-|---|---|---|---|---|---|---|
-| NVIDIA, cold first attempt (clean) | No | 0.5 to 158.8 s (158.3 s) | 192,580 | About 30.5 s | 196.8 s | 47 tokens a second |
-| NVIDIA, offline, before the label fix (clean) | Yes | None | 6,890 | About 0.5 s | 15.3 s | 40 tokens a second |
-| NVIDIA, offline, after the label fix | Yes | None | 11,621 | About 0.4 s | 17.7 s | 65 tokens a second |
-| Intel, SmolLM2 360M (clean) | No | 0.9 to 81.2 s | 122,438 | About 39.4 s | 199.2 s | 4 to 5 tokens a second |
-| NVIDIA, first use (other programs running) | No | 1.8 to 138.7 s | 200,316 | About 56 s | 207 s | 38 tokens a second |
+The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length.
 
-The writing speeds are the decode speed of each run's last request. The clean NVIDIA runs record 34 to 53 tokens a second. The after-fix run records 65 tokens a second for the single request of the short article and 45 for the two-part article. The run file does not explain why that value is above the clean range. The first-use row marked "other programs running" is a disturbed run, so its times are slower than the clean runs. The files `v2-local-nvidia.md` and `v2-local-nvidia-cold-second-attempt-with-load.md` hold that same run.
-
-Table: The two clean offline runs, side by side
-
-| Offline run | Label on the popup | Load in the page | Warm-up | Summary step | Short article, total | Long article, total |
-|---|---|---|---|---|---|---|
-| Before the label fix (`v2-local-nvidia-offline.md`) | "Downloading the model (first time only): 0%" at 3.9 s, for about 0.8 s | 6,890 ms | 8.1 to 8.6 s | About 6.7 s | 15.3 s | 16.5 s |
-| After the label fix (`v2-local-nvidia-offline-after-label-fix.md`) | No "Downloading" line; loading from 0% at 1.9 s | 11,621 ms | 13.1 to 13.5 s | About 4.2 s | 17.7 s | 16 s |
-
-The after-fix run's load took longer (11.6 seconds against 6.9 seconds). Its own note says that differences of this size are normal on this laptop, and the cause is not measured here. The summary-step times are shown for reference only, because the length of each answer differs between the runs.
+The Intel first use (SmolLM2, clean run) took 199.2 seconds: a download from 0.9 to 81.2 seconds for about 204 MB, a warm-up of about 39.4 seconds, and writing at 4 to 5 tokens a second. The NVIDIA first use run while other programs were using the processor took 207 seconds, with a warm-up of about 56 seconds. That run is labelled as disturbed in the test-run folder.
 
 Figure: first use and later use as two sequences.
 
 ![First use and later use as two sequences: the first use checks the card, downloads, loads, warms up and summarizes; the later use checks the stored model, loads and summarizes](../figures/V03_first_run_vs_cached.png)
 
-Reading the figure: the top sequence is the first use. The popup presses the button, the service worker asks whether the model is stored, and the offscreen page downloads and saves it in 158.3 seconds. The load takes 3.8 seconds and the warm-up about 30 seconds, and the summary takes 3.7 seconds, for a total of 196.8 seconds. The lower sequence is the later use with outside sites blocked. The model files are read from IndexedDB, the load and warm-up take 6.9 seconds, and the summary takes 6.7 seconds, for a total of 15.3 seconds. A footnote says the warm-up was 30.5 seconds on first use and 0.5 seconds in the later run, and that the reason is not measured.
+Reading the figure: the top sequence is the first use, with the download taking 158.3 seconds and the whole short article 196.8 seconds. The lower sequence is the later use, with outside sites blocked: the model files are read from IndexedDB, the load and warm-up take 6.9 seconds, and the whole short article takes 15.3 seconds. A footnote gives the two warm-ups, 30.5 seconds and 0.5 seconds.
 
-**What this means in plain words.** Once the model is stored, the same article takes about 15 to 18 seconds, not about 200 seconds. The stored copy is what makes the second use fast, and the two clean offline runs agree on that.
+**What this means in plain words.** Once the model is stored, the same article takes about 15 to 18 seconds, not about 200 seconds. Chapter 3 explains the second use in more depth.
 
-## The offline proof: what was blocked and what was not
+## The offline proof
 
-The offline runs are meant to show that a stored model works without a network. The measurement script starts Chrome with a host resolver rule, `MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`. The rule maps every host name to "not found", except the address 127.0.0.1, where the fixture pages are served (`tests/helpers/fixtures-server.mjs`). Both offline runs used this rule.
+The offline runs use a host resolver rule, `MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`. It maps every host name to "not found", except the address where the fixture pages are served.
 
 Table: What the offline runs blocked, and what they did not
 
 | Item | Blocked? | Why, and what the run shows |
 |---|---|---|
-| Outside host names (Hugging Face, GitHub raw files, any other name) | Yes | Each name maps to "not found", so a download cannot start |
-| Fixture pages at 127.0.0.1 | No | The rule excludes 127.0.0.1, where the short and long fixtures are served |
-| The extension's own pages | No | The browser loads them from the extension folder. The developer log says Playwright's offline switch blocked them, which is why a host rule was used |
-| Weights, library and tokenizer | Not needed | Read from IndexedDB; the load took 6.9 s before the label fix and 11.6 s after it |
-| Requests made by IP address | Not covered | The rule matches host names, and the code requests host names only |
-| Whether any blocked request was tried | Not recorded | The script records outcomes and a timeline, not requests. No probe checks that a blocked name fails |
-| The Wikipedia page | Not run | The offline plan lists only the short and long fixtures |
+| Outside host names | Yes | Each name maps to "not found", so a download cannot start |
+| Fixture pages at 127.0.0.1 | No | The rule excludes that address |
+| The extension's own pages | No | The browser loads them from the extension folder. Playwright's offline switch had blocked them, which is why a host rule was used |
+| Weights, library and tokenizer | Not needed | Read from IndexedDB |
+| IP addresses, and whether any blocked request was tried | Not covered, not recorded | The rule matches host names. The script records outcomes, not requests, and no probe checks a blocked name |
 
-The runs prove one thing: a summary completes when the model and the library are in the browser's storage and the outside names do not resolve. Both offline runs show that. They do not prove that no request was attempted, because requests are not logged. They do not prove that the page text never leaves the computer, because no traffic was captured.
+The offline runs prove one thing: a summary completes when the model is stored and the outside names do not resolve. They do not prove that no request was attempted, and no traffic was captured, so they do not prove that the page text never leaves the computer. The Wikipedia page was not run offline. The first offline attempt failed because the test script copied the extension to a new folder on each launch, so Chrome gave it a new extension ID and it could not see the earlier storage. The fix was a fixed folder (DEVLOG, 2026-10-21, "V2 offline check"). The test setup also adds a wider host permission for its copy of the extension, and no run used the shipped manifest alone.
 
-The result also depends on the test setup. The helper `tests/helpers/extension.mjs` rewrites the manifest of the staged copy, adding `http://127.0.0.1/*`. The measurement script adds `https://*/*` for that copy (`extraHostPermissions`). The shipped manifest lists four hosts, and no run in the repository used it alone.
-
-The first offline attempt failed for a reason the developer log records (DEVLOG, 2026-10-21, "V2 offline check"). Playwright's offline switch stopped the extension's own page from loading. A second run then said "Not downloaded yet", although the model was stored. The test script had copied the extension to a new temporary folder on each launch, so Chrome gave it a new extension ID and it could not see the earlier storage. The fix had two parts: the host rule, and a fixed extension folder. The script names that folder in a comment: "fixed folder: same extension id on every run" (`scripts/local-run.mjs`, line 43).
-
-**What this means in plain words.** The offline runs show that the stored model works with the outside names switched off, both before and after the label fix. They do not show that nothing tried to reach the internet, and Wikipedia was not run offline.
+**What this means in plain words.** The offline runs show that the stored model works with the outside names switched off, before and after the label fix. They do not show that nothing tried to reach the internet.
 
 ## Design decisions
-
-The decisions below come from the code and the decision record. Where the repository does not record an alternative, the options column says so.
 
 Table: Design decisions for storing and loading the model
 
 | Decision | Options considered | Choice | Why | Trade-off accepted |
 |---|---|---|---|---|
-| Where the model is kept | Cache Storage (WebLLM default); IndexedDB | IndexedDB | Cache Storage failed inside the offscreen page (DEVLOG spike) | Needs the `unlimitedStorage` permission so the model is kept |
-| Where the warm-up runs | Inside the load; on the first answer | Inside the load, with a message | The first answer would otherwise look frozen (code comment) | The load time includes the warm-up; the cold NVIDIA load took about 192 s |
-| Size before download | A fixed size; the model's own file list | The file list (`ndarray-cache.json`) | The size follows the model's own record | Needs Hugging Face to answer within 8 s; falls back to "several hundred MB" |
-| Stored check | Load and see; ask the store | `hasModelInCache` on the weights, before the load | Fast, avoids a download attempt, and lets the label say "loading" for a stored model | A failed check reads as "not stored" |
+| Where the model is kept | Cache Storage (WebLLM default); IndexedDB | IndexedDB | Cache Storage failed in the offscreen page | The `unlimitedStorage` permission is needed |
+| Where the warm-up runs | Inside the load; on the first answer | Inside the load, with a message | The first answer would otherwise look frozen (code comment) | The load time includes the warm-up |
+| Size before the download | A fixed size; the model's own file list | The file list | The size follows the model's own record | Needs Hugging Face to answer within 8 s |
+| Stored check | Load and see; ask the store | `hasModelInCache` before the load | Avoids a download attempt, and lets the label say "loading" | A failed check reads as "not stored" |
 
-**What this means in plain words.** The main choices are IndexedDB for storage and a warm-up inside the load. Both make the reader wait less, and the cost is a larger permission and a longer load.
+**What this means in plain words.** IndexedDB and the warm-up inside the load both make the reader wait less. The cost is a larger permission and a longer load.
 
-## Screenshots of the first use and the offline runs
-
-The first five screenshots are real model screenshots. The first two come from the cold NVIDIA run, and the last three from the two offline runs.
+## Screenshots
 
 ![Real model: the popup while the model downloads on the NVIDIA chip, at 32 percent](../screenshots/v2-nvidia-short-downloading.png)
 
-Reading the screenshot: the progress line reads "Downloading the model (first time only): 32%", and the bar is filled about one third of its width. The model line reads "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only)." The button is greyed out, because a job is running.
+Reading the screenshot: the progress line reads "Downloading the model (first time only): 32%", with the bar about one third full. The model line reads "Not downloaded yet (about 695 MB, first use only)", and the button is greyed out while the job runs.
 
 ![Real model: the popup in the warm-up step on the NVIDIA chip, with an empty bar](../screenshots/v2-nvidia-short-warming.png)
 
-Reading the screenshot: the progress line reads "Warming up the model (first time can take about 30 seconds)...", and the bar is empty. The model line still reads "Not downloaded yet". That line is refreshed when a job ends, so it is out of date during the job. The button is greyed out.
+Reading the screenshot: the line reads "Warming up the model (first time can take about 30 seconds)...", and the bar is empty because no measured progress exists during the compile. The model line still says "Not downloaded yet", because that line is refreshed when a job ends.
 
 ![Real model, before the label fix: the popup after a short article with the outside names blocked, showing the stored model](../screenshots/v2-nvidia-offline-short-popup.png)
 
-Reading the screenshot: the picture comes from the clean offline run, before the label fix. The model line reads "Model: Llama 3.2 1B. Downloaded, runs on this computer.", and the button reads "Summarize this page". The summary appears as numbered points. The line under it reads "1 part · 1 request · 14.8 s · Llama 3.2 1B", which matches the 14,844 ms in that run's file.
+Reading the screenshot: the model line reads "Downloaded, runs on this computer", and the summary appears as numbered points. The stats line reads "1 part · 1 request · 14.8 s · Llama 3.2 1B", which matches the clean offline run. This picture was taken before the label fix.
 
-![Real model, after the label fix: the popup after a short article with the outside names blocked, showing the stored model and the result in 17.5 seconds](../screenshots/v2-nvidia-offline-short-popup-after-label-fix.png)
+![Real model, after the label fix: the popup after a short article with the outside names blocked, showing the result in 17.5 seconds](../screenshots/v2-nvidia-offline-short-popup-after-label-fix.png)
 
-Reading the screenshot: the model line reads "Model: Llama 3.2 1B. Downloaded, runs on this computer.", and the button reads "Summarize this page". The summary appears as numbered points, and the line under it reads "1 part · 1 request · 17.5 s · Llama 3.2 1B". No "Downloading" line appears at any point in that run.
+Reading the screenshot: the model line reads "Downloaded, runs on this computer", and the stats line reads "1 part · 1 request · 17.5 s · Llama 3.2 1B". No "Downloading" line appears at any point in that run.
 
-![Real model, after the label fix: the popup in the warm-up step for a stored model, with the model line already saying downloaded](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
+## Failure cases
 
-Reading the screenshot: the progress line reads "Warming up the model (first time can take about 30 seconds)...", with an empty bar. The model line already reads "Model: Llama 3.2 1B. Downloaded, runs on this computer." because the popup read the stored state when it opened. The button is greyed out.
+Most failures in this part end with a message and leave the stored model alone. Four are worth naming here, and chapter 12 explains the rest, including downloads and computers that cannot run the model.
 
-The next five screenshots are pretend model screenshots. They come from the mock engine, which uses fixed download sizes and steps.
-
-![Pretend model: the first state, model not stored, before the reader presses the button](../screenshots/ui-01-not-downloaded.png)
-
-Reading the screenshot: the button reads "Download model and summarize", and the model line reads "Model: Llama 3.2 1B. Not downloaded yet (about 664 MB, first use only)." The 664 MB is the pretend model's fixed figure (`mock-engine.js`). The real popup showed about 695 MB.
-
-![Pretend model: the downloading state at 25 percent](../screenshots/ui-02-downloading.png)
-
-Reading the screenshot: the progress line reads "Downloading the model (first time only): 25%", and the bar is filled a quarter of its width. The button is greyed out.
-
-![Pretend model: the loading state at 45 percent. The job record was written by hand, because the pretend model never sends this message](../screenshots/ui-03-loading.png)
-
-Reading the screenshot: the progress line reads "Loading the model into the graphics card: 45%", and the bar is filled a little under half. The model line still says "Not downloaded yet". The picture was made by writing this job record by hand into session storage, because the pretend model never sends the loading message at this point.
-
-![Pretend model: the warm-up state with the indeterminate bar](../screenshots/ui-04-warming.png)
-
-Reading the screenshot: the line reads "Warming up the model (first time can take about 30 seconds)...", on two lines in the narrow popup. The bar is empty, and the button is greyed out.
-
-![Pretend model: the state after the model is stored, on a different page titled Fleet Dashboard](../screenshots/ui-08-ready-to-use.png)
-
-Reading the screenshot: the page title is "Fleet Dashboard", a different page from the lighthouse article. The model line reads "Model: Llama 3.2 1B. Downloaded, runs on this computer.", and the button reads "Summarize this page". No summary is shown yet.
-
-## Failure cases and how each is handled
-
-Table: Failures during the first use and later use
-
-| Failure | Code or result | What the reader sees | Handling in the code |
-|---|---|---|---|
-| Download stops | `MODEL_DOWNLOAD_FAILED` | "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept." | Not retried with the small model, and nothing is saved (browser test V12). The claim that the partial download is kept is not tested with a real network break |
-| Model will not start, and not for memory | `MODEL_LOAD_FAILED` | "The model could not be started. Press the button to try again." | Retried once with the small model, and the choice is saved (see the card check chapter) |
-| Stored check throws | Counted as not stored | "Not downloaded yet" | Falls back to the download path, so a stored model may be offered again |
-| Size estimate fails or takes more than 8 s | Null | "about several hundred MB" | The download continues normally |
-| The tab moves to another page | New job replaces the old one | The old job's writes are dropped | `startJob` in `service-worker.js` aborts the old job |
-| The tab closes during the download | Job aborted, record removed | No record is left (browser test V22) | `closedTabs` and the queued writes in `service-worker.js` |
-| The popup closes during the download | Job keeps running | A reopened popup shows the same progress (browser test V15) | The job record lives in session storage |
-| The service worker stops | `INTERRUPTED` after restart | "The summary was interrupted. Press Summarize to try again." (browser test V20) | `sweepOrphans` marks the old running jobs |
-| The load or warm-up is silent for more than 5 minutes | Shown as interrupted | "The summary was interrupted", while the page may still work | The load has no timeout. The stale limit is now 5 minutes in the service worker and the popup |
-
-The stale limit was 3 minutes before the fix. That was the same length as the 180-second answer timeout, so a slow answer could look interrupted while still running. The limit is now 5 minutes, which is longer than the answer timeout, so the timeout fires first (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2). The load still has no timeout of its own. The warm-up writes only one progress message, so a warm-up silent for more than 5 minutes is still shown as interrupted. No run in the repository reached that length.
+- A stored check that throws counts as "not stored", so a stored model may be offered again.
+- A size estimate that fails, or takes more than 8 seconds, shows "about several hundred MB".
+- A download that stops gives `MODEL_DOWNLOAD_FAILED`. It is not retried with the small model, and nothing is saved (browser test V12). The message says that what was already downloaded is kept. No real network break has tested that claim.
+- A load or warm-up that is silent for more than 5 minutes is shown as interrupted, even if it is still working. The load has no timeout of its own. The stale limit was 3 minutes before the fix, which was the same length as the 180-second answer timeout. It is now 5 minutes (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2).
 
 **What this means in plain words.** Most failures show a clear message and leave the stored model alone. The one remaining gap is a very long silent wait, which the popup reports as an interruption.
 
 ## What went wrong while building it
 
-The developer log records these problems on the first-use path (DEVLOG, 2026-10-21).
-
-- WebLLM's default store did not work inside the offscreen page. The fix was IndexedDB. The spike then loaded the model from the cache in about 8 to 13 seconds, and the clean run measured 6.9 seconds.
-- The first offline check showed "Not downloaded yet" for a stored model. The extension ID had changed because the test copy was made in a new folder on each launch. The fix was a fixed folder.
-- The popup said "Downloading" for a stored model for about 0.8 seconds in the clean offline run. The cause was a word in WebLLM's message. The fix checks the store before the load ("V2 popup wording (found while writing the report)").
-- The first answer on either chip took about 30 seconds to compile graphics programs. The warm-up was added to the load for that reason.
-
-**What this means in plain words.** Two of the problems came from the browser, and one came from trusting a library's wording. Each was found by a run of the real path, and each fix is in the code.
+Chapter 15 tells the stories behind this part: the model cache that refused to open, the offline check that failed because the folder moved, and the "Downloading" line for a stored model. The spike loaded the model from the cache in about 8 to 13 seconds, and the clean run measured 6.9 seconds.
 
 ## How it was tested
 
-The unit tests in `tests/unit/gpu-and-errors.test.js` cover the label rule, including "mapInitProgress never says downloading when the model is already stored". The unit tests in `tests/unit/local-engine.test.js` cover the engine, including "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 70 tests in total.
-
-The browser tests in `tests/e2e/pipeline.test.js` use the pretend model for the first-use path. Scenario V01 runs the whole first use: the model line, a download with percentages that never go down, a warm-up, a summary, and then the model shown as downloaded. V02 checks the order of the job phases, V12 covers a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The browser suite has 26 tests in total.
-
-The real-model runs are the clean cold NVIDIA run, the two clean offline runs (before and after the label fix) and the clean Intel run. The busy runs are labelled in the table above.
-
-**What this means in plain words.** The pretend model tests the logic of the first use many times. The real model ran in clean conditions for each case listed here, and the two offline runs show the effect of the label fix.
+The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 70 tests, and the browser suite has 26. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
 
 ## Limitations
 
-- The timeline is a sample taken every 0.4 seconds, so a short label can be missing.
-- The meaning of WebLLM's download percentage is not recorded. For a model that is not stored, the label still depends on WebLLM's wording (the 5.1-second "Loading" line in the cold run).
-- The size shown before the download leaves out the library and the tokenizer.
+- The timeline is sampled every 0.4 seconds, so a short label can be missing.
+- The meaning of WebLLM's percentage is not recorded, and for a model that is not stored the label still depends on WebLLM's wording.
+- The size shown leaves out the library and the tokenizer.
 - The claim that a partial download is kept has not been tested with a real network break.
 - The first-use runs used the test setup's copy, which has a wider host permission than the shipped extension.
 - The offline runs do not log requests, and they cover only the short and long fixtures.
-- The after-fix offline run's load took 11.6 seconds against 6.9 seconds, and the cause is not measured.
-- The warm-up label still says "first time only" in the code while it runs on every load.
+- The after-fix offline load took 11.6 seconds against 6.9 seconds, and the cause is not measured.
+- The warm-up label still says "first time only" in the code, while the code runs the warm-up on every load.
 - The client's laptop has not been tested, so every time here is from the developer laptop.
 
 ## Questions this chapter answers
@@ -2015,9 +1731,6 @@ Yes, in both offline runs, with the outside host names switched off and the mode
 
 **Did the popup ever say "Downloading" for a stored model?**
 Yes, before the label fix. The clean offline run showed that line for about 0.8 seconds. The fix checks the store before the load and reports "loading" for a stored model, and the after-fix run shows no such line. A model that is not stored still relies on WebLLM's wording.
-
-**Where is the model kept, and why not in Cache Storage?**
-The weights and the library are kept in IndexedDB. Cache Storage failed inside the offscreen page in the first spike, while IndexedDB worked, with about 10.7 GB of quota in the test. The extension asks for `unlimitedStorage` so the browser does not delete the model.
 
 
 <div style="page-break-after: always"></div>
@@ -3500,315 +3213,217 @@ The script prints `SETUP FAILED.`, the reason, and the fix in plain words, and i
 
 # Testing and results
 
-This chapter reports how Version 2 was tested and what the measurements show. There are three kinds of evidence. Automated tests check the logic and the browser behaviour, with a pretend model that can be made to fail on purpose. A set of Windows checks runs the batch files. Real-model runs measure what the actual model does on the developer's laptop. Each kind answers different questions, so the results are kept apart.
+This chapter reports how Version 2 was tested and what the measurements show. Three kinds of evidence are used. Automated tests run the whole chain with a pretend model that can be made to fail on purpose. Windows checks run the batch files. Real-model runs measure the actual model on the developer's laptop.
 
-Every saved result is labelled. A run marked **clean** was done with nothing else busy on the laptop, according to its record. A run marked **under load** was done while other programs were using the processor, according to the note in its record file. Under-load runs are kept because they were measured, but they are never presented as clean numbers. Two clean offline runs are shown side by side, one made before a popup fix and one made after it, because the fix changed what the reader sees.
+Each real-model run appears once, in the table for its case. A run marked **clean** was done with nothing else busy on the laptop, according to its record. A run marked **under load** was done while other programs were using the processor, according to its note. Under-load runs are kept as records, but their numbers are never presented as clean.
 
-## The four test layers
+## The test layers
 
-Table: The test layers, what each one covers and how to run it
+Table: The four test layers
 
-| Layer | Files | Count | Where it runs | Model used | Command |
-|---|---|---|---|---|---|
-| Unit tests | `tests/unit/*.test.js` (six files) | 70 | Node.js only, no browser, no network | None; fakes and pure functions | `npm test` |
-| Browser tests | `tests/e2e/smoke.test.js`, `tests/e2e/pipeline.test.js` | 26 (the smoke test plus V01 to V24, with V18b) | Hidden Playwright Chromium with the extension loaded | Pretend model (`?mock=<mode>`) | `npm run test:e2e` |
-| Windows script checks | `tests/bat/test-bat-scripts.ps1` | 15 (B1 to B10c) | Runs `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key | None | `powershell -File tests\bat\test-bat-scripts.ps1` |
-| Real-model runs | `scripts/local-run.mjs` | Three modes, saved as record files in `docs/test-runs` | Hidden Chromium, real model | Llama 3.2 1B or SmolLM2 360M | `node scripts/local-run.mjs nvidia` (and the other modes) |
+| Layer | Files | Count | What it shows |
+|---|---|---|---|
+| Unit tests | `tests/unit` (six files) | 70 | Each piece of logic, with fakes. No browser, no network |
+| Browser tests | `tests/e2e` (smoke test, V01 to V24 and V18b) | 26 | The whole chain in hidden Chromium, with the pretend model |
+| Windows script checks | `tests/bat` | 15 (B1 to B10c) | `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key |
+| Real-model runs | `scripts/local-run.mjs` | Three modes | The real model's speed and output on the developer's laptop |
 
-The secret scan (`scripts/secret-scan.mjs`) is a check before pushing to the repository, not a test of the product. Chapter 16 explains its limit.
-
-The layers answer different questions. The unit tests check the logic of each piece on its own. The browser tests check the whole chain from the button to the summary, with the extension loaded. The Windows checks check the batch files and the graphics script. Only the real-model runs show how fast the real model is and how it behaves on this laptop.
+The layers answer different questions. Only the real-model runs show how fast the real model is and how its answers read. The commands are `npm test`, `npm run test:e2e`, the Windows check script, and `node scripts/local-run.mjs` with a mode name.
 
 ### What this means in plain words
 
 Each layer tests something the others cannot. Only the real-model runs can say how long a real summary takes.
 
-## Unit tests, file by file
+## Unit tests
 
-Table: The six unit test files, the number of tests in each, and what they cover
+Table: The six unit test files
 
-| File | Tests | What they cover |
+| File | Tests | What it covers |
 |---|---|---|
-| `tests/unit/chunker.test.js` | 10 | Cutting text into parts: empty text, short text, packing paragraphs, splitting at sentence ends and at spaces, cutting a word longer than the limit, keeping the order, rejecting bad limits, and cleaning line endings. Identical to the Version 1 file. |
-| `tests/unit/merger.test.js` | 8 | Grouping parts within the size limit, merging one part or many, merging in levels when there are too many, no model call for a single part, and failures and cancellation passing up. Identical to the Version 1 file. |
-| `tests/unit/pipeline.test.js` | 7 | A short page in one call, a long page in parts merged in order, too little text stopping before any model call, extraction and engine failures, cancellation between parts, and the timing clock. Identical to the Version 1 file. |
-| `tests/unit/local-engine.test.js` | 20 | The engine's contract with a fake offscreen page: the part and merge prompts, copied markers removed from answers, empty answers, error codes passed through, the checking, downloading and loading phases, no WebGPU, integrated graphics choosing the small model, a retry with the small model after running out of graphics memory, no retry after a download failure, one offscreen page reused, answers made one at a time, the idle close, and the idle countdown not starting while a load is still running. |
-| `tests/unit/gpu-and-errors.test.js` | 11 | No WebGPU API, no adapter, no shader-f16 support, a good adapter; the model choice on a normal and on a small computer; download and loading progress, including no "downloading" label for a stored model; engine error classification; the word "room" not counting as out of memory; and a network word during generation not counting as a download failure. |
-| `tests/unit/small.test.js` | 14 | Summary formatting that never produces HTML, default settings and stored values, rejected silly values, the two model names, a plain message for every error code, technical detail kept apart from the user message, the prompt layout, removal of copied page markers, restricted addresses, and the same-page check. |
+| `chunker.test.js` | 10 | Cutting text into parts. Identical to Version 1 |
+| `merger.test.js` | 8 | Joining part summaries, in levels when there are many. Identical to Version 1 |
+| `pipeline.test.js` | 7 | The job flow for short and long pages, and early refusals. Identical to Version 1 |
+| `local-engine.test.js` | 20 | The engine's calls to the fake offscreen page, retries, the idle close and countdown, and removal of copied markers |
+| `gpu-and-errors.test.js` | 11 | Graphics checks, model choice, progress labels, error codes, and the word "room" |
+| `small.test.js` | 14 | Formatting, settings, plain error messages, prompts and URL checks |
 
-The total is 70. Two of the six files are new in Version 2 (`gpu-and-errors` and `local-engine`), and one (`small`) was changed for it. The other three (`chunker`, `merger` and `pipeline`) are identical to the Version 1 files. The `local-engine` file is the largest because the engine has the most branches.
+Two files are new in Version 2, one was changed, and three are identical to Version 1.
 
 ### What this means in plain words
 
-The 70 small tests check each piece of logic with fake parts. They need no browser and no internet, so they can be repeated at any time.
+The 70 tests check each piece of logic with fake parts. They need no browser and no internet.
 
 ## Browser tests and the pretend model
 
-The browser tests load the real extension into a hidden Chromium, serve the fixture pages from a small local server, press the real Summarize button and read what the popup shows. A test cannot click the toolbar icon, so the popup is opened as a small popup window. The test copy of the extension gets one extra host permission for the local server. The product manifest is not changed. The real toolbar grant is covered only by the manual smoke test, which is not yet recorded (chapter 16).
+The browser tests load the extension in hidden Chromium, serve fixture pages, press the real Summarize button and read the popup. Most of them use a pretend model, which is chosen by a `mock` mode. The decision record gives the reason (`docs/DECISIONS.md`, D5). The pretend model is fast and free, it needs no graphics card, and it can be made to fail in each way a test needs. A real model cannot be made to fail on demand. The pretend model therefore proves the extension's own logic, and it says nothing about how good a real summary is. The error cases the tests force are described in chapter 12.
 
-The browser tests choose their model through a test seam. The offscreen page reads the `mock` value from its address. The code that builds that address is short:
+A worked example shows the level of detail. Scenario V01 checks that the download percentages never go down:
 
-`src/background/offscreen-manager.js` (the test seam)
-
-```
-    if (typeof engineMode === 'string' && engineMode.startsWith('mock')) {
-      const mode = engineMode.split(':')[1] ?? 'ok';
-      const { mockDelayMs } = await api.storage.local.get('mockDelayMs');
-      return `${path}?mock=${encodeURIComponent(mode)}&delay=${Number(mockDelayMs) || 0}`;
-    }
-```
-
-Most browser tests use this pretend model. The project's decision record (`docs/DECISIONS.md`, D5) gives the reason. The pretend model is fast and free, and it needs no graphics card. It can also be made to fail in exactly the way a test needs: no WebGPU, out of memory, a failed download, an empty answer or hostile output. A real model cannot be made to fail on demand. The pretend model therefore proves the extension's own logic, and the real-model runs prove that the real model works. The browser tests say nothing about how good a real summary is.
-
-A worked example shows the level of detail. Scenario V01 checks that download percentages never go down while the model downloads:
-
-`tests/e2e/pipeline.test.js` (the V01 check, lines 180 to 185)
+`tests/e2e/pipeline.test.js` (the V01 check)
 
 ```
-  const percents = downloadPercents(lines);
-  assert.ok(percents.length >= 2, `expected several download percentages, the popup showed: ${JSON.stringify(lines)}`);
   for (let i = 1; i < percents.length; i += 1) {
     assert.ok(percents[i] >= percents[i - 1], `download percentage went down: ${percents.join(' -> ')}`);
   }
 ```
 
-The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026, and all 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. Later fixes added checks, and the current suite still has the same 26 scenarios, all passing. The table reproduces the scenarios in plain words. The IDs are the same as in the test file.
+The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026. All 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. The current suite has the same 26 scenarios, and all of them pass.
 
-Table: The 26 browser scenarios, what each one checks, and the result
+Table: The 26 browser scenarios, what each checks, and the result
 
-| ID | What the scenario checks | Result |
+| ID | What is checked | Result |
 |---|---|---|
-| smoke | A first run shows the model line, a download bar and a summary. A second run skips the download. | Pass |
-| V01 | A first run shows download percentages that only rise, a warm-up, and a summary. Afterwards the popup shows the model as downloaded. | Pass |
-| V02 | The job passes through its phases in order: extracting, checking, downloading, loading, summarizing. | Pass |
-| V03 | A long article is cut into four parts, summarized in order, and merged. The stats say four parts. | Pass |
-| V04 | A near-empty page is refused for too little text, and the model is not downloaded. | Pass |
-| V05 | A restricted Chrome page is refused before any model work starts. | Pass |
-| V06 | A page that needs more parts than the limit is refused as too long, with no download. | Pass |
-| V07 | A computer without WebGPU shows that in the model line. The button is disabled and a script press starts no job. | Pass |
-| V08 | A computer without 16-bit shader support gets the same treatment. | Pass |
-| V09 | Integrated graphics shows a note that names Intel, the small model is used, and a summary works. | Pass (run 1 found a fault here, fixed; see chapter 15) |
-| V10 | When the main model runs out of memory, the small model writes the summary, the choice is saved, the next popup shows it, and the finished summary carries a notice that the smaller model wrote it. | Pass |
-| V11 | When every model runs out of memory, the error says so, the choice is saved, and Summarize is enabled again. | Pass |
-| V12 | A failed download shows an error and saves nothing. A later press succeeds once the download works. | Pass |
-| V13 | An empty answer from the model is reported as no summary. | Pass |
-| V14 | Markup in the model's answer is shown as plain text and is never rendered. | Pass |
-| V15 | A popup closed during a job shows the same job when it is reopened, then the summary. | Pass |
-| V16 | A finished job is still shown when the popup reopens, and no new job starts. | Pass |
-| V17 | After the tab moves to another page, the old summary is hidden and Summarize is enabled. | Pass |
-| V18 | Text that arrives late, after 1.5 seconds, is still summarized. | Pass |
-| V18b | Text still missing when Summarize is pressed is refused for too little text. | Pass |
-| V19 | An article with a table is summarized without failure. | Pass |
-| V20 | A service worker stopped during a job leaves the job marked interrupted, and the popup says so. | Pass |
-| V21 | Pressing Summarize on a new page while an old job runs gets a reply within four seconds. | Pass |
-| V22 | A tab closed during a job leaves no job record behind. | Pass (run 1 found a fault here, fixed; see chapter 15) |
-| V23 | The offscreen page closes after the idle time, and the next summary still works. | Pass |
-| V24 | A normal summary opens only the popup window. No tab and no options page open. | Pass |
+| smoke | First run shows the model line, a download and a summary; a second run skips the download | Pass |
+| V01 | Download percentages never fall; a warm-up follows; the model then shows as downloaded | Pass |
+| V02 | The job phases come in order | Pass |
+| V03 | A long article is cut into four parts and merged | Pass |
+| V04 | A near-empty page is refused, and no model is downloaded | Pass |
+| V05 | A restricted Chrome page is refused before any model call | Pass |
+| V06 | A page over the part limit is refused, with no download | Pass |
+| V07 | No WebGPU: the model line says so, the button is disabled, no job starts | Pass |
+| V08 | No 16-bit shader support: the same treatment | Pass |
+| V09 | Integrated graphics: the note names Intel and the small model works | Pass (fault found in run 1, fixed) |
+| V10 | Main model out of memory: the small model writes the summary, the choice is saved, and a notice says so | Pass |
+| V11 | Every model out of memory: the error shows and Summarize is enabled again | Pass |
+| V12 | Failed download: an error, nothing saved, and a later press succeeds | Pass |
+| V13 | An empty answer is reported as no summary | Pass |
+| V14 | Markup in an answer is shown as plain text | Pass |
+| V15 | A popup closed mid-job shows the same job when reopened | Pass |
+| V16 | A finished job is shown again, and no new job starts | Pass |
+| V17 | After the page changes, the old summary is hidden | Pass |
+| V18 | Text that arrives after 1.5 seconds is still summarized | Pass |
+| V18b | Text still missing at the press is refused | Pass |
+| V19 | An article with a table is summarized | Pass |
+| V20 | A worker stopped mid-job leaves the job marked interrupted | Pass |
+| V21 | A press on a new page during an old job gets a reply within four seconds | Pass |
+| V22 | A tab closed mid-job leaves no record behind | Pass (fault found in run 1, fixed) |
+| V23 | The offscreen page closes after the idle time, and the next summary works | Pass |
+| V24 | A normal summary opens only the popup window | Pass |
 
-Run 1 found a fault in the graphics note (V09) and a fault in the closed-tab cleanup (V22), and fixed both. Chapter 15 tells those stories, along with the later faults found by the screenshot run and the code reading.
+Run 1 also found three faults in the test setup itself. Chapter 15 tells those stories with the two extension faults.
 
 ### What this means in plain words
 
-The browser tests press the real buttons, but on a fake model. They prove that the popup, the background worker and the offscreen page work together and handle failures. They say nothing about the quality of a real summary.
+The browser tests press the real buttons, but on a fake model. They show that the parts work together. They say nothing about the quality of a real summary.
 
-## The real-model runs: how they were measured
+## Real-model runs
 
-The real-model script `scripts/local-run.mjs` measures the real model in hidden Chromium with the extension loaded. It has three modes, and each one keeps its own browser profile folder, so the downloaded model is kept between runs.
+The script `scripts/local-run.mjs` measures the real model in hidden Chromium. It has three modes. Each mode keeps its own browser profile folder, so the downloaded model is kept between runs.
 
-Table: The three real-model modes and their settings
+Table: The three real-model modes
 
-| Mode | Chrome flags | Outside websites | Profile folder | Cases run |
-|---|---|---|---|---|
-| `nvidia` | `--force_high_performance_gpu` | Allowed | `.model-profile` | Short article, long article, Wikipedia "Lighthouse" (live) |
-| `nvidia-offline` | The same flag, plus a host rule that maps every outside address to "not found" | Blocked; the cache only | `.model-profile`, the same folder as `nvidia` | Short article, long article |
-| `intel` | None | Allowed | `.model-profile-intel` | Short article, long article |
-
-The script records the popup's text with a time stamp every time it changes, the wall time from the click to the result, the job's own statistics (model, parts, requests, load time and writing speed) and three screenshots: the download, the warm-up and the final popup. Each run writes a JSON file and a Markdown table into `docs/test-runs`. A first use needs a profile that does not yet hold the model. Later runs in the same mode use the stored model.
-
-Table: The saved real-model record files and their labels
-
-| Record file | Mode and state | Label | Note |
+| Mode | Flags and outside websites | Profile folder | Cases |
 |---|---|---|---|
-| `v2-local-nvidia-cold-first-attempt.md` | `nvidia`, first use | Clean | Markdown only; no JSON file in the folder |
-| `v2-local-nvidia.md` | `nvidia`, first use | Under load | JSON file present |
-| `v2-local-nvidia-cold-second-attempt-with-load.md` | `nvidia`, first use | Under load | The same numbers as `v2-local-nvidia.md`; it looks like a copy |
-| `v2-local-nvidia-offline.md` | `nvidia-offline`, stored model | Clean, before the label fix | JSON file present; has a wrong "Downloading" line |
-| `v2-local-nvidia-offline-first-attempt-with-load.md` | `nvidia-offline`, stored model | Under load | Markdown only |
-| `v2-local-nvidia-offline-after-label-fix.md` | `nvidia-offline`, stored model | Clean, after the label fix | JSON file present; no "Downloading" line |
-| `v2-local-intel.md` | `intel`, first use | Clean, before the marker fix | JSON file present; its summary still shows the copied markers |
+| `nvidia` | `--force_high_performance_gpu`; outside websites allowed | `.model-profile` | Short article, long article, Wikipedia "Lighthouse" (live) |
+| `nvidia-offline` | The same flag and a host rule that blocks outside addresses; cache only | `.model-profile`, the same as `nvidia` | Short article, long article |
+| `intel` | No flags; outside websites allowed | `.model-profile-intel` | Short article, long article |
 
-The clean label for the first-use and offline runs follows each record's own note. The under-load label follows each file's own note. The JSON file `v2-local-nvidia.json` holds the same 207 s run as `v2-local-nvidia.md`, and the popup screenshot `v2-nvidia-short-popup.png` was taken from that same run.
+Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and three screenshots. It writes a JSON file and a Markdown table. The clean records are `v2-local-nvidia-cold-first-attempt.md`, `v2-local-nvidia-offline.md` (made before the label fix), `v2-local-nvidia-offline-after-label-fix.md` and `v2-local-intel.md`. The records made under load are `v2-local-nvidia.md`, `v2-local-nvidia-cold-second-attempt-with-load.md` and `v2-local-nvidia-offline-first-attempt-with-load.md`. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting.
 
 ### What this means in plain words
 
-The real-model runs record every step the popup showed, with the time it showed it. Each result is labelled, so a slow number cannot pass as a fast one, and a run made before a fix is labelled as such.
+Each real-model run leaves a timeline, the statistics and a screenshot, so every number can be traced back to a record.
 
-## Results: first use on the NVIDIA chip
+## First use on the NVIDIA chip, clean run
 
-The first use means the model is downloaded and loaded for the first time. The clean run is in `v2-local-nvidia-cold-first-attempt.md`. The run under load is in `v2-local-nvidia.md`.
+The clean first-use run is in `v2-local-nvidia-cold-first-attempt.md`. It has no JSON file.
 
-Table: First use on the NVIDIA chip, clean run and run under load
+Table: Clean first use on the NVIDIA chip
 
-| Measure | Clean run | Run under load |
-|---|---|---|
-| Short article, total time | 196.8 s | 207 s |
-| Long article, total time (2 parts) | 15.9 s | 17 s |
-| Wikipedia "Lighthouse", total time (7 parts) | 74.1 s | 101.6 s |
-| Writing speed, short article | 47 tokens a second | 38 tokens a second |
-| Writing speed, long article | 53 tokens a second | 44 tokens a second |
-| Writing speed, Wikipedia | 34 tokens a second | 39 tokens a second |
-
-The first-use total is about 10 seconds longer under load. The timeline of the two runs shows where the time went. The stage boundaries are the first "Loading" line, the "Warming up" line and the "Summarizing" line of each timeline.
-
-Table: Stages of the short article's first use, in seconds after the click
-
-| Stage | Clean run | Run under load |
-|---|---|---|
-| Read the page and check the card | 0.5 | 1.8 |
-| Download, from the start to the first loading line | 158.3 | 138.6 |
-| Loading into the graphics card | 3.8 | 6.0 |
-| Warm-up, the first answer compiling the card's programs | 30.5 | 56.0 |
-| Writing the answer | 3.7 | 4.6 |
-
-The clean run's download was longer, not shorter. The under-load run's warm-up was about 25 seconds longer, and that stage is where a busy processor would show most. The download depends on the network speed, which the test did not control. These two runs cannot prove the cause of the difference. The file's own note attributes the slower numbers to other programs running, and the timeline places most of the extra time in the warm-up.
-
-Figure V09 draws the clean run's stages as one timeline.
+| Measure | Value |
+|---|---|
+| Short article, total time | 196.8 s |
+| Long article (2 parts), total time | 15.9 s |
+| Wikipedia "Lighthouse" (7 parts, 8 requests), total time | 74.1 s |
+| Writing speed, short / long / Wikipedia | 47 / 53 / 34 tokens a second |
+| Short article: download, from 0.5 s to 158.8 s | 158.3 s |
+| Short article: loading into the graphics card | 3.8 s |
+| Short article: warm-up, compiling the card's programs | 30.5 s |
+| Short article: writing the answer | 3.7 s |
 
 ![First-use timeline, clean run on the NVIDIA chip](../figures/V09_cold_timeline.png)
 
-Reading the figure: the figure shows the first use of the clean run as one long bar. The download bar runs from 0.5 s to 158.8 s and is labelled 158.3 s. The loading into the card is a short bar of 3.8 s, the warm-up is 30.5 s, and the final summary takes 3.7 s, for a total of 196.8 s. The figure's notes give the timestamps of each stage, and it says that a "Loading 0%" line during the download is not shown.
-
-The Wikipedia article shows the difference more clearly, because the same steps were slower one after another. Each line below is the time a part started in each run.
-
-Table: Wikipedia "Lighthouse" (7 parts), time in seconds at which each step started
-
-| Step | Clean run | Run under load |
-|---|---|---|
-| Part 1 | 3.2 | 5.1 |
-| Part 2 | 7.8 | 12.4 |
-| Part 3 | 17.0 | 21.7 |
-| Part 4 | 22.5 | 30.6 |
-| Part 5 | 30.1 | 37.2 |
-| Part 6 | 38.1 | 50.1 |
-| Part 7 | 54.7 | 65.8 |
-| Combining the seven summaries | 60.2 | 80.5 |
-
-In the Wikipedia run, every step was slower under load. That pattern is consistent with a busy processor, but the test does not measure the processor's use, so the cause is not proven.
-
-The popup screenshot below is from the under-load first-use run. It was taken at the moment the summary appeared.
-
-![Popup after first use on the NVIDIA chip, run under load](../screenshots/v2-nvidia-short-popup.png)
-
-Real-model screenshot, first-use run under load. The summary is the start of the Lighthouse article, shown as a heading line and bullets. The stats line reads 206.5 s, the job's own time, while the table above gives 207 s, the script's wall time. The model line still reads "Not downloaded yet". The popup refreshes that line after a job ends, and the picture was taken as soon as the summary appeared, so it shows the state from before the press.
+Reading the figure: the download is most of the wait, 158.3 s of the 196.8 s total. Loading into the card takes 3.8 s, and the warm-up takes 30.5 s. The popup shows a warm-up message during that stage, which tells the reader why the wait is long. Chapter 9 explains the offscreen page that does the warm-up.
 
 ### What this means in plain words
 
-The first use takes about three minutes on this laptop, most of it downloading and warming up. The clean run was not faster on every stage, so the 10 seconds between the two runs should not be read as a clear effect of other programs.
+Most of the first use is the download and the warm-up. Both happen once, when the model is first stored and first loaded.
 
-## Results: offline use on the NVIDIA chip, before and after the label fix
+## Offline use on the NVIDIA chip, before and after the label fix
 
-Offline use means the model is already stored in the browser, and every outside website is blocked. The summary still has to be made. Two clean runs were made in this mode, one before a popup fix and one after it. The fix stopped the popup from saying "Downloading the model" when the model was already stored. Before the fix, the popup printed that line for a stored model at 3.9 s, showing 0%.
+Offline runs use a stored model, and outside websites are blocked. Before the label fix, the popup printed "Downloading the model (first time only): 0%" at 3.9 s, although the model was already stored. The fix removed that line. Chapter 15 tells how.
 
-Table: Offline use on the NVIDIA chip, clean run before the label fix and clean run after it
+Table: Offline runs on the NVIDIA chip, before and after the label fix
 
-| Measure | Before the label fix (`v2-local-nvidia-offline.md`) | After the label fix (`v2-local-nvidia-offline-after-label-fix.md`) |
+| Measure | Before the fix (`v2-local-nvidia-offline.md`) | After the fix (`v2-local-nvidia-offline-after-label-fix.md`) |
 |---|---|---|
-| Short article, wall time (script) | 15.3 s | 17.7 s |
-| Short article, time shown in the popup | 14.8 s | 17.5 s |
+| Short article, wall time / time shown in the popup | 15.3 s / 14.8 s | 17.7 s / 17.5 s |
 | Short article, load (loading and warm-up, no download) | 6.9 s | 11.6 s |
 | Short article, writing speed | 40 tokens a second | 65 tokens a second (one request) |
-| Long article (2 parts), wall time | 16.5 s | 16.0 s |
-| Long article, time shown in the popup | 16.4 s | 15.7 s |
+| Long article (2 parts), wall time / time shown in the popup | 16.5 s / 16.4 s | 16.0 s / 15.7 s |
 | Long article, writing speed (last request) | 42 tokens a second | 45 tokens a second |
-| "Downloading the model" line for a stored model | Yes, at 3.9 s, showing 0% | None |
+| "Downloading" line for a stored model | Yes, at 3.9 s, showing 0% | None |
 
-The label result is clear. After the fix, the timeline of both articles has no "Downloading" line. The short article's timeline runs from "Loading the model into the graphics card: 0%" at 1.9 s, through the loading percentages to 96% at 12.7 s, then "Warming up the model" at 13.1 s and "Summarizing" at 13.5 s.
-
-The timings did not all improve. The short article took longer after the fix, because its load took 11.6 seconds against 6.9 seconds. Its writing was faster, at 65 tokens a second against 40, although that figure comes from one request. The record notes that differences of this size are normal on this laptop. Two runs in each state are too few to show why the load differed, and this report does not settle the question. The "before" record is kept for its timings, but its timeline carries the wrong line, and its note says so.
-
-The before-fix screenshot shows the popup after the clean run, with the stats line at 14.8 s and the model line reading "Downloaded, runs on this computer".
-
-![Popup after an offline summary, before the label fix](../screenshots/v2-nvidia-offline-short-popup.png)
-
-Real-model screenshot, offline short article, clean run before the label fix. The summary's first lines are numbered points, and the stats line reads 14.8 s. This picture does not show the wrong line, which is in the timeline only.
-
-The after-fix popup was taken from the same kind of run after the fix.
+After the fix, neither timeline has the "Downloading" line. The short article's timeline runs from "Loading the model into the graphics card: 0%" at 1.9 s to 96% at 12.7 s, then warm-up at 13.1 s and the summary at 13.5 s. The short article took longer after the fix, because its load took 11.6 s against 6.9 s, and its writing was faster. The record notes that differences of this size are normal on this laptop. Two runs in each state are too few to show why the load differed, so this report does not explain it.
 
 ![Popup after an offline summary, after the label fix](../screenshots/v2-nvidia-offline-short-popup-after-label-fix.png)
 
-Real-model screenshot, offline short article, clean run after the label fix. The model line reads "Downloaded, runs on this computer", and the stats line reads 17.5 s, the job's own time. The table gives 17.7 s, the script's wall time.
-
-The picture of the warm-up stage after the fix shows the progress line that replaced the wrong one.
-
-![Popup during the warm-up, after the label fix](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
-
-Real-model screenshot, offline short article, warm-up stage after the label fix. The model line reads "Downloaded, runs on this computer". The popup shows "Warming up the model (first time can take about 30 seconds)..." with an indeterminate bar and no "Downloading" line. The button is greyed out while the job runs.
-
-The under-load offline run, `v2-local-nvidia-offline-first-attempt-with-load.md`, gave 13.4 s for the short article and 32.2 s for the long one. Its note says the run was slower than the clean run. That holds for the long article only, because the short article was faster.
+Real-model screenshot, offline short article, clean run after the label fix. The model line reads "Downloaded, runs on this computer", and the stats line reads 17.5 s, the job's own time.
 
 ### What this means in plain words
 
-Once the model is stored, a short article takes about 15 to 18 seconds on this chip, and no internet is needed. The popup no longer tells the reader that a stored model is downloading. Two runs in each state are too few to say why the load time varied.
+Once the model is stored, a short article takes about 15 to 18 seconds on this chip, with no internet. After the fix, the popup no longer says that a stored model is downloading.
 
-## Results: the integrated Intel chip
+## Runs done while other programs were running
 
-The Intel chip is built into the processor. Its results come from the `intel` mode, which does not force the separate card. The extension chose the small model (SmolLM2 360M) by itself, because the chip is integrated. The clean run is in `v2-local-intel.md` and `v2-local-intel.json`. That run was made before the fix that removes copied markers from answers, and it has not been repeated since. Its saved output therefore still shows the markers.
+These records are kept as measurements, not as clean numbers.
 
-Table: Clean run on the Intel chip, the automatic small model
+Table: Runs under load on the NVIDIA chip
+
+| Record | Case | Result | Writing speed |
+|---|---|---|---|
+| `v2-local-nvidia.md` and `.json` | First use | Short 207 s; long 17 s; Wikipedia 101.6 s | 38, 44 and 39 tokens a second |
+| `v2-local-nvidia-offline-first-attempt-with-load.md` | Offline, stored model | Short 13.4 s; long 32.2 s | 48 and 29 tokens a second |
+
+Against the clean offline run, the under-load short article was faster (13.4 s against 15.3 s) and the under-load long article was slower (32.2 s against 16.5 s), so the record's note that the run was slower holds for the long article only. The under-load first use took 138.6 s to download, 6.0 s to load and 56.0 s to warm up, against 158.3 s, 3.8 s and 30.5 s in the clean run. The under-load Wikipedia article started every part later: part 1 at 5.1 s instead of 3.2 s, and the final combining step at 80.5 s instead of 60.2 s. The cause of these differences is not proven, because the test does not measure the processor's use. The file `v2-local-nvidia-cold-second-attempt-with-load.md` repeats the numbers of `v2-local-nvidia.md`.
+
+![Popup after first use on the NVIDIA chip, under load](../screenshots/v2-nvidia-short-popup.png)
+
+Real-model screenshot, first use under load. The summary is the start of the Lighthouse article, and the stats line reads 206.5 s, the job's own time. The model line still reads "Not downloaded yet", because the picture was taken as the summary appeared, before the popup refreshed that line.
+
+### What this means in plain words
+
+The runs under load are slower in several steps. The records do not prove what caused that, so they are kept apart from the clean results.
+
+## Intel chip
+
+The `intel` mode does not force the separate card. The extension chose the small model, SmolLM2 360M, by itself, because the chip is built into the processor. The clean run is in `v2-local-intel.md` and `v2-local-intel.json`. It was made before the fix that removes copied markers, and it has not been repeated since.
+
+Table: Clean run on the Intel chip, with the small model
 
 | Measure | Short article | Long article (2 parts) |
 |---|---|---|
-| Total time | 199.2 s | 149.1 s |
-| Download (small model, about 204 MB) | 0.9 to 81.2 s | Already stored |
-| Loading into the graphics card | 81.6 to 83.3 s | Already stored |
+| Total time | 199.2 s | 149.1 s (popup 148.7 s) |
+| Download, about 204 MB | 0.9 to 81.2 s | Already stored |
 | Warm-up | 83.7 to 123.1 s (about 39 s) | Already stored |
-| Writing the answer | 123.1 to 199.0 s (about 76 s) | Parts: 0.9 s and 65.7 s; merge from 122.6 s |
+| Writing the answer | 123.1 to 199.0 s (about 76 s) | Parts start at 0.9 s and 65.7 s; merge from 122.6 s |
 | Writing speed | 4 tokens a second | 5 tokens a second |
-
-The popup for the short article shows the graphics note that the extension adds for integrated chips. The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster."
 
 ![Popup for the short article on the Intel chip, recorded before the marker fix](../screenshots/v2-intel-short-popup.png)
 
-Real-model screenshot, Intel chip, short article, first use, recorded before the fix that removes copied markers. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the text `<<<PAGE TEXT START>>>`, a marker copied from the prompt. This picture shows the defect, which the code now removes, but the Intel run has not been made again to show the fixed output.
-
-![Popup for the long article on the Intel chip, clean run](../screenshots/v2-intel-long-popup.png)
-
-Real-model screenshot, Intel chip, long article, clean run with the model already stored. The stats line reads "2 parts · 3 requests · 148.7 s · SmolLM2 360M". The table above gives 149.1 s, the script's wall time.
-
-The copied markers are a defect in the saved output. The short Intel summary begins with the prompt's start marker and ends with its end marker. The record text starts like this:
-
-```
-<<<PAGE TEXT START>>>
-A lighthouse lens works by using many thin glass rings to bend the light.
-```
-
-The most likely cause is that the small model repeats the marker text it was given. Chapter 15 tells how the fix was made. Of the seven summaries in the three original JSON files, this is the only one that contains the markers.
+Real-model screenshot, Intel chip, short article, first use, recorded before the marker fix. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the copied marker `<<<PAGE TEXT START>>>`, which the later fix removes from answers.
 
 ### What this means in plain words
 
-On the built-in chip, the small model writes a short summary in a little over three minutes on first use, and a two-part article in about two and a half minutes. The answers work but are slow. The first short answer shows the prompt's marker text, which the code now removes. That removal has not been checked on the Intel chip.
+On the built-in chip, a short summary takes a little over three minutes on first use, and writing the answer alone takes about 76 seconds. The smaller model works, but it is slow.
 
 ## What the saved summaries show
 
-The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more. The table lists each one and what a reader sees in it. The check is about form and about facts that can be checked from the repository. The Wikipedia article is live and is not in the repository, so its facts cannot be checked here.
+The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more. Only the Intel short summary contains the copied markers. It ends with the end marker too.
 
-Table: The saved summaries and what they show. Bullet counts include nested bullet lines.
+Five of the seven summaries that use bullets have more than six bullet lines, counting nested lines. They are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9, of which six are at the top level). The Wikipedia article is live, so its facts cannot be checked here.
 
-| Record | Case and run | Bullet lines | What a reader sees |
-|---|---|---|---|
-| `v2-local-nvidia.json` | Short article, under load, before the fixes | 5 | Heading line and five bullets. No fault seen |
-| `v2-local-nvidia.json` | Long article, under load, before the fixes | 10 | Repeats labels from the merge prompt ("Page title:", "These are summaries of consecutive parts", "Part 1:", "Part 2:"). Gives "around 3000 BC" for the Pharos lighthouse, where the page says "the third century BC" |
-| `v2-local-nvidia.json` | Wikipedia, under load, before the fixes | 13 | Heading line and thirteen bullets. The prompt asks for three to six |
-| `v2-local-nvidia-offline.json` | Short article, clean, before the label fix | 8 | Heading line and eight bullets |
-| `v2-local-nvidia-offline.json` | Long article, clean, before the label fix | 5 | The first bullet is "Page title provides a brief overview of the content within.", which gives no fact |
-| `v2-local-intel.json` | Short article, clean, before the marker fix | 0 | Begins with the prompt's start marker and ends with its end marker |
-| `v2-local-intel.json` | Long article, clean | 0 | One paragraph of five sentences. No fault seen in the form |
-| `v2-local-nvidia-offline-after-label-fix.json` | Short article, clean, after the fixes | 8 | Heading line and eight bullets. No markers |
-| `v2-local-nvidia-offline-after-label-fix.json` | Long article, clean, after the fixes | 9 (six at the top level, three nested) | No markers. The first bullet still repeats the copied label "Page title provides a brief overview of the content within." |
-
-Five of the seven summaries that use bullets have more than six bullet lines, counting nested lines. Those are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9). The after-fix long article has six top-level bullets, which is within the limit, plus three nested lines. The popup's summary box has a fixed maximum height and scrolls, so the picture below shows only the first five items.
-
-The clearest factual slip is in the under-load long article. The fixture article says the Pharos lighthouse "was built in the third century BC during the reign of the Ptolemies". The model's summary said "around 3000 BC". The same summary copied the merge prompt's own labels. Its opening lines are shown here as they were saved:
+The clearest factual slip is in the under-load long article. The fixture says the Pharos lighthouse "was built in the third century BC", but the summary said "around 3000 BC". The same summary repeats the merge prompt's labels. Its opening lines, as saved, are:
 
 ```
 Lighthouses: A Short History of Light on the Coast
@@ -3816,89 +3431,72 @@ Lighthouses: A Short History of Light on the Coast
 - Page title: Lighthouses: A Short History of Light on the Coast
 - These are summaries of consecutive parts of one web page
 - Part 1: Lighthouses have been used for navigation and safety for thousands of years
-- The first lighthouse was built on the island of Pharos in Egypt around 3000 BC
 ```
 
-The after-fix long summary shows the same kind of copying in a milder form. Its first bullet repeats the "Page title" label, and the picture below shows that bullet at the top of the list.
+The after-fix long summary shows a milder copy. Its first bullet repeats the "Page title" label.
 
 ![Popup for the long article after the label fix, Llama 3.2 1B](../screenshots/v2-nvidia-offline-long-popup-after-label-fix.png)
 
-Real-model screenshot, offline long article (two parts), clean run after the label fix. The summary's first numbered point is "Page title provides a brief overview of the content within." The stats line reads "2 parts · 3 requests · 15.7 s · Llama 3.2 1B". The list continues below the visible part of the box.
+Real-model screenshot, offline long article, clean run after the label fix. The first numbered point is "Page title provides a brief overview of the content within." The stats line reads 15.7 s, and the popup's summary box scrolls, so the list continues below the visible part.
 
-Each record is a single run, so the table shows what happened in those runs, not how often it happens.
+Each record is a single run. The table above shows what happened in those runs, not how often it happens.
 
 ### What this means in plain words
 
-The model follows the structure of the prompt, but its answers can copy the prompt's labels, add a wrong date, or add a bullet that says nothing. The marker fix removed one kind of copying. A reader still has to check the page before trusting a fact in a summary.
+The model follows the shape of the prompt, but it can copy the prompt's labels, give a wrong date, or add bullets that say nothing. The marker fix removed one kind of copying. A reader still has to check the facts against the page.
 
-## Speed: NVIDIA against Intel
+## Speed
 
-Writing speed is measured in tokens a second. A token is a piece of a word, so a higher number means the answer appears faster. The decode speed used in the records is the value for the job's last request. The table gathers the measured values and labels each one. The two chips did not run the same model in the saved clean runs, and that matters for reading the table.
+The speeds below are measured in tokens a second, which is the decode speed of each job's last request. A token is a piece of a word, so a higher number means the answer appears faster.
 
-Table: Writing speed on the two chips, with the model and the source of each number
+- Clean NVIDIA runs with the 1 billion parameter model: 34 to 53 tokens a second.
+- Offline after the label fix: 65 for the short article (one request) and 45 for the two-part article. These are single measurements.
+- Intel with SmolLM2 360M, clean run: 4 to 5 tokens a second.
+- Intel with the 1 billion parameter model: about 2 tokens a second, from an earlier speed test recorded in the development log. No run file holds it.
+- NVIDIA with the 1 billion parameter model: about 63 tokens a second writing and about 600 reading the prompt, from an earlier speed test recorded in the development log. No run file holds these, and the log does not say which text was used.
+- Download sizes in the real runs, from the popup: about 695 MB for the main model and about 204 MB for SmolLM2. The pretend model's 664 MB and 300 MB are fixed numbers, not measurements.
 
-| Chip and run | Model | Writing speed (tokens a second) | Source | Label |
-|---|---|---|---|---|
-| NVIDIA, first use | Llama 3.2 1B | 47 (short), 53 (two parts), 34 (seven parts) | `v2-local-nvidia-cold-first-attempt.md` | Clean |
-| NVIDIA, offline, before the label fix | Llama 3.2 1B | 40 (short), 42 (two parts) | `v2-local-nvidia-offline.md` | Clean |
-| NVIDIA, offline, after the label fix | Llama 3.2 1B | 65 (short, one request), 45 (two parts) | `v2-local-nvidia-offline-after-label-fix.md` | Clean |
-| NVIDIA, runs under load | Llama 3.2 1B | 38, 44 and 39 (first use); 48 and 29 (offline) | The two under-load records | Under load |
-| Intel built-in | SmolLM2 360M, chosen by the extension | 4 (short), 5 (two parts) | `v2-local-intel.md` | Clean |
-| Intel built-in | Llama 3.2 1B | About 2 | Earlier speed test, recorded in the development log; no saved run file | Not a saved run |
-| NVIDIA, earlier speed test | Llama 3.2 1B | About 63 while writing; about 600 while reading the prompt | Earlier speed test, recorded in the development log; no saved run file. The log does not say which text was used | Not a saved run |
-
-The saved clean NVIDIA runs gave 34 to 53 tokens a second. The under-load values are listed separately, because the run under load is not a clean measurement. The earlier speed test in the development log, with about 63 tokens a second, is not a saved run file. The after-fix offline run's 65 tokens a second is a saved measurement, but it comes from a single request.
-
-Model sizes come from the popup text in the real runs. The main model's download was about 695 MB, and SmolLM2's was about 204 MB. The pretend model reports fixed sizes of 664 MB and 300 MB. Those figures are not measurements, and no result in this chapter uses them.
-
-The comparison that matters most is the same model on both chips. The saved runs do not contain that pair in full, because the Intel runs used the small model. Figure V08 draws the saved numbers and labels each bar.
+The Intel runs used the small model, so the saved runs do not compare the two chips on the same model. With the 1 billion parameter model, the clean NVIDIA runs were roughly 17 to 27 times the earlier Intel speed test. Figure V08 draws the saved numbers.
 
 ![Writing speed on the NVIDIA card against the Intel chip](../figures/V08_speed_chart.png)
 
-Reading the figure: the figure has two panels, writing speed in tokens a second and time for the short article. The NVIDIA bars come from the clean runs with the 1 billion parameter model, and they show 47, 53, 34, 40 and 42 tokens a second. The Intel bars with the small model show 4 and 5. A dashed bar marks the earlier speed test, about 2 tokens a second with the large model on the Intel chip. The time panel shows 196.8 s for the NVIDIA first use, 15.3 s for the stored offline short article, and 199.2 s for the Intel first use with the small model. A dashed box says that no short-article run on the Intel chip with the model stored has been measured. The footnote says that three under-load runs are left out.
-
-With the large model, the clean NVIDIA runs (34 to 53 tokens a second) wrote roughly 17 to 27 times as fast as the built-in chip's earlier speed test of about 2 tokens a second. The built-in chip is usable only with the smaller model, and even then it is slow.
+Reading the figure: the NVIDIA bars come from the clean runs with the large model, 47, 53, 34, 40 and 42 tokens a second. The two Intel bars with the small model show 4 and 5. A dashed bar marks the earlier speed test of about 2 tokens a second, which has no saved run file. The time panel shows 196.8 s for the NVIDIA first use, 15.3 s for the stored offline article, and 199.2 s for the Intel first use, with a dashed box saying that no Intel short-article run with the model stored has been measured. The figure leaves out the three runs made under load.
 
 ### What this means in plain words
 
-The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the small model, and even then a short summary takes minutes.
+The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the smaller model, and even then a short summary takes minutes.
 
 ## What these tests do not show
-
-The honest limits of the results are listed here. The list is taken from `run-1.md` and the README, and it is kept in plain words.
 
 From run 1, the browser tests do not show:
 
 - real summary quality, because the pretend model returns fixed text;
-- real download speed, graphics-card behaviour or shader warm-up, which are covered only by the real-model records;
+- real download speed, graphics-card behaviour or shader warm-up, which only the real-model records cover;
 - the visible Chrome the client will use, because every test ran in hidden Chromium.
 
 From the README, these items are not yet verified:
 
-- a test on the client's laptop, because its details were requested and have not been received;
+- the client's laptop, whose details have not been received;
 - `setup.bat --gpu` against a real Chrome installation;
 - a manual click-through in the visible Chrome, using the V2 checklist;
 - languages other than English, because the model is small and is meant for English text.
 
-Two more limits apply to the real-model records. They cover only the pages named in the table of cases: two fixture articles and one live Wikipedia page. No formal rating of summary quality exists in the repository, so a claim that a summary is good or poor is an opinion, and this report does not make one.
+The real-model records cover two fixture articles and one live Wikipedia page. No formal rating of summary quality exists in the repository, so this report does not call any summary good or poor.
 
 ### What this means in plain words
 
-The tests prove the logic and the real model's speed on one laptop. They do not prove how good the summaries are, how the extension behaves in visible Chrome, or how it runs on the client's laptop.
+The tests prove the logic and the real model's speed on one laptop. They do not prove how good the summaries are, how the extension looks in the visible Chrome, or how it runs on the client's laptop.
 
 ## Questions this chapter answers
 
 **Why do most browser tests use a pretend model?**
-A real model cannot be made to fail on demand, and it needs a graphics card and a long download. The pretend model is fast, free and forced into each failure case, such as no WebGPU or out of memory. The real-model runs then cover what the pretend model cannot.
+A real model cannot be made to fail on demand, and it needs a graphics card and a long download. The pretend model is fast, free and forced into each failure case. The real-model runs then cover what the pretend model cannot.
 
 **Which results are clean, and which were done under load?**
-The clean results are the NVIDIA first-use run in `v2-local-nvidia-cold-first-attempt.md`, the two offline runs (one before and one after the label fix), and the Intel run. The first-use and Wikipedia runs in `v2-local-nvidia.md` were done while other programs were busy, and they are kept as records. Each run's note gives its label.
+The clean results are the NVIDIA first-use run in `v2-local-nvidia-cold-first-attempt.md`, the two offline runs (before and after the label fix), and the Intel run. The runs in `v2-local-nvidia.md` and `v2-local-nvidia-offline-first-attempt-with-load.md` were done while other programs were busy, and they are kept as records.
 
 **What did the label fix change, and what did it leave?**
-It removed the "Downloading the model" line that appeared for a stored model. It did not change the load time, which was 11.6 seconds after the fix against 6.9 seconds before. Two runs in each state are too few to say why, so the difference is recorded but not explained.
-
-**How does the NVIDIA chip compare with the Intel chip?**
-The clean NVIDIA runs wrote 34 to 53 tokens a second with the large model. The Intel chip wrote 4 to 5 tokens a second with the small model that the extension chooses for it, and about 2 with the large model in an earlier speed test. The same-model comparison rests on that earlier test, which has no saved run file.
+It removed the "Downloading" line that appeared for a stored model. It did not change the load time, which was 11.6 seconds after the fix against 6.9 seconds before. Two runs in each state are too few to say why, so the difference is recorded but not explained.
 
 **Can the results be trusted for the client's laptop?**
 Not yet. Every real-model number comes from the developer's laptop, which has an NVIDIA RTX 3050 and a built-in Intel chip. The client's graphics chip, memory and free disk space have been requested and have not arrived, so the client's results are [to be measured].
