@@ -53,7 +53,7 @@ Table: caption text        (put this line directly above a pipe table)
 | a | b |
 |---|---|
 | x | y |
-![Caption text](figures/F01_context.png)     figure with auto-numbered caption
+![Caption text](../figures/V01_context.png)     figure with auto-numbered caption (screenshots: ../screenshots/<name>.png)
 ```
 Fenced code blocks are allowed for short code or text samples (copy real lines from the source; keep them under 25 lines). Do not use HTML. Do not type "Figure 3" or "Table 2" as numbers in the text (they are generated); say "the figure above" or "the table below".
 
