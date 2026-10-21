@@ -9,9 +9,8 @@ Every message quoted here was copied from the script that prints it, so the word
 The summary runs inside Chrome. The batch files and scripts run before Chrome is used and then finish. The figure below shows the running parts: the page the reader has open, the extension's service worker that owns the summary job, the hidden offscreen page that holds the model, the graphics card that does the arithmetic, and the model files kept by the browser on disk.
 
 ![What runs where on the client laptop](../figures/V12_deployment.png)
-<!-- check against figure -->
 
-Reading the figure: the setup and run scripts are not in the picture, because they finish before the extension is used. The model files are the only large data kept after the first download, and they stay on the system drive. The manifest lists Hugging Face and GitHub raw addresses as the hosts the extension may read from, which is where the model files come from. The manifest does not list any address that would receive page text, and the code passes page text only between the extension's own pages.
+Reading the figure: the popup starts the job through the service worker, which sends messages to the offscreen page. The offscreen page holds the model and passes the work to a web worker, which runs WebLLM on Chrome's GPU part and the graphics card. The model files are kept on disk in IndexedDB. A dashed arrow from Hugging Face and GitHub marks the first download only. The figure's footer says that the client's laptop has not been tested yet, and that Chrome's own process layout is not measured. The setup and run scripts are not in the picture, because they finish before the extension is used. The manifest lists Hugging Face and GitHub raw addresses as the hosts the extension may read from, which is where the model files come from. The manifest does not list any address that would receive page text, and the code passes page text only between the extension's own pages.
 
 ### What this means in plain words
 
@@ -39,7 +38,8 @@ The client double-clicks two files and makes a few clicks in Chrome. The scripts
 The client works in one folder, `finalsem\project`. The two batch files and `manifest.json` sit in its root, the PowerShell checks and the real-model script sit in `scripts`, and the extension itself sits in `src`. The figure below shows the same layout with a short note beside each part.
 
 ![Folder tree of finalsem with one-line notes](../figures/V13_repo_tree.png)
-<!-- check against figure -->
+
+Reading the figure: the tree lists the folders of `finalsem/`. Its `project` folder holds `manifest.json`, the two batch files, the `src` folder with the extension's parts (background, content, core, engines, lib, offscreen and ui), the `tests` folder, and the `scripts` folder for the computer check, the Chrome graphics setting and the real-model run. The `docs` folder holds the decision record, the figures, the screenshots and the test runs.
 
 ### What this means in plain words
 
@@ -102,9 +102,9 @@ exit /b 0
 
 **What setup writes.** Two files appear in the project folder. `.setup-ok` holds the Chrome path and the date, and `run.bat` reads it. `setup.log` holds every line that was printed, each with a time stamp. If setup fails, the marker is deleted, so `run.bat` refuses to start with a broken setup.
 
-The lines below are a real excerpt from `setup.log` for the run on 21 October 2026. The line "Free space on C::" has a doubled colon. The script writes `$env:SystemDrive` followed by a colon, and that value already ends in a colon. The mistake is cosmetic and does not change the check.
+The lines below are a real excerpt from `setup.log` for the run on 21 October 2026, recorded before a fix. The line "Free space on C::" has a doubled colon, because the script wrote `$env:SystemDrive` followed by a colon, and that value already ends in a colon. The check itself was right. The script now prints "Free space on drive C:" and the doubled colon is gone.
 
-`setup.log` (real output from step 4 to the end; the time stamps and the `[computer]` source tags are removed)
+`setup.log` (real output from step 4 to the end, recorded before the fix; the time stamps and the `[computer]` source tags are removed)
 
 ```
 Step 4 of 5: looking at this computer (graphics card, memory, free disk space)...
@@ -188,7 +188,7 @@ The computer check reads Windows facts. It stops setup only when the disk is nea
 
 ## The graphics switch (setup.bat --gpu)
 
-Some laptops have two graphics chips, and Chrome may use the weaker, built-in one. On this laptop the built-in chip wrote about 2 tokens a second with the 1 billion parameter model in an earlier speed test (chapter 14), while the separate NVIDIA card wrote between 29 and 53 tokens a second in the saved runs. The client can change Chrome's choice in the Windows settings by hand, or the developer can run `setup.bat --gpu`.
+Some laptops have two graphics chips, and Chrome may use the weaker, built-in one. On this laptop the built-in chip wrote about 2 tokens a second with the 1 billion parameter model in an earlier speed test (chapter 14), while the separate NVIDIA card wrote between 34 and 53 tokens a second in the clean saved runs. The client can change Chrome's choice in the Windows settings by hand, or the developer can run `setup.bat --gpu`.
 
 `setup.bat --gpu` runs `scripts\set-chrome-gpu.ps1`, which writes one value for the current Windows user. The value sits under `HKCU\Software\Microsoft\DirectX\UserGpuPreferences`. Its name is the full path of `chrome.exe`, and its value is `GpuPreference=2;`, which is the Windows code for "high performance". It needs no administrator rights, and it changes nothing for other users.
 
@@ -203,22 +203,21 @@ Some laptops have two graphics chips, and Chrome may use the weaker, built-in on
 
 The switch is opt-in. The script runs only when `--gpu` is given, and it is never run by default. The project owner asked that Windows settings are not changed without being asked (`docs/DECISIONS.md`, D4).
 
-To undo it, use the `-Remove` form with the same `-ChromePath`:
+To undo it, run the script with `-Remove`:
 
 ```
-powershell -File scripts\set-chrome-gpu.ps1 -ChromePath "C:\Program Files\Google\Chrome\Application\chrome.exe" -Remove
+powershell -File scripts\set-chrome-gpu.ps1 -Remove
 ```
 
-The README and `DECISIONS.md` show a shorter undo command without `-ChromePath`. That shorter command does not work. The script declares `-ChromePath` as mandatory, so PowerShell asks for the missing value, or stops with an error when no one can answer. The command above is the form that runs.
+The script finds Chrome itself. It looks in the two Program Files folders and the local application data folder, and then in the Windows registry entry for `chrome.exe`. If it cannot find Chrome, it says so and asks for the path, which is then given with `-ChromePath "C:\...\chrome.exe"`. The script's own message after a change prints the exact undo command with that path.
 
-The switch has three limits. First, the script says to close every Chrome window and reopen Chrome, because the change takes effect only at start-up. Second, `setup.bat` does not check the result of the script. After the call it continues without an error test, so `SETUP COMPLETE` can print after a failed change. The script prints its own failure line and the manual route, so the client still has a way forward. Third, the script has been tested only against a throw-away registry key (tests B10 and B10b). It has not been tried against the client's Chrome setting.
+The switch has three limits. First, the script says to close every Chrome window and reopen Chrome, because the change takes effect only at start-up. Second, `setup.bat` now checks the result. If the script fails, setup prints "The graphics setting was NOT changed (see the message above). Setup goes on; the extension works without it, only slower." and then finishes, so the failure is visible before `SETUP COMPLETE`. Third, the script has been tested only against a throw-away registry key (tests B10, B10b and B10c). It has not been tried against the client's Chrome setting.
 
 The measured NVIDIA runs in chapter 14 did not use this registry value. They used the command-line flag `--force_high_performance_gpu` in the test browser. Those numbers show what the chip can do under that flag. They do not show what the registry value does on the client's Chrome. After any change, `chrome://gpu` should list WebGPU as "Hardware accelerated".
 
 ![Two graphics chips and the choice Chrome makes](../figures/V17_two_graphics_chips.png)
-<!-- check against figure -->
 
-Reading the figure: the figure shows a laptop with two chips. By default Chrome uses the built-in chip, which the figure marks as slow. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the separate card. The speed labels in the figure are the measured values named in this section.
+Reading the figure: Chrome's default on this laptop is the Intel chip built into the processor, where the clean run measured 4 to 5 tokens a second with SmolLM2 and a short article took 199.2 s on first use. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the NVIDIA RTX 3050, where the clean runs measured 34 to 53 tokens a second with the 1 billion parameter model, and a stored short article took 15.3 s offline. The lower box gives the two ways, says that the `setup.bat --gpu` route was tested only against a test registry key, and gives the undo command with `-ChromePath` and `-Remove`. Either form works, because the script finds Chrome itself. A note at the bottom says that the `--force_high_performance_gpu` flag is used only by the test script to start its browser.
 
 ### What this means in plain words
 
@@ -268,7 +267,7 @@ It checks that Chrome is installed and is version 116 or newer, that the extensi
 It is the minimum free space on the system drive, checked before the model download. The model is about 700 MB, and the margin allows for Chrome's extra copies during unpacking. The figure is not measured, and the check cannot tell whether the graphics card supports the model, which Chrome decides later.
 
 **What does the graphics switch change, and how is it undone?**
-It writes one per-user Windows value, `GpuPreference=2;`, for the full path of `chrome.exe`. It runs only with `--gpu`. Undo it with `set-chrome-gpu.ps1`, using `-ChromePath` together with `-Remove`, because the shorter form in the README does not work.
+It writes one per-user Windows value, `GpuPreference=2;`, for the full path of `chrome.exe`. It runs only with `--gpu`. Undo it with `set-chrome-gpu.ps1 -Remove`. The script finds Chrome itself, so that short command works as the README gives it.
 
 **What happens when a step fails?**
 The script prints `SETUP FAILED.`, the reason, and the fix in plain words, and it keeps `setup.log` for the developer. The marker file is deleted, so `run.bat` refuses to start until setup succeeds again.

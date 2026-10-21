@@ -85,4 +85,4 @@
 <text x="529.9456" y="928.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1030.0544">job stops, message shown</text>
 <rect x="849.90968" y="908.1600000000003" width="40" height="26" rx="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="901.90968" y="928.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="658.09032">refused early, or not shown</text>
-<text x="40" y="958.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Messages are copied from src/core/errors.js (USER_MESSAGES). The technical detail goes only to the console.</text></svg>
+<text x="40" y="958.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Messages are copied from src/core/errors.js (USER_MESSAGES). The technical detail goes to the console and the job record.</text></svg>

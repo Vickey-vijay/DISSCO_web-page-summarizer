@@ -26,9 +26,8 @@ Table: The limits met in Version 1 and what Version 2 does about each
 The first version chose the cloud route on purpose. A local model needed a capable graphics card and a large first download, and nobody yet knew how good its summaries would be. The cloud route let the core flow (read, split, summarize, merge, show) be built and tested first. Version 2 is the local route that Version 1 left open.
 
 ![Version 1 and Version 2 compared: the cloud engine against the engine on the laptop](../figures/V07_v1_vs_v2.png)
-<!-- check against figure -->
 
-Reading the figure: the left column describes Version 1, with the key, the internet needed for every summary and the text sent to Google. The right column describes Version 2, with no key, the internet needed once for the download, and the text kept on the laptop. Each row states a fact that comes from the code or from a measured run.
+Reading the figure: a table with one row per measure, and two columns. Version 1 (cloud, Gemini) needs a free key pasted into the popup, needs the internet for every summary, and sends the page text to Google over HTTPS. Version 2 needs no key, needs the internet once to download the model (about 695 MB, or about 204 MB for SmolLM2), and keeps the page text on the laptop. The timing rows show 1.7 seconds for the short article in Version 1, measured with the live service, and 15.3 seconds for the short article in Version 2 with the model stored, or 196.8 seconds on first use with the download included. The seven-part row shows 17.8 seconds for Version 1 and 74.1 seconds for Version 2. The free-tier row shows 15 requests a minute for the default cloud model, and no service quota for Version 2. The summary-quality row says that neither version was measured.
 
 ## What Version 2 changes
 
@@ -43,9 +42,8 @@ The new parts are these.
 - The cloud engine and the key box are removed from Version 2. Version 1 stays as it was.
 
 ![What the extension is made of, and where the model lives, compared with the reader and the page](../figures/V01_context.png)
-<!-- check against figure -->
 
-Reading the figure: the reader presses the button in the popup in Chrome. The page is read in the browser, and the summary is made by the model on the laptop. The only arrow that leaves the laptop is the dashed one to the model host, used once for the first download. No arrow leads to a cloud service for the summary.
+Reading the figure: "You" press Summarize, and the arrow leads into the box "Your laptop (Windows and Chrome)". Inside it, the extension reads the web page, the box "Page Summarizer" (popup, service worker and offscreen page) saves and loads the model files in IndexedDB, and it runs the model on the graphics card through WebLLM and WebGPU. A crossed-out box marks the cloud service as not used, with no page text, prompt or summary sent to it. A dashed arrow from Hugging Face and GitHub brings the model files in on first use only. The footer says that page text, prompts and summaries are never sent to a service in Version 2.
 
 ## Objectives
 
@@ -70,16 +68,17 @@ Table: Project objectives and the state of Version 2
 - The local engine, with the model download, the cache in IndexedDB and the load into the graphics card.
 - The graphics card check, with the messages for missing WebGPU and missing 16-bit math.
 - The switch to the smaller model on a weak built-in chip, with a one-line note in the popup.
-- A fallback to the smaller model after a memory failure, remembered for later.
+- A fallback to the smaller model after a memory failure, remembered for later, with a notice in the popup when the smaller model wrote the summary.
 - The offscreen page that holds the model and its messages, and the job that runs in the background.
 - Setup and run scripts for Windows (`setup.bat`, `run.bat`), a computer check (`scripts/check-computer.ps1`) and an opt-in script that asks Windows to run Chrome on the separate graphics card.
-- Tests: 65 unit tests, 26 browser scenarios that use a pretend model, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
+- Tests: 70 unit tests, 26 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
 
 ### What is not built or not verified
 
 - Other models beyond the two in `src/core/config.js`.
 - The step that halves the part size and tries again when a model reports that its window is too small. The design allowed for it. No run needed it, and the part limit refuses very long pages first, so it was not built (`DECISIONS.md`, D1, item 4).
 - A summary-quality comparison between Version 1 and Version 2.
+- Clearing the saved switch to the smaller model. Once it is saved, it stays until the stored settings are cleared. Closing a tab during the download does not stop the download either.
 - Languages other than English. The model is small and is meant for English text.
 - Chrome's built-in Summarizer API. It was studied as background only.
 - A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a manual click-through in the visible Chrome window. All runs so far used a hidden Chromium browser.

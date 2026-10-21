@@ -12,7 +12,7 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **Context window.** The number of tokens a model can look at in one go, including the prompt and the answer. The decision record gives the window of Llama 3.2 1B as 4,096 tokens, and the part size is set to fit inside it.
 
-**Decode.** The step in which the model writes its answer, one token at a time. Each token needs a full pass through the model, so decode is slower than prefill. The clean NVIDIA runs decoded at 34 to 53 tokens a second.
+**Decode.** The step in which the model writes its answer, one token at a time. Each token needs a full pass through the model, so decode is slower than prefill. The saved clean NVIDIA runs decoded at 34 to 53 tokens a second. An unsaved speed test, recorded in the DEVLOG, gave about 63.
 
 **fp16 and shader-f16.** fp16 means a number stored in 16 bits, instead of 32, which is faster and smaller. `shader-f16` is the graphics feature that lets the card's small programs use those 16-bit numbers. The models in this project need it, and a card without it gets the NO_SHADER_F16 message.
 
@@ -38,13 +38,13 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **Model weights.** The numbers a model learned, stored in a file. The 1B model's weights are about 695 MB in this project, because they are stored in 4-bit form.
 
-**Offscreen document.** A hidden page that Chrome lets an extension open for a task that needs a page, such as holding a model. This project's offscreen page has no window, can only send messages, and is closed after five minutes idle (`idleCloseMs`).
+**Offscreen document.** A hidden page that Chrome lets an extension open for a task that needs a page, such as holding a model. This project's offscreen page has no window, can only send messages, and is closed after five minutes idle (`idleCloseMs`), and never while a message is running.
 
 **Parameter.** One of the numbers inside a model that was set during learning. "1B" means about one billion of them. More parameters usually need more memory and time, which is why the project offers a smaller model.
 
 **Pipeline.** The fixed order of steps for one job: read the page, check the length, cut into parts, prepare the model, summarize each part, merge. The same pipeline code is used in Version 1 and Version 2, with a prepare step added in Version 2.
 
-**Prefill.** The step in which the model reads the whole prompt before it writes anything. The DEVLOG records about 600 tokens a second on the NVIDIA card, and about 1.5 seconds for a 250-token prompt. Prefill is faster than decode.
+**Prefill.** The step in which the model reads the whole prompt before it writes anything. An unsaved speed test, recorded in the DEVLOG on 21 October, gave about 600 tokens a second on the NVIDIA card, and about 1.5 seconds for a 250-token prompt. The record does not say which text was used. Prefill is faster than decode.
 
 **Prompt.** The text sent to the model in one request: the page text between markers, followed by one fixed instruction. Version 2's prompt layout is `PROMPT_VERSION` `v2.0`. The model reads the prompt and then writes the answer.
 
@@ -52,7 +52,7 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **Readability.** A library that finds the main article in a web page and leaves out the menus and adverts. It is the same file as in Version 1, with an Apache-2.0 licence.
 
-**Service worker.** A background script that Chrome runs for an extension. In this project it owns the job and keeps the job record. Chrome can stop it when it is idle, and a job left running at that moment is marked INTERRUPTED.
+**Service worker.** A background script that Chrome runs for an extension. In this project it owns the job and keeps the job record. Chrome can stop it when it is idle, and a job left running at that moment is marked INTERRUPTED. A job with no update for five minutes counts as dead.
 
 **Session storage.** Chrome's storage for an extension that is cleared when the browser closes. The job records are kept here (`chrome.storage.session`).
 
@@ -60,13 +60,15 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **SmolLM2 360M.** The fallback model, with the id `SmolLM2-360M-Instruct-q4f16_1-MLC`. It needs 376 MB of graphics memory and its download is about 204 MB. The extension chooses it on integrated graphics, on a computer with less than 8 GB of memory, or after the primary model fails to load.
 
+**Stale job.** A job whose record has had no update for five minutes. The popup and the service worker both treat it as dead. The answer timeout of 180 seconds is a separate limit, and Version 1 used three minutes for its own dead-job limit.
+
 **Temperature.** A setting that controls how much a model varies its choice of next word. The project uses 0.2, so the answer stays close to the most likely words and to the text.
 
 **Token.** The piece of text a model reads and writes: a word, part of a word, or a punctuation mark. A page of 6,000 characters is about 1,500 tokens, according to the comment in `config.js`. The repository does not store how many tokens each answer had.
 
 **Tokenizer.** The part that turns text into token numbers for the model, and turns the model's numbers back into text. WebLLM loads it with the model. This is background; the project does not change it.
 
-**Tokens per second.** The speed of decode, written as tokens a second. It is recorded as `decodeTps` in the stats and in the test-run files. Clean NVIDIA runs: 34 to 53. Clean Intel runs with SmolLM2: 4 to 5.
+**Tokens per second.** The speed of decode, written as tokens a second. It is recorded as `decodeTps` in the stats and in the test-run files. Saved clean NVIDIA runs: 34 to 53, each the last request of its job. The repeat run after the label fix gave 65 for the short article and 45 for the two-part article. Saved clean Intel runs with SmolLM2: 4 to 5.
 
 **WebGPU.** A browser feature that lets a web page or extension use the graphics card for calculation. Chrome's `chrome://gpu` page shows whether WebGPU is "Hardware accelerated". The extension asks for an adapter and checks it.
 

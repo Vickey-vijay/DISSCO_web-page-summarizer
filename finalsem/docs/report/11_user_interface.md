@@ -1,6 +1,6 @@
 # User interface
 
-The popup is the only screen the reader sees. It opens from the toolbar, is 380 pixels wide, and holds one button, a line about the model, and the result. It contains no logic for summarizing. It asks the service worker to start a job, reads the job record from Chrome's session storage, and draws what it finds (`src/ui/popup.js`). This chapter lists what the popup shows in each state, explains why nothing opens in a new tab, and describes the look that `src/ui/ui.css` gives it.
+The popup is the only screen the reader sees. It opens from the toolbar, is 380 pixels wide, and holds one button, a line about the model, and the result. It contains no logic for summarizing. It asks the service worker to start a job, reads the job record from Chrome's session storage, and draws what it finds (`src/ui/popup.js`). This chapter lists what the popup shows in each state, explains why nothing opens in a new tab, and describes the look that `src/ui/ui.css` gives it. Where the code changed after a review, the chapter describes the code as it is now. The earlier behaviour is kept only as "what was seen before the fix".
 
 The popup holds eight parts, in this order from top to bottom (`src/ui/popup.html`). Each one is shown or hidden with its `hidden` attribute.
 
@@ -15,7 +15,7 @@ Table: The parts of the popup
 | Graphics note | Only on integrated graphics | The note about the built-in Intel chip |
 | Progress block | While a job runs | A label and a thin bar |
 | Error block | After a failure, or for an interrupted job | The plain message for the error code |
-| Result block | After a finished job | The summary and a stats line |
+| Result block | After a finished job | A notice when the small model wrote the summary, then the summary and a stats line |
 
 **What this means in plain words.** The reader sees one button and one line about the model. Below them appears whichever of progress, error or result applies now.
 
@@ -35,10 +35,9 @@ The real model reports "about 695 MB" for the same download. The pretend model r
 
 Each phase has its own label. The bar is measured only where the label has a percentage or a part count. Elsewhere it is indeterminate, which the stylesheet draws as a red sweep moving along a grey track.
 
-![The job phases in order, with the phases a cached model skips](../figures/V06_job_phases.png)
-<!-- check against figure -->
+![The job phases in order, with the downloading step drawn dashed and skipped by a stored model](../figures/V06_job_phases.png)
 
-Reading the figure: the phases run in the order the popup shows them. A model that is already stored skips the download label, and a page with one part skips the merge. The table below gives the wording and the bar for each phase.
+Reading the figure: the phases run from top to bottom in the order the popup shows them. The downloading box is dashed and labelled "first time only", and an arrow leaves checking straight for loading, which is the path a stored model takes. "Combining" is drawn grey, because it runs only for a page with more than one part. The footnote gives the downloading line that one offline run showed as about one second. The DEVLOG row gives 0.8 seconds. The table below gives the wording and the bar for each phase.
 
 Table: Progress labels and the bar, from `progressLabel` in `src/ui/popup.js`
 
@@ -63,9 +62,9 @@ The first use goes through the download. The button is grey and cannot be presse
 
 ![Pretend model: the download at 25 percent, with the button disabled](../screenshots/ui-02-downloading.png)
 
-Next comes the label "Loading the model into the graphics card", which moves in steps as the weights are placed on the card. The pretend model shows 45 percent.
+Next comes the label "Loading the model into the graphics card", which moves in steps as the weights are placed on the card. The pretend model shows 45 percent. The job record for that picture was written by hand. The pretend model never sends the loading message, so the test script writes the record itself, in the same shape the service worker writes it.
 
-![Pretend model: loading into the graphics card at 45 percent](../screenshots/ui-03-loading.png)
+![Pretend model, with the job record written by hand: the loading label at 45 percent. The pretend model never sends this message.](../screenshots/ui-03-loading.png)
 
 The warm-up follows. The hidden page sends one short request, so that the graphics programs are compiled before the first part. The label says "about 30 seconds", and the bar is indeterminate.
 
@@ -75,11 +74,11 @@ The warm-up follows. The hidden page sends one short request, so that the graphi
 
 ![Real model: the warm-up on the Intel chip with the small model, clean Intel run. The warm-up takes about 40 seconds there.](../screenshots/v2-intel-short-warming.png)
 
-The warm-up in the clean offline run lasted about half a second, against about 30 seconds in the clean first attempt on the same card. The repository does not explain the difference. The warm-up runs each time the model is loaded into a new hidden page, which happens after the five-minute idle close, so the label can return on a later job. The repository records no measured warm-up after an idle close: [to be measured].
+The warm-up in the clean offline run lasted about half a second, against about 30 seconds in the clean first attempt on the same card. The repeat after the label fix lasted about 0.4 seconds, and the repository does not explain the difference. The warm-up runs each time the model is loaded into a new hidden page, which happens after the five-minute idle close. The warm-up after an idle close has not been measured: [to be measured].
 
-A cached model still goes through loading. In the clean offline run, the popup showed "Downloading the model (first time only): 0%" for a moment during that load, although the model was already stored. The likely cause is `mapInitProgress` in `src/core/gpu-check.js`, which treats any progress text containing "fetch" as a download. The repository does not show WebLLM's exact text for a cached load, so this is a reading of the code: [to be checked]. The label is wrong in that moment, but no download happened.
+A stored model still goes through loading, and the popup now says so. Before the fix, the clean offline run showed "Downloading the model (first time only): 0%" for about 0.8 seconds during the load of a model that was already stored (DEVLOG, 21 October, "V2 popup wording"). The cause was `mapInitProgress`, which treated any progress text containing "fetch" as a download. WebLLM also says "Start to fetch params" when it loads from the browser's own storage. The code now checks `hasModelInCache` before loading and passes the result to `mapInitProgress`. A stored model is always "loading". The repeat of the offline run after the fix shows no such line.
 
-![Real model: the warm-up with a stored model, clean offline run. The button is disabled.](../screenshots/v2-nvidia-offline-short-warming.png)
+![Real model, after the label fix: warm-up with a stored model. The model line says Downloaded, the button is disabled, and no Downloading line appears.](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
 
 ### Summarizing and merging
 
@@ -93,19 +92,25 @@ The merge follows, with the label "Combining N summaries..." and an indeterminat
 
 ### The result
 
-The result block holds the summary and a stats line, for example "1 part · 1 request · 206.5 s · Llama 3.2 1B". The stats count requests, which are the part answers plus any merge. The field behind the number is still named `apiCalls`, a name kept from Version 1.
+The result block holds the summary and a stats line, for example "1 part · 1 request · 17.5 s · Llama 3.2 1B". The stats count requests, which are the part answers plus any merge. The field behind the number is still named `apiCalls`, a name kept from Version 1.
 
 The summary sits in a box 360 pixels high that scrolls, so a long list needs scrolling to reach its last points. The pretend result shows the numbered points and the stats line.
 
 ![Pretend model: the finished result, with the fixed answer the pretend model gives, numbered points and the stats line](../screenshots/ui-07-result.png)
 
-![Real model: the result for the short article, clean offline run. The fourth point is cut off by the scroll area.](../screenshots/v2-nvidia-offline-short-popup.png)
+When the small model wrote the summary because the main model failed to load, a notice sits in ochre above the summary: "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The popup builds that text from the job's stats, so the notice field of the job record stays empty. No notice appears when the small model was chosen for integrated graphics, because that case has its own note. Before the fix, nothing on screen said that the small model had taken over.
 
-![Real model: the result for the two-part article, clean offline run](../screenshots/v2-nvidia-offline-long-popup.png)
+![Pretend model, re-shot after the fix: the main model ran out of memory, so SmolLM2 wrote the summary. The notice in ochre sits above it.](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
-After a result arrives, the popup asks for the model state again, so the model line should change to "Downloaded, runs on this computer." In two first-use results the line still reads "Not downloaded yet" under the finished summary. The screenshots are `v2-nvidia-short-popup.png` and `v2-intel-short-popup.png`. The second one is shown below. The code intends the line to change, and the repository does not show whether the screenshots caught the moment before the update, or whether the line failed to refresh: [to be checked].
+![Real model, after the label fix: the result for the short article. The model line says Downloaded, and the stats show 17.5 seconds for the main model.](../screenshots/v2-nvidia-offline-short-popup-after-label-fix.png)
 
-![Real model: the Intel result for the short article. The model line still says Not downloaded yet, and the page markers show as text (clean Intel run)](../screenshots/v2-intel-short-popup.png)
+![Real model: the result for the two-part article, clean offline run, recorded before the label fix](../screenshots/v2-nvidia-offline-long-popup.png)
+
+After every job ends, success or error, the popup asks for the model state once more (`refreshModelLineOnce`), so the model line is current. Before this change, the line was refreshed only after a successful job. Two first-use results still show the old line, because they were recorded before the refresh was added. `v2-nvidia-short-popup.png` shows "Not downloaded yet" under a finished summary. `v2-intel-short-popup.png` shows the same, and it also shows the page markers that are now removed.
+
+![Real model, recorded before the fix: the model line still says Not downloaded yet, and the page markers show as text. Both are fixed in the code now.](../screenshots/v2-intel-short-popup.png)
+
+The model line is still not refreshed while a download or a warm-up is running. This is an open limit.
 
 ![Real model: the Intel result for the two-part article, where the model line says Downloaded (clean Intel run)](../screenshots/v2-intel-long-popup.png)
 
@@ -121,13 +126,17 @@ The vendor name is capitalized because WebGPU reports it in lower case. A browse
 
 ### Errors and the blocked state
 
-Errors appear in the error block below the progress area, or, for a computer without WebGPU or without 16-bit shader support, in the model line with the button disabled. Each error has its own screenshot in the chapter on errors and fallbacks.
+Errors appear in the error block below the progress area. For a computer without WebGPU or without 16-bit shader support, the message appears in the model line and the button is disabled. Each error has its own screenshot in the chapter on errors and fallbacks.
 
-**What this means in plain words.** Each state has one place on the popup. A label that moves tells the reader the job is alive, and a message in the red block says what stopped it.
+After a memory failure that switched to the small model, the model line names the model the extension now uses. The re-shot `ui-13` shows the case where that small model also ran out of memory. The model line reads "SmolLM2 360M. Not downloaded yet", the error block gives the memory message, and the button is enabled again. Before the fix, the line still named the main model after both had failed.
+
+![Pretend model, re-shot after the fix: every model ran out of memory. The model line names the small model, which is not downloaded, and the error block gives the memory message.](../screenshots/ui-13-out-of-memory-all.png)
+
+**What this means in plain words.** Each state has one place on the popup. A label that moves tells the reader the job is alive, a notice explains a switch to the smaller model, and a message in the error block says what stopped the job.
 
 ## Why everything stays in the popup
 
-The popup is the only window. A summary does not open a tab, and Version 2 has no options page: its manifest has no `options_page` entry, and the key box from Version 1 is gone (`finalsem/docs/DECISIONS.md`, D1). This follows the owner's instruction recorded in the Version 1 DEVLOG of 20 October 2026, that the extension should open in a popup, not in a new tab. The browser test V24 checks it, and confirms that a normal summary adds only the popup window.
+The popup is the only window. A summary does not open a tab, and Version 2 has no options page: its manifest has no `options_page` entry, and the key box from Version 1 is gone (`finalsem/docs/DECISIONS.md`, D1). This follows the owner's instruction recorded in the Version 1 DEVLOG of 20 October 2026, that the extension should open in a popup, not in a new tab. Scenario V24 checks it, and confirms that a normal summary adds only the popup window.
 
 **What this means in plain words.** The reader never leaves the page to use the tool, and no extra tab appears in the browser.
 
@@ -157,7 +166,7 @@ function writeJob(tabId, jobId, patch) {
 }
 ```
 
-The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Browser test V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for three minutes is shown as interrupted.
+The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Scenario V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for five minutes is shown as interrupted. Version 1 used three minutes, which suited short cloud calls, but a slow local answer needed more room. The answer timeout itself is still 180 seconds.
 
 **What this means in plain words.** The summary belongs to the browser, not to the popup. Closing the popup does not stop it, and reopening the popup shows where it has got to.
 
@@ -181,9 +190,9 @@ The stylesheet sets a small palette on `:root`, and every colour in the popup co
 }
 ```
 
-The paper is a warm off-white and the ink is almost black. The one red accent, a brick colour, marks the hover state of the button, the progress bar, the error bar and the numbers of the points. The ochre marks the integrated graphics note. Sans-serif text is used for the controls and the model line, a serif for the summary, and a monospace for the page title, the progress labels and the stats line. The font stacks start with Windows fonts (Segoe UI and Consolas), with fallbacks.
+The paper is a warm off-white and the ink is almost black. The one red accent, a brick colour, marks the hover state of the button, the progress bar, the error bar and the numbers of the points. The ochre marks the integrated graphics note and the memory-switch notice. Sans-serif text is used for the controls and the model line, a serif for the summary, and a monospace for the page title, the progress labels and the stats line. The font stacks start with Windows fonts (Segoe UI and Consolas), with fallbacks.
 
-The spacing is plain. The header has a 2-pixel ink rule underneath. The summary's points are divided by 1-pixel hairlines in the rule colour. The button is full width with a 2-pixel corner. The text inputs, which only the old key box used, have none. The stylesheet has no shadows, no icons, no images and no dark-mode rules. Its only gradient is the sweep of the indeterminate bar. Some rules for the Version 1 key box and Options page are still in the file, but the popup does not use them.
+The spacing is plain. The header has a 2-pixel ink rule underneath. The summary's points are divided by 1-pixel hairlines in the rule colour. The button is full width with a 2-pixel corner. The stylesheet has no shadows, no icons, no images and no dark-mode rules. Its only gradient is the sweep of the indeterminate bar. The rules for the Version 1 key box and Options page have been removed. Three small rules, `.outline`, `.textbtn` and `.fine`, remain in the file, but the popup never uses them. One rule was added for the notice, which gets a 14-pixel gap below it.
 
 The look was chosen after the owner said that the first design looked as if an AI had made it, as `midsem/docs/report/05_technology_choices.md` records. Version 2 keeps the printed-page style.
 
@@ -197,11 +206,13 @@ The page declares its language (`lang="en"`) and has a viewport tag. The model l
 
 ## What went wrong and what is left
 
-The screenshots and timelines show four problems. The model line can lag behind a finished result. The "Downloading" label appears during a cached load. The warm-up label says "first time" each time a new hidden page loads the model. The summary box hides its last points unless the reader scrolls. The DEVLOG also records that the vendor name appeared in lower case, which a browser test caught, and the popup now capitalizes it.
+Several problems were found in the screenshots and the timelines. Four are fixed. The "Downloading" line showed for a stored model, and the fix is described above. The model line stayed on the main model after both models failed, and the popup now refreshes it after every job. A switch to the small model was silent, and a notice now says so. The vendor name appeared in lower case, which a browser test caught, and the popup now capitalizes it. The DEVLOG rows dated 21 October 2026 tell these stories.
+
+One problem is still open. The model line is not refreshed while a download or warm-up is running. The warm-up label also says "first time" each time a new hidden page loads the model, which is accurate for the first use only.
 
 ## Limitations
 
-The popup has a fixed width, and its summary is a scrolling box, so long answers need scrolling. There is no dark mode. Colour contrast and screen-reader behaviour have not been measured. The screenshots come from one laptop, not from the client's computer.
+The popup has a fixed width, and its summary is a scrolling box, so long answers need scrolling. There is no dark mode. The model line can be out of date while a job is running. Colour contrast and screen-reader behaviour have not been measured. The screenshots come from one laptop, not from the client's computer, and the pictures of the first use were recorded before some fixes.
 
 ### Questions this chapter answers
 
@@ -209,13 +220,13 @@ The popup has a fixed width, and its summary is a scrolling box, so long answers
 The reader sees one button and a line about the model. The button says "Download model and summarize" until the model is stored, and "Summarize this page" after that. A progress block, an error block or a result block appears below, depending on the job.
 
 **Why does nothing open in a new tab?**
-The tool was built to live in the popup. Version 2 has no options page, and the key box from Version 1 is gone. A browser test checks that a normal summary opens only the popup window.
+The tool was built to live in the popup. Version 2 has no options page, and the key box from Version 1 is gone. Scenario V24 checks that a normal summary opens only the popup window.
 
 **Can the reader close the popup during a summary?**
 Yes. The job runs in the service worker and writes its progress to session storage. Reopening the popup reads the same record and shows the same progress.
 
-**Why does the popup look like a printed page?**
-The palette, the serif summary text and the hairline rules were chosen after the owner said the first design looked AI-made. The stylesheet has no shadows, icons or gradients, apart from the sweep of the indeterminate bar.
+**How does the reader know the small model wrote the summary?**
+A notice in ochre sits above the summary when the main model failed to load with a memory error or a load failure. It does not appear for the integrated-graphics switch, which has its own note.
 
-**What does the popup not yet show clearly?**
-Two first-use results show the model as not downloaded under a finished summary, and a cached load can briefly show the download label. Neither is fixed in the repository, and the cause of the stale line is not yet confirmed.
+**What does the popup still show poorly?**
+The model line is not refreshed while a download or warm-up is running, and the warm-up label says "first time" on each new hidden page. The summary box also hides its last points until the reader scrolls.

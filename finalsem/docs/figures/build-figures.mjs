@@ -497,7 +497,7 @@ registerFigure('V05_offscreen_messages', () => {
     kind: 'neutral',
     title: 'Idle close',
     lines: [
-      'Each message restarts a 5-minute timer (idleCloseMs = 300000). When it runs out, the offscreen page is closed and its graphics memory is freed. The model files stay in IndexedDB.',
+      'The 5-minute timer (idleCloseMs = 300000) starts when the last running message is done. At zero the offscreen page closes and its graphics memory is freed. Model files stay in IndexedDB.',
     ],
   });
   box(980, 620, 560, 190, {
@@ -546,7 +546,7 @@ registerFigure('V06_job_phases', () => {
   arrow([[bx, yA], [130, yA], [130, yB], [bx, yB]], { dashed: true });
   text(40, y0 + 2 * step + bh / 2 + 8, 'skipped', { size: 22 });
 
-  text(40, 930, 'Later use is meant to skip the Downloading step (dashed). One offline test run showed that line for about 1 s (see FIGURES.md).', { size: 22 });
+  text(40, 930, 'Later use is meant to skip the Downloading step (dashed). One offline test run, made before a fix, showed that line for about 0.8 s (see FIGURES.md).', { size: 22 });
   text(40, 962, 'TOO_LITTLE_TEXT (under 200 characters) and TOO_LONG (more than 12 parts) stop the job before the model is used.', { size: 22 });
   return { svg: finish(H), height: H };
 });
@@ -783,7 +783,7 @@ registerFigure('V11_error_flow', () => {
     ['job stops, message shown', 'red'],
     ['refused early, or not shown', 'neutral'],
   ]);
-  text(40, y + 66, 'Messages are copied from src/core/errors.js (USER_MESSAGES). The technical detail goes only to the console.', { size: 22 });
+  text(40, y + 66, 'Messages are copied from src/core/errors.js (USER_MESSAGES). The technical detail goes to the console and the job record.', { size: 22 });
   const H = y + 100;
   return { svg: finish(H), height: H };
 });
@@ -916,14 +916,14 @@ registerFigure('V14_reuse_v1_v2', () => {
     ['ui/options.js', 'Version 1 key page script'],
   ];
   const CHANGED = [
-    ['background/service-worker.js', '83 · local engine, no Gemini'],
+    ['background/service-worker.js', '85 · local engine, no Gemini'],
     ['core/config.js', '83 · local models, no key'],
     ['core/errors.js', '56 · model error codes'],
     ['core/pipeline.js', '6 · model prepared first'],
-    ['core/prompts.js', '48 · shorter prompts'],
-    ['ui/popup.js', '146 · model line, no key box'],
-    ['ui/popup.html', '15 · model line, no key box'],
-    ['ui/ui.css', '5 · styles for the model line'],
+    ['core/prompts.js', '61 · shorter prompts'],
+    ['ui/popup.js', '172 · model line, no key box'],
+    ['ui/popup.html', '16 · model line, no key box'],
+    ['ui/ui.css', '38 · model line styles'],
   ];
   const NEW = [
     ['background/offscreen-manager.js', 'hidden page, opened and closed'],
@@ -1093,7 +1093,7 @@ registerFigure('V17_two_graphics_chips', () => {
     lines: [
       '1. By hand: Windows Settings, System, Display, Graphics, add Chrome, Options, High performance. Restart Chrome.',
       '2. setup.bat --gpu (opt-in): writes one per-user value, GpuPreference=2, for Chrome in the Windows graphics settings. Tested only against a test registry key, not yet against a real Chrome.',
-      'Undo: powershell -File scripts\\set-chrome-gpu.ps1 -ChromePath <chrome.exe> -Remove',
+      'Undo: powershell -File scripts\\set-chrome-gpu.ps1 -Remove',
     ],
   });
   text(40, 866, 'The flag --force_high_performance_gpu is used only by the test script to start its browser; it is not what a user gets.', { size: 22 });

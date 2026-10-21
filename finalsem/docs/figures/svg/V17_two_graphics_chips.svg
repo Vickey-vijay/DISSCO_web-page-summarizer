@@ -26,5 +26,5 @@
 <text x="800" y="686.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">1. By hand: Windows Settings, System, Display, Graphics, add Chrome, Options, High performance. Restart Chrome.</text>
 <text x="800" y="715.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">2. setup.bat --gpu (opt-in): writes one per-user value, GpuPreference=2, for Chrome in the Windows graphics settings. Tested only</text>
 <text x="800" y="744.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">against a test registry key, not yet against a real Chrome.</text>
-<text x="800" y="773.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">Undo: powershell -File scripts\set-chrome-gpu.ps1 -ChromePath &lt;chrome.exe&gt; -Remove</text>
+<text x="800" y="773.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">Undo: powershell -File scripts\set-chrome-gpu.ps1 -Remove</text>
 <text x="40" y="866" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The flag --force_high_performance_gpu is used only by the test script to start its browser; it is not what a user gets.</text></svg>

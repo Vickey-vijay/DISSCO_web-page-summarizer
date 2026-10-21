@@ -1,24 +1,24 @@
 # Running a model in the browser
 
-Chapter 2 explained what the model does. This chapter explains how the model reaches Chrome and runs there. The question is how a file of about 695 MB becomes a working program inside a browser extension, running on a graphics card that the browser shares with other programs.
+Chapter 2 explained what the model does. This chapter explains how the model reaches Chrome and runs there. Chapter 5 gives the system design, chapter 7 the graphics-card check and the choice of model, chapter 8 the download, storage and first use, chapter 9 the offscreen page and its messages, and chapter 10 the summaries. This chapter outlines those parts and explains the ideas they depend on.
 
-The chain has several links. The popup holds the button and shows progress. The service worker owns the job. The offscreen page is a hidden page that holds the loaded model. A web worker, a separate thread, runs the WebLLM library, which runs the model on the graphics card through WebGPU. The model files sit in the browser's own storage.
+The chain has several links. The popup holds the button and shows progress. The service worker owns the job. The offscreen page is a hidden page that holds the loaded model. A web worker, a separate thread of the browser, runs the WebLLM library, and the library runs the model on the graphics card through WebGPU. The model files sit in the browser's own storage.
 
 ## The model file and what 4-bit compression gives up
 
-A photo saved at a lower quality is smaller, and the fine details are lost. The model file is compressed in the same way. Each stored number is rounded to fewer bits, so the file takes less space.
+A photo saved at a lower quality is smaller, and its fine details are lost. The model file is compressed in a similar way: each stored number is rounded to fewer bits.
 
-The model's stored numbers are the parameters from chapter 2, and they are also called weights. In the project's model, the weights are kept at 4 bits each for most of the model, where full precision would use 16 bits. The name of the model carries the format: `q4f16_1`. The `q4` part means the stored weights use 4 bits. The `f16` part means the other numbers used while the model runs are 16-bit floating-point numbers. The `_1` is a version label for the packing format used by WebLLM, and the repository does not describe it further.
+The stored numbers are the parameters from chapter 2, also called weights. Most of them are kept at 4 bits, where full precision would use 16. The model's name carries the format, `q4f16_1`. The `q4` part means the weights use 4 bits. The `f16` part means the other numbers used while the model runs are 16-bit floating-point numbers. The `_1` is a version label for WebLLM's packing format, which the repository does not describe further.
 
-The arithmetic shows the saving. One billion numbers at 4 bits each is about 0.5 GB. The downloaded file is about 695 MB, which is larger than the simple figure. This means not every part of the model is stored at 4 bits. The repository does not list which parts are kept at a higher precision.
+One billion numbers at 4 bits each take about 0.5 GB. The downloaded file is about 695 MB, so not every part is stored at 4 bits. The repository does not say which parts keep a higher precision.
 
-The cost of compression is precision. Four bits can hold only 16 different values, so each stored number is an approximation of the value it came from. The answers of the compressed model can differ a little from those of the full-precision model. The project did not run the full-precision model, so the size of this loss is not measured here. WebLLM publishes this compressed version for the size, and `DECISIONS.md` (D1) records why Llama 3.2 1B was chosen as the default.
+The cost is precision. Four bits hold only 16 different values, so each stored number approximates the value it came from. The answers can differ a little from those of the full-precision model. The project did not run the full-precision model, so the size of this loss is not measured.
 
-**What this means in plain words.** The model is stored with rounded numbers to make the file about three times smaller. The price is a small loss of accuracy, which was not measured against the full version.
+**What this means in plain words.** The model is stored with rounded numbers, which makes the file about three times smaller. The price is a small loss of accuracy that was not measured.
 
-## Choosing the model in the code
+## The model choice, in brief
 
-The two models are listed in one place, `src/core/config.js`.
+The two models are listed in `src/core/config.js`.
 
 `src/core/config.js`
 
@@ -29,70 +29,31 @@ export const MODELS = Object.freeze({
 });
 ```
 
-The primary model is used unless one of three things happens. The first is that Chrome reports less than 8 GB of memory. Chrome rounds its memory report and caps it at 8, so a laptop with 15.7 GB of memory also reports 8 and is not switched by this rule (`chooseModel()` in `src/core/gpu-check.js`). The second is that the graphics chip is the one built into the processor. The third is that the primary model fails to start because it does not fit.
+The primary model is used unless one of three things happens. The first is that Chrome reports less than 8 GB of memory. Chrome caps its report at 8, so the developer laptop, with 15.7 GB, is not switched by this rule, and the rule has not been seen on real low-memory hardware. The second is that the graphics chip is the one built into the processor. The extension recognises Intel only by name, so a built-in AMD or Apple chip would count as a full card. The third is that the primary model fails to start. The engine then retries once with the smaller model and saves that choice. The extension never clears the saved choice, so later summaries stay on the smaller model until the stored settings are cleared.
 
-`src/engines/local.js`
+When the smaller model wrote a summary after the main model failed, the popup shows a notice in the result block.
 
-```
-async checkStatus() {
-  let status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
-  if (status.gpu?.integrated && engine.model.id === MODELS.primary.id && !settings.modelOverride) {
-    engine.model = MODELS.fallback;
-    engine.modelSwitchReason = 'integrated-graphics';
-    status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
-  }
-  engine.status = status;
-  return status;
-},
-```
+![Pretend model: the result block with the notice that the smaller model wrote this summary](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
-The third case is a retry. If the primary model fails with a graphics memory error or a load error, the engine tries once with the smaller model. The choice is then saved in `chrome.storage.local` as `modelOverride`, so the next summary starts with the smaller model. The saved choice is set by the service worker through `onFallback` (`src/background/service-worker.js`). The retry and the messages it produces are covered in chapter 12.
+Reading the screenshot: this is a pretend-model capture, so the three points are fixed test text. The notice reads "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The model line reads "Model: SmolLM2 360M. Downloaded, runs on this computer." Chapter 7 gives the full rules and chapter 12 the failures.
 
-**What this means in plain words.** The extension picks the smaller model when the laptop looks small, when only the built-in chip is available, or when the bigger model will not start. The reader does not make this choice.
+**What this means in plain words.** The extension picks the smaller model when the laptop reports little memory, when only the built-in chip is there, or when the bigger model will not start. It tells the reader when the smaller model wrote a summary. The saved choice stays until the stored settings are cleared.
 
-## The graphics card and why the model uses it
+## The graphics card, WebGPU and shader-f16
 
-A processor (CPU) works through a job one step at a time, with a few skilled workers. A graphics card has many small calculating units that can work on parts of one job at the same time. A language model is mostly multiplication of long lists of numbers, and those lists can be split across many units, so a graphics card runs the model far faster than a processor does.
+Each step of the model is many multiplications of long lists of numbers. A graphics card has many small calculating units that work on parts of one job together, so it runs the model far faster than a processor. The extension has no path that runs the model on the processor.
 
-The model also has to fit in the card's memory. The 1B model needs 879 MB of graphics memory and SmolLM2 needs 376 MB (`src/core/config.js`). The card's memory is shared with the browser and with any other program that uses the card, such as a game or a video player. The developer laptop's NVIDIA RTX 3050 has 6 GB of its own memory (`finalsem/docs/DECISIONS.md`, D1).
+WebGPU is the browser's way for a web page to ask the card to do calculations. The project requires Chrome 116 or newer (`README.md`). A shader is a small program that runs on the card. The shader-f16 feature lets those programs use 16-bit floating-point numbers, and the configuration comment says both models need it (`src/core/config.js`). The card must also hold the model: 879 MB of graphics memory for the 1B model and 376 MB for SmolLM2. The developer laptop's NVIDIA RTX 3050 has 6 GB of its own memory (`finalsem/docs/DECISIONS.md`, D1).
 
-The extension has no path that runs the model on the processor. WebLLM uses WebGPU, and if WebGPU is missing, the popup refuses with the message for NO_WEBGPU and disables the button (`src/ui/popup.js`). The consequence is that a computer without a usable graphics card cannot run Version 2 at all. The popup says so instead of failing silently.
+If WebGPU or shader-f16 is missing, the popup shows a plain message and disables the button. Scenarios V07 and V08 check both cases with the pretend model. Chapter 7 covers the check.
 
-**What this means in plain words.** The model runs on the graphics card because the card does the model's arithmetic much faster than the processor. A computer without a usable card cannot run this version, and the popup says so.
+**What this means in plain words.** The card does the model's arithmetic much faster than the processor. If the card or its 16-bit feature is missing, the extension says so and stops before any download.
 
-## WebGPU and the 16-bit feature, shader-f16
+## WebLLM, the web worker and the offscreen page
 
-WebGPU is the browser's way for a web page to ask the graphics card to do calculations. The project requires Chrome 116 or newer (`README.md`). A web page does not reach the card directly. It sends its work through this interface, and the browser passes the work on.
+WebLLM is an open-source library that loads a model into the browser and runs it. The project uses version 0.2.86 under the Apache 2.0 licence. It is copied into the project as one file, `src/lib/web-llm.js`, of about 6.8 MB, so the project needs no build step (`finalsem/docs/DECISIONS.md`, D1). The library turns text into tokens, runs the model on the card and turns the output back into text.
 
-shader-f16 is an optional feature of WebGPU. A shader is a small program that runs on the card. With the feature, those programs can use 16-bit floating-point numbers. The configuration comment says that both models need it (`src/core/config.js`), and WebLLM's model list marks them with the same requirement (`src/lib/web-llm.js`). A card without the feature cannot run either model, even if it supports WebGPU.
-
-The check is short. This is `evaluateGpu()` in `src/core/gpu-check.js`, which the offscreen page calls with the result of the browser's request.
-
-`src/core/gpu-check.js`
-
-```
-export function evaluateGpu({ hasGpuApi, adapter }) {
-  if (!hasGpuApi) return { ok: false, code: ERROR_CODES.NO_WEBGPU, detail: 'navigator.gpu is missing' };
-  if (!adapter) return { ok: false, code: ERROR_CODES.NO_WEBGPU, detail: 'requestAdapter() returned nothing' };
-  if (!adapter.features.has('shader-f16')) {
-    return { ok: false, code: ERROR_CODES.NO_SHADER_F16, detail: 'adapter has no shader-f16 feature' };
-  }
-  const info = adapter.info ?? {};
-  return { ok: true, f16: true, vendor: String(info.vendor ?? ''), architecture: String(info.architecture ?? '') };
-}
-```
-
-The two failures have plain messages in `src/core/errors.js`. For NO_WEBGPU the popup says that Chrome cannot use the graphics card for the model and tells the reader to open `chrome://gpu`. For NO_SHADER_F16 it says that the card does not support the 16-bit math the model needs. In both cases the button is disabled, so a press does nothing. Test V07 and V08 check these two cases with the pretend model.
-
-The request for the card asks for the high-performance one: `requestAdapter({ powerPreference: 'high-performance' })` (`src/offscreen/offscreen.js`). The request is only a hint. The developer laptop showed that Chrome can still choose the built-in chip, as described in the section on two graphics chips below.
-
-**What this means in plain words.** WebGPU lets the page use the card, and shader-f16 is an extra feature the model needs. If either is missing, the extension says so and stops before any download.
-
-## WebLLM and the web worker
-
-WebLLM is an open-source library that loads a model into the browser and runs it. The version in this project is 0.2.86 under the Apache 2.0 licence (`README.md`). It is copied into the project as one file, `src/lib/web-llm.js`, of about 6.8 MB, so the project needs no build step (`finalsem/docs/DECISIONS.md`, D1). The library does the heavy work: it turns text into tokens, runs the model on the card and turns the output back into text.
-
-The library runs in a web worker. A web worker is a separate thread of the browser. Work done there does not freeze the page that started it. `src/offscreen/engine-worker.js` starts the library's handler in that worker, and it is short enough to show in full.
+The library runs in a web worker, so heavy work does not freeze the page that started it. `src/offscreen/engine-worker.js` starts the library's handler inside that worker. The whole file is four lines.
 
 `src/offscreen/engine-worker.js`
 
@@ -103,198 +64,105 @@ const handler = new WebWorkerMLCEngineHandler();
 self.onmessage = (message) => handler.onmessage(message);
 ```
 
-The offscreen page creates the worker and loads the model into it. This is the part that reports progress and that the popup shows.
+The offscreen page exists because of the service worker. Chrome stops an extension's service worker when it is idle, and a stopped worker would lose the loaded model, which takes seconds to load. The offscreen page is a hidden page that stays alive. It has only the `chrome.runtime` messaging API, so it cannot read the storage or the tabs, and it works purely by messages from the service worker (chapter 9).
 
-`src/offscreen/offscreen.js`
+Two timing rules govern the page. While it is busy, it sends a keepalive message every 10 seconds. It closes after five minutes without work to free the card's memory. It is never closed while a message is still running: only the last message to finish starts the five-minute countdown. The code comment estimates that closing frees about a gigabyte of graphics memory, which was not measured. A job that receives no update for five minutes counts as dead, and the 180-second answer timeout is a separate limit.
 
-```
-const worker = new Worker(new URL('./engine-worker.js', import.meta.url), { type: 'module' });
-engine = await CreateWebWorkerMLCEngine(worker, modelId, {
-  appConfig: APP_CONFIG,
-  initProgressCallback: (report) => emitProgress(mapInitProgress(report)),
-});
-```
+![What runs where on the client laptop: the popup, service worker, offscreen page, web worker, Chrome GPU, graphics card, the disk and the first download](../figures/V12_deployment.png)
 
-The offscreen page exists because of the service worker. Chrome stops an extension's service worker when it is idle, and a stopped worker would lose the loaded model, which takes seconds to load. The offscreen page is a hidden page that Chrome lets an extension open for a task such as this one. It has only the `chrome.runtime` messaging API. It cannot read the storage or the tabs, so it works purely by messages from the service worker. While it is busy, it sends a message every 10 seconds, which keeps the service worker awake. When it has been idle for five minutes, the page is closed to free the card's memory (`idleCloseMs` in `src/core/config.js`). The code comment estimates that this frees about a gigabyte of graphics memory. That figure was not measured.
+Reading the figure: the popup and the service worker sit at the top. The service worker sends messages to the offscreen page, which holds the model and starts the web worker. The web worker runs WebLLM, whose work goes through Chrome's WebGPU to the graphics card. The offscreen page reads and writes the model files in IndexedDB on disk. Hugging Face and GitHub sit outside the laptop, with a dashed arrow for the first download only. The footer says the client's laptop has not been tested and Chrome's own process layout is not measured.
 
-The figure below shows which part runs in which process.
+**What this means in plain words.** The model runs in a hidden page and a separate thread, under the library's control. The page stays alive while work is in progress, and it closes after five minutes without work.
 
-![What runs where on the client laptop: the Chrome pages, the web worker, the graphics card and the disk](../figures/V12_deployment.png)
-<!-- check against figure -->
+## Where the model is kept
 
-Reading the figure: the popup and the service worker run in the extension, the offscreen page and its web worker run beside them, and the work on the model goes to the graphics card through Chrome. The disk holds the model files in the browser's storage. The model files stay on disk after the page closes, and only the loaded model leaves the card.
+WebLLM stores its files in Cache Storage by default. Inside the offscreen page that failed with `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error` (`DEVLOG.md`, 21 October 2026). A normal extension page could use Cache Storage, so only this kind of page was affected. The project stores the model in IndexedDB instead, which had about 10.7 GB of quota in the test (`DECISIONS.md`, D2). The switch is one setting in `src/offscreen/offscreen.js`: `cacheBackend: 'indexeddb'`. The manifest also asks for the `unlimitedStorage` permission, so the browser does not delete the model when disk space runs short.
 
-**What this means in plain words.** The model runs in a hidden page, in a separate thread, under the library's control. The page stays alive while the model is in use, and it closes after five idle minutes so the card's memory is returned.
+![What is stored where, and for how long: model files, job record, settings and loaded model](../figures/V10_storage.png)
 
-## Where the model is stored: IndexedDB, and why Cache Storage failed
+Reading the figure: a table with one row per store. The model files are in IndexedDB, are kept between runs, and no code deletes them. The job record is in session storage until the browser closes, and it is removed when its tab closes. The settings are in local storage and survive restarts, including the saved switch to the smaller model. The loaded model is in graphics memory inside the offscreen page until the page closes, five minutes after the last message or when the browser closes. The footer notes that Version 2 stores no API key.
 
-WebLLM stores the downloaded files in Cache Storage by default, which is one of the browser's storage systems for web files. In the offscreen page this did not work. The first real try stopped at once with the message `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error` (`DEVLOG.md`, 21 October 2026). A normal extension page could use Cache Storage, so only this kind of page was affected.
+A wording fault appeared in the timelines of the clean offline run, recorded before the fix. The popup showed "Downloading the model (first time only): 0%" for about 0.8 seconds, although the model was stored and no download was possible. The library's progress text contains the word "fetch", and the code treated any such text as a download. The fix passes the stored state to `mapInitProgress()` in `src/core/gpu-check.js`. The run made after the fix has no "Downloading" line. The DEVLOG rows dated 21 October 2026 record the fault.
 
-The project therefore uses IndexedDB, the browser's database for larger structured data. In the test, IndexedDB offered about 10.7 GB of quota (`DECISIONS.md`, D2). The switch is one setting, shown below.
+**What this means in plain words.** The model lives in the browser's database, so it survives a restart and can hold the large file. Cache Storage did not work in this kind of page, so another store is used. Chapter 8 covers the storage in detail.
 
-`src/offscreen/offscreen.js`
+## The first use and the warm-up
 
-```
-// Cache Storage fails inside an offscreen page ("Unexpected internal error"), IndexedDB works,
-// so the model is stored in IndexedDB. (Found by a spike; see DEVLOG.md.)
-const APP_CONFIG = { ...prebuiltAppConfig, cacheBackend: 'indexeddb' };
-```
-
-The extension also asks for the `unlimitedStorage` permission in its manifest. Without it, the browser may delete a large amount of stored data when disk space runs short, and the model's files would be at risk (`DECISIONS.md`, D2).
-
-Table: What is kept where, and for how long
-
-| What | Where | How long it stays | Source |
-|---|---|---|---|
-| Model files | IndexedDB, in the browser's storage | Until the extension's data is removed | `src/offscreen/offscreen.js`, `DECISIONS.md` D2 |
-| The job record (progress and summary) | `chrome.storage.session` | Until the browser restarts | `src/background/service-worker.js` |
-| Settings and the saved model choice | `chrome.storage.local` | Until changed or removed | `src/core/config.js`, `src/background/service-worker.js` |
-| The loaded model | The graphics card's memory | While the offscreen page is open, and closed after five minutes idle | `src/background/offscreen-manager.js` |
-
-The figure below shows the same layout.
-
-![Where the model, the job record, the settings and the loaded model are kept, and for how long](../figures/V10_storage.png)
-<!-- check against figure -->
-
-Reading the figure: each store is shown with its lifetime. The model files and the settings survive a browser restart. The job record does not, and the loaded model must be loaded again after the page closes.
-
-A small wording fault shows in the timelines of the runs. In the clean offline run, the popup showed "Downloading the model (first time only): 0%" for about 0.8 seconds, from 3.9 to 4.7 seconds, although the model was stored and no download was possible. At that moment the library's progress text contained the word "fetch". The code treats any progress text containing "fetch" as a download (`mapInitProgress()` in `src/core/gpu-check.js`), so the label was wrong for that moment.
-
-`src/core/gpu-check.js`
-
-```
-export function mapInitProgress(report) {
-  const text = String(report?.text ?? '');
-  const fraction = Math.max(0, Math.min(1, Number(report?.progress) || 0));
-  // "Start to fetch params" and "Fetching param cache[...]" both mean the download is happening.
-  const phase = /fetch/i.test(text) ? 'downloading' : 'loading';
-  return { phase, percent: Math.round(fraction * 100), text };
-}
-```
-
-The report records it as a fault of wording. It did not affect the summary.
-
-**What this means in plain words.** The model is kept in the browser's database, which survives a restart and can hold the large file. Cache Storage was the usual choice and did not work in this kind of page, so a different store was used.
-
-## The first use: download, load and warm-up
-
-The first use is slow for three reasons. The model must be downloaded, it must be copied into the graphics card's memory, and the card must prepare its programs before the first answer. The popup shows each step in turn. The table gives the times from the two clean first-use runs, one on each chip. Both runs started with no stored model.
+The first use is slow because the model is downloaded, copied into the card's memory, and the card prepares its programs before the first answer. Chapter 8 gives the stages. The table gives the stage times from the two clean first-use runs. Both started with no stored model.
 
 Table: The first use in the two clean runs, in seconds after the button was pressed
 
 | Step | NVIDIA RTX 3050, Llama 3.2 1B (`v2-local-nvidia-cold-first-attempt.md`) | Built-in Intel chip, SmolLM2 360M (`v2-local-intel.md`) |
 |---|---|---|
-| Reading the page | 0.1 | 0.1 |
-| Checking the card | the download label appears at 0.5 | 0.5 |
-| Download, 0% to 100% | 0.5 to 158, about 695 MB | 0.9 to 81.2, about 204 MB |
+| Download, 0% to 100% | 0.5 to 158 (about 695 MB) | 0.9 to 81.2 (about 204 MB) |
 | Load into the card | 158.8 to 162.2 (3.4) | 81.6 to 83.3 (1.7) |
 | Warm-up (one short answer) | 162.6 to 193.1 (30.5) | 83.7 to 123.1 (39.4) |
 | Writing the summary | 193.1 to 196.8 (3.7) | 123.1 to 199.2 (76.1) |
 | Total | 196.8 | 199.2 |
 
-The two totals are almost the same, but the runs are not a like-for-like test. The Intel run downloaded the smaller model, and the NVIDIA run downloaded the larger one. The totals match by coincidence of the parts: the longer download on the NVIDIA run offsets the slower answer on the Intel chip. The difference between the chips shows in the writing step, at 3.7 seconds on the card and 76 seconds on the built-in chip.
+The warm-up sends one answer of one token, to the question "Say ok." (`src/offscreen/offscreen.js`). Its purpose is to compile the card's programs, so the first real summary does not look frozen. The developer notes say the first answer takes about 30 seconds (`DEVLOG.md`). The clean NVIDIA run matches that figure. The run recorded as 207 seconds, done while other programs were running, took 56 seconds, and its timing is not used as a clean figure. Later offline warm-ups took 0.5 seconds in the clean run and 0.4 seconds after the label fix. The cause of the difference was not investigated.
 
-Two rates can be read from these runs. The NVIDIA run downloaded about 695 MB in about 158 seconds, which is about 4.4 MB a second. The Intel run downloaded about 204 MB in about 81 seconds, which is about 2.5 MB a second. These rates depend on the connection on the day, and they are not fixed values.
+![Pretend model: the popup during the warm-up](../screenshots/ui-04-warming.png)
 
-Two screenshots show the download and the warm-up on the NVIDIA card. They were taken in the session of the run recorded as 207 seconds, which was done while other programs were using the processor, so its timing is not used as a clean figure. Both are real-model captures.
+Reading the screenshot: a pretend-model capture. The progress line reads "Warming up the model (first time can take about 30 seconds)...". The model line shows "about 664 MB", which is the pretend model's fixed number and not a measurement. The real download was about 695 MB.
 
-![Real model, NVIDIA chip, first use: the popup during the download, at 32 percent](../screenshots/v2-nvidia-short-downloading.png)
+Two limits apply to this step. Closing the tab during a download does not stop the download, because the preparation step ignores the abort signal. The model line is not refreshed while a download or warm-up is running (chapter 11).
 
-Reading the screenshot: the model line reads "Not downloaded yet (about 695 MB, first use only)", the button reads "Download model and summarize", and the progress line reads "Downloading the model (first time only): 32%".
+**What this means in plain words.** The first use waits for the download, the copy into the card and a warm-up of about half a minute on the NVIDIA card or about forty seconds on the Intel chip. Later uses skip the download.
 
-![Real model, NVIDIA chip, first use: the popup during the warm-up](../screenshots/v2-nvidia-short-warming.png)
+## The second use, with no internet
 
-Reading the screenshot: the progress line reads "Warming up the model (first time can take about 30 seconds)...", which is the message written in `progressLabel()` in `src/ui/popup.js`.
+The second use starts from the stored files. The extension checks the card, asks whether the model is stored (`hasModelInCache()` in the offscreen page), loads the files into the card, runs the warm-up and then summarizes. Nothing is downloaded.
 
-The warm-up is the step that most readers will not expect. The offscreen page sends one short question to the model, "Say ok.", with a limit of one token (`src/offscreen/offscreen.js`). The purpose is to prepare the card before the first real part is sent, so that the first summary does not look frozen. The developer notes say that the first answer compiles the card's programs and takes about 30 seconds (`DEVLOG.md`, 21 October 2026).
+Two clean offline runs on the NVIDIA card, with outside websites blocked, give the timings. The first, recorded before the label fix, took 15.3 seconds for the short article and 16.5 seconds for the two-part article. Its load took 6.9 seconds (`v2-local-nvidia-offline.md`). The second, made after the label fix, took 17.7 and 16 seconds. Its load took 11.6 seconds and its first answer was written at 65 tokens a second. The two-part article's last request, the merge, ran at 45 tokens a second (`v2-local-nvidia-offline-after-label-fix.md`). The run notes say that differences of this size are normal on this laptop.
 
-The warm-up times differ across the runs. The clean NVIDIA run took 30.5 seconds and the clean Intel run 39.4 seconds. The run recorded as 207 seconds took 56 seconds, and that run was disturbed. The clean offline run, which reused a stored model, took 0.5 seconds, and the second offline run, also done while other programs were running, took 0.6 seconds. The repository does not record why the later runs were so much shorter. The popup message says "first time", and the offline runs, which reused the stored model, did not wait for it.
+In the test setup, outside websites were blocked with `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`, which makes every outside name fail to resolve. Playwright's own offline switch was not used, because it also blocks the extension's pages (`DEVLOG.md`). The extension was loaded from one fixed folder, because its identifier comes from the folder and the stored data belongs to that identifier.
 
-The Intel screenshot shows the same warm-up on the built-in chip, with the graphics note.
+![Real model, NVIDIA chip, offline, after the label fix: the popup while the stored model is warmed](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
 
-![Real model, built-in Intel chip: the popup during the warm-up, with the graphics note](../screenshots/v2-intel-short-warming.png)
+Reading the screenshot: a real-model capture made after the label fix. The model line reads "Model: Llama 3.2 1B. Downloaded, runs on this computer." The progress line reads "Warming up the model (first time can take about 30 seconds)...". No "Downloading" line appears.
 
-Reading the screenshot: the model line reads "Model: SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)". The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The progress line reads "Warming up the model".
+![Real model, NVIDIA chip, offline, after the label fix: the popup with the finished summary](../screenshots/v2-nvidia-offline-short-popup-after-label-fix.png)
 
-**What this means in plain words.** The first use waits for the download, then for the copy into the card, then for a warm-up of about half a minute on the NVIDIA card and about forty seconds on the Intel chip. Only after that does the summary start. Once the model is stored, the download is skipped, and the warm-up was short in the offline runs.
+Reading the screenshot: a real-model capture of the short article. The summary is a title line and a numbered list of points. The footer reads "1 part · 1 request · 17.5 s · Llama 3.2 1B".
 
-## Why the second use works with no internet
+These tests ran on one computer, with two pages, in a hidden browser. They did not run on the client's laptop or in the visible Chrome window. They show that the stored model works with outside websites blocked on this computer.
 
-The second use starts from the stored files. The extension checks the card, asks the storage whether the model is there, loads the stored files into the card, warms the card, and then summarizes. Nothing is downloaded. The table gives the clean offline run on the NVIDIA card.
-
-Table: The second use with outside websites blocked, clean run, in seconds
-
-| Step | Time (s) |
-|---|---|
-| Reading the page | 0 to 0.1 |
-| Checking the card | 0.6 |
-| Loading the stored model into the card | 1.3 to 7.6 |
-| Warm-up | 8.1 to 8.6 |
-| Summary, one part | 8.6 to 14.8 (the run's own timer) |
-| Total for the short article | 15.3 |
-| Total for the long article, two parts | 16.5 |
-
-The model line in this run read "Model: Llama 3.2 1B. Downloaded, runs on this computer." The check that the model is stored is `hasModelInCache()`, called from the offscreen page. It looks for the stored files in the browser, and the offline run shows that it works with the outside websites blocked.
-
-The test made the outside websites unreachable and left the local test server working. Chrome was started with `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`, which makes every outside name fail to resolve. The developer notes explain why this was chosen. Playwright's own offline switch also blocks the extension's own pages, so the summary could not be made with it (`DEVLOG.md`, 21 October 2026). The test also loaded the extension from one fixed folder, because an unpacked extension gets its identifier from its folder, and the stored data belongs to that identifier.
-
-The two screenshots below come from this clean offline run.
-
-![Real model, NVIDIA chip, offline: the popup while the stored model is loaded and warmed](../screenshots/v2-nvidia-offline-short-warming.png)
-
-Reading the screenshot: the model line reads "Model: Llama 3.2 1B. Downloaded, runs on this computer." and the progress line reads "Warming up the model (first time can take about 30 seconds)...". The warm-up in this run took half a second.
-
-![Real model, NVIDIA chip, offline: the popup with the finished summary](../screenshots/v2-nvidia-offline-short-popup.png)
-
-Reading the screenshot: the summary is shown as a numbered list, and the footer reads "1 part · 1 request · 14.8 s · Llama 3.2 1B". The footer matches the clean offline run.
-
-What the test shows is limited. It was run on one computer, with two pages, in a hidden browser, and not in the visible Chrome window that the client would use. It was not run on the client's laptop. The offline result proves that the stored model is used without the internet on this computer. It does not prove the same on another machine.
-
-**What this means in plain words.** After the first download, the summary runs from the stored model on the laptop. The internet is not needed for later summaries, which the test showed on the developer laptop with the outside websites blocked.
+**What this means in plain words.** After the first download, the summary runs from the stored model on the laptop. The internet is not needed for later summaries, which was shown on the developer laptop with outside websites blocked.
 
 ## Laptops with two graphics chips
 
-The developer laptop has two graphics chips. The Intel chip is built into the processor, and the NVIDIA RTX 3050 is a separate card (`DECISIONS.md`, D1). Chrome decides which chip to use, and the page's request is only a hint. On this laptop, Chrome picked the built-in Intel chip even when the code asked for the high-performance card. The fix that was measured was a browser start with the flag `--force_high_performance_gpu`, which made Chrome use the NVIDIA card (`DEVLOG.md`, 21 October 2026). The speed of the same model on the two chips was about 2 tokens a second on the built-in chip and about 63 tokens a second on the card, in the speed test that the developer notes record.
+The developer laptop has two graphics chips. The Intel chip is built into the processor, and the NVIDIA RTX 3050 is a separate card (`DECISIONS.md`, D1). Chrome decides which chip a page uses. The page's request for the high-performance card is only a hint. On this laptop Chrome used the built-in Intel chip by default. Starting Chrome with the test flag `--force_high_performance_gpu` made it use the NVIDIA card. A speed test recorded in the developer notes gave about 2 tokens a second on the Intel chip and about 63 on the NVIDIA card with the 1B model. That test was not saved as a run file.
 
-The clean runs give the same comparison in a fuller form. The two runs are not the same model, so the table marks which model each run used.
+The saved runs use different models on each chip, so they are not a like-for-like comparison. On the built-in chip the extension picks SmolLM2 360M, and the clean run wrote at 4 to 5 tokens a second (`v2-local-intel.md`). On the NVIDIA card the clean runs wrote at 34 to 53 tokens a second with Llama 3.2 1B. Chapter 7 sets out the comparison.
 
-Table: The built-in Intel chip and the NVIDIA card on the same laptop, from the clean runs
+The extension detects the built-in chip by vendor and architecture. The Intel chip here reports the architecture `gen-12lp`, and the rule matches the "gen" part (`src/offscreen/offscreen.js`). The popup then shows a note that answers can be slow.
 
-| Measure | Built-in Intel chip, SmolLM2 360M | NVIDIA RTX 3050, Llama 3.2 1B |
-|---|---|---|
-| Writing speed | 3.9 and 4.7 tokens a second | 40 to 47 tokens a second (clean runs, short article) |
-| First-use total, short article | 199.2 s | 196.8 s |
-| Writing the short summary | 76.1 s | 3.7 s |
-| Offline short summary | not measured | 15.3 s |
+![Pretend model: the popup with the note for built-in graphics](../screenshots/ui-09-intel-note.png)
 
-The sources are `v2-local-intel.md` and `v2-local-intel.json` for the Intel column, and `v2-local-nvidia-cold-first-attempt.md` and `v2-local-nvidia-offline.md` for the NVIDIA column.
+Reading the screenshot: a pretend-model capture. The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The model line shows "about 300 MB", which is the pretend model's fixed number. The real SmolLM2 download was about 204 MB.
 
-The extension does not force the choice of chip. It detects the built-in chip and switches to the smaller model by itself (`checkStatus()` in `src/engines/local.js`). The detection reads the vendor and the architecture name. The Intel chip in this laptop reports the architecture `gen-12lp`, and the rule matches the "gen" part (`src/offscreen/offscreen.js`). The popup then shows the note from the screenshot above. The note says that answers can be slow and that a separate card is much faster.
+A user can move Chrome to the separate card in two ways. By hand, in Windows Settings under System, Display and Graphics, Chrome is set to High performance (`README.md`). Or with the optional `setup.bat --gpu`, which writes one per-user value, `GpuPreference=2`, for Chrome (`scripts/set-chrome-gpu.ps1`). The switch is never run by default. If the script fails, setup says the graphics setting was not changed and carries on. The undo command is `powershell -File scripts\set-chrome-gpu.ps1 -Remove`, which needs no Chrome path. The switch was tested only against a test registry key, not yet against a real Chrome on the client's laptop (`DECISIONS.md`, D4).
 
-The figure below shows the choice.
+![A laptop with two graphics chips: Chrome's default built-in chip, and the NVIDIA card reached by the Windows setting or setup.bat --gpu](../figures/V17_two_graphics_chips.png)
 
-![A laptop with two graphics chips: Chrome on the built-in chip by default, and the NVIDIA card when the setting is changed](../figures/V17_two_graphics_chips.png)
-<!-- check against figure -->
+Reading the figure: from Chrome, the default path leads to the Intel built-in graphics, marked as measured at 4 to 5 tokens a second with SmolLM2 360M and 199.2 seconds for the short article on first use. The dashed path, through the Windows setting or `setup.bat --gpu`, leads to the NVIDIA RTX 3050, marked at 34 to 53 tokens a second with Llama 3.2 1B and 15.3 seconds for the stored short article offline. The box below lists the two ways. Its undo line still shows the older `-ChromePath` argument, which the script no longer needs. The footer says the flag `--force_high_performance_gpu` is used only by the test script.
 
-Reading the figure: by default Chrome uses the built-in chip, and the project then uses the smaller model with the note. The figure shows the two ways to move Chrome to the card, the Windows setting made by hand and the optional setup switch. The test flag `--force_high_performance_gpu` appears only as the setting of the project's own test script. A client laptop does not need it.
-
-There are two ways to make Chrome use the separate card. The first is by hand: in Windows Settings, under System, Display and Graphics, add Chrome, open its options and choose High performance (`README.md`). The second is the optional switch `setup.bat --gpu`, which asks Windows to run Chrome on the separate card by writing one value under the current user's registry key (`scripts/set-chrome-gpu.ps1`). The switch is never run by default, because it changes a Windows setting. The undo command is `scripts\set-chrome-gpu.ps1 -Remove`. The switch was tested only against a throw-away registry key. It has not yet been tried against a real Chrome on the client's laptop (`DECISIONS.md`, D4).
-
-**What this means in plain words.** The built-in chip is far slower at writing, so the extension uses the smaller model on it and says why. On the developer laptop, the separate card ran the larger model much faster, once Chrome was set to use it. The setting can be made by hand or by the optional switch.
+**What this means in plain words.** The built-in chip is far slower at writing, so the extension uses the smaller model there and says so. On the developer laptop the separate card ran the larger model much faster once Chrome was set to use it. The setting can be made by hand or by the opt-in switch.
 
 ### Questions this chapter answers
 
 **Does the model run on the processor or on the graphics card?**
-On the graphics card, through WebGPU. The extension has no path that runs the model on the processor. A computer without a usable card is refused with a plain message.
+On the graphics card, through WebGPU. The extension has no path that runs the model on the processor. A computer without a usable card, or without shader-f16, is refused with a plain message.
 
 **Why does the first summary take minutes, and the later ones seconds?**
-The first summary has to download the model, copy it into the card's memory and warm up the card. On the NVIDIA card the download and the warm-up took about 190 seconds in the clean run. Once the model is stored, the later summaries load it from the browser's storage, and the warm-up was under a second in the offline runs.
+The first summary must download the model, copy it into the card's memory and warm up the card. On the NVIDIA card the download, the load and the warm-up took about 190 seconds in the clean run. Once the model is stored, later summaries load it from the browser's storage, and the warm-up took half a second or less in the offline runs.
 
 **Where is the model kept, and can it be deleted?**
 The model files are kept in IndexedDB, in the browser's storage for the extension. The loaded copy lives in the card's memory and is freed when the offscreen page closes after five idle minutes. Removing the extension's data removes the stored files.
 
 **Why does Chrome sometimes use the weak chip?**
-Chrome chooses the chip for each page, and on the developer laptop it chose the built-in Intel chip even when the code asked for the high-performance one. The reader can change Chrome's setting by hand, or use the optional switch, which is never run by default. The extension also detects the built-in chip and uses the smaller model.
+Chrome decides which chip a page uses. On the developer laptop it chose the built-in Intel chip by default, although the code asked for the high-performance one. The reader can move Chrome to the separate card by hand or with the opt-in switch, which is never run by default. The extension also detects the built-in chip and uses the smaller model there.
 
 **Does the extension work offline?**
-Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with the outside websites blocked. The test covers one computer in a hidden browser. It has not been run on the client's laptop or in the visible Chrome window.
+Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in the visible Chrome window.

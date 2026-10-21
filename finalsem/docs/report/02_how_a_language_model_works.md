@@ -29,7 +29,7 @@ Table: The two models in the project, from the code and the popup
 | Llama 3.2 1B | about 1 billion parameters | about 695 MB | 879 MB |
 | SmolLM2 360M | about 360 million parameters | about 204 MB | 376 MB |
 
-The download size comes from the model's own file list, read by `estimateDownloadMB()` in `src/offscreen/offscreen.js`. The developer notes in `DEVLOG.md` record 664 MB for the same model in an earlier spike. This report uses the popup figure. The graphics memory figure is what the card must hold while the model runs. It is not the size of the file.
+The download size comes from the model's own file list, read by `estimateDownloadMB()` in `src/offscreen/offscreen.js`. This report uses the size that the popup reports in real runs. The graphics memory figure is what the card must hold while the model runs. It is not the size of the file.
 
 A number stored at full 16-bit precision takes two bytes. One billion of them would take about 2 GB. The stored model is about three times smaller than that, because the numbers are kept in fewer bits. Chapter 3 explains how that is done and what it costs.
 
@@ -66,9 +66,8 @@ The window does not explain why the part size is 6,000 characters. The configura
 Long pages are cut because they do not fit in one request and because a short request is faster. The encyclopedia article used in the Wikipedia test had 36,752 characters of text, and the model handled it as 7 parts. The fixture article with 10,532 characters was handled as 2 parts. The parts are summarized one after another, in page order. The part summaries are then merged, and if they are too long together, they are merged in groups first (`src/core/merger.js`). The results of this process are shown in the figure below.
 
 ![Long page cut into parts of about 6,000 characters, each summarized, then merged; limit of 12 parts](../figures/V16_chunking_v2.png)
-<!-- check against figure -->
 
-Reading the figure: the page text is cut into parts that are each no longer than 6,000 characters, and each part gets its own summary. The part summaries are then joined in page order. A page that needs more than 12 parts is refused with a message that the page is too long. The 7-part encyclopedia example took 74.1 seconds in the clean run, with the model already downloaded, and its merge was the eighth request.
+Reading the figure: the 36,752-character Lighthouse page is cut into seven parts of at most 6,000 characters. Each part gets its own summary. The seven summaries then go into one merge request, in page order, and the merge gives the final summary. The timeline is the clean run of 74.1 seconds, with the model already downloaded and loaded. The start takes 3.2 seconds, the parts take between 4.6 and 16.6 seconds each (part 6 is the longest), and the merge takes 13.9 seconds. The footer states that a page needing more than 12 parts is refused as TOO_LONG before any model work, and that this run made eight requests: seven for the parts and one for the merge.
 
 The reason for cutting pages is also given in the project's reference list. A 2023 study cited there found that language models use information in the middle of a long input less well than information at the start or the end (`abstract/abstract.md`, reference 6). The project did not measure this effect on its own model. It is cited as the reason for the design.
 
@@ -84,22 +83,21 @@ Table: Speeds of the Llama 3.2 1B model and the smaller model, by measurement
 
 | Measurement | Chip and model | Speed | Where the number comes from |
 |---|---|---|---|
-| Reading the prompt (prefill) | NVIDIA RTX 3050, Llama 3.2 1B | about 600 tokens a second | `DEVLOG.md`, the speed test of 21 October 2026 (not a saved run) |
-| A 250-token prompt | NVIDIA RTX 3050, Llama 3.2 1B | about 1.5 seconds | same speed test |
-| Writing (decode) in the speed test | NVIDIA RTX 3050, Llama 3.2 1B | about 63 tokens a second | same speed test |
-| Writing, clean runs (last request of each job) | NVIDIA RTX 3050, Llama 3.2 1B | 34 to 53 tokens a second | `v2-local-nvidia-cold-first-attempt.md` for the first-use run (47, 53, 34) and `v2-local-nvidia-offline.md` for the offline run (40, 42) |
-| Writing, runs done while other programs ran | NVIDIA RTX 3050, Llama 3.2 1B | 29 to 48 tokens a second | the run recorded as 207 s in `v2-local-nvidia.md` (38, 44, 39) and the second offline run in `v2-local-nvidia-offline-first-attempt-with-load.md` (48, 29) |
-| Writing, clean run | built-in Intel chip, SmolLM2 360M | 3.9 and 4.7 tokens a second | `v2-local-intel.json` (short and long article) |
-| Writing, earlier speed test | built-in Intel chip, Llama 3.2 1B | about 2 tokens a second | `DEVLOG.md`, the speed test of 21 October 2026 |
+| Reading the prompt (prefill) | NVIDIA RTX 3050, Llama 3.2 1B | about 600 tokens a second | earlier speed test, recorded in `DEVLOG.md` on 21 October 2026; no saved run file, and the text used is not recorded |
+| A 250-token prompt | NVIDIA RTX 3050, Llama 3.2 1B | about 1.5 seconds | same earlier speed test |
+| Writing (decode) | NVIDIA RTX 3050, Llama 3.2 1B | about 63 tokens a second | same earlier speed test |
+| Writing, saved clean runs (last request of each job) | NVIDIA RTX 3050, Llama 3.2 1B | 34 to 53 tokens a second | `v2-local-nvidia-cold-first-attempt.md` (47, 53, 34) and `v2-local-nvidia-offline.md` (40, 42) |
+| Writing, run made after the label fix, offline | NVIDIA RTX 3050, Llama 3.2 1B | 65 for the one request of the short article; 45 for the merge of the two-part article | `v2-local-nvidia-offline-after-label-fix.md` |
+| Writing, saved clean run | built-in Intel chip, SmolLM2 360M | 4 to 5 tokens a second | `v2-local-intel.md` |
+| Writing, earlier speed test | built-in Intel chip, Llama 3.2 1B | about 2 tokens a second | earlier speed test, recorded in `DEVLOG.md` on 21 October 2026; no saved run file |
 
-Two notes apply to the table. The speed test in the developer notes was a single measurement made while the extension was being built, so it is labelled as such. The clean runs are the numbers this report relies on. The decode figure in each run file is the speed of the job's last request. For a long page that is the final merge. The code keeps only the statistics of the last answer (`src/engines/local.js`), so the tables do not show an average over all requests.
+Two notes apply to the table. The speed test in the developer notes was a single measurement made while the extension was being built, so it is labelled as such. The saved clean runs, and the run made after the label fix, are the numbers this report relies on. Runs done while other programs were running are not used as speeds. The decode figure in each run file is the speed of the job's last request. For a long page that is the final merge. The code keeps only the statistics of the last answer (`src/engines/local.js`), so the tables do not show an average over all requests.
 
 The figure below shows the two stages on a page.
 
 ![How the model reads a page and writes a summary: prefill, then decode, one token at a time](../figures/V15_how_a_model_writes.png)
-<!-- check against figure -->
 
-Reading the figure: the page text and the instruction go in together, which is the prefill stage, and the speed labelled for it is the one in the speed test, about 600 tokens a second. The answer then comes out one token at a time, which is the decode stage. The writing speed is labelled as 34 to 53 tokens a second for the NVIDIA card in the clean runs, with the earlier speed test of about 63 tokens a second marked as a separate reading.
+Reading the figure: five boxes run left to right. Page text is up to 6,000 characters per part, about 1,500 tokens. The prompt holds one safety line, the title, the text between markers and one instruction. Reading (prefill) is one pass over every token of the prompt. Writing (decode) makes one new token per step, and each step uses everything before it. The summary stops at its last token or at the limit of 300 tokens a part or 320 for the final summary. A row of small squares shows one step per token. The panel below gives the measured values. Writing is 34 to 53 tokens a second in the saved clean runs, each value the last request of its job. Writing is about 63 tokens a second and reading about 600 in the earlier speed test, which has no saved run file. The warm-up is about 30 seconds on first use, against 0.5 seconds in the later offline run.
 
 A check of the numbers agrees. The clean offline summary of the short article is 961 characters, about 240 tokens by the rule of thumb. At 40 tokens a second, that is about 6 seconds. The run's own timeline shows the "Summarizing" label at 8.6 seconds and the end at 14.8 seconds, which is about 6 seconds.
 
@@ -121,7 +119,7 @@ const FORMAT_RULES = [
 ].join('\n');
 ```
 
-The popup then reads the answer line by line. A line that starts with "- ", "* " or "•" becomes a list item. Any other line becomes a paragraph. The popup puts the text into the page with `textContent` only, so markup in the answer is shown as plain characters and is never run as page code. Test V14 checks this with a model that returns markup.
+The popup then reads the answer line by line. A line that starts with "- ", "* " or "•" becomes a list item. Any other line becomes a paragraph. The popup puts the text into the page with `textContent` only, so markup in the answer is shown as plain characters and is never run as page code. Scenario V14 checks this with a model that returns markup.
 
 `src/ui/summary-format.js`
 
@@ -143,15 +141,19 @@ Table: Mistakes seen in real-model summaries, with the file that shows each one
 
 | Mistake | What the summary says | Where it was seen |
 |---|---|---|
-| Copies the markers | The summary starts with `<<<PAGE TEXT START>>>` and ends with `<<<PAGE TEXT END>>>`. | Built-in Intel chip, SmolLM2 360M, short article (`v2-local-intel.json`; `v2-intel-short-popup.png` shows the first marker) |
+| Copies the markers (fixed in the code since) | The summary starts with `<<<PAGE TEXT START>>>` and ends with `<<<PAGE TEXT END>>>`. | Built-in Intel chip, SmolLM2 360M, short article, recorded before the fix (`v2-local-intel.json`; `v2-intel-short-popup.png`) |
 | Reverses a fact | The page says a ship sees a white light on a safe course and a coloured one when it drifts toward rocks. The summary says a white light when it drifts toward rocks. | Same run, same article (`v2-local-intel.json` against `tests/fixtures/article-short.html`) |
 | Repeats the merge instruction | "Page title: ..." and "These are summaries of consecutive parts of one web page" appear as points of the final summary. | The run recorded as 207 s, Llama 3.2 1B, long article (`v2-local-nvidia.json`; `v2-nvidia-long-popup.png` shows the first two points) |
 | Writes filler | "Page title provides a brief overview of the content within." | Clean offline run, Llama 3.2 1B, long article (`v2-local-nvidia-offline.json`) |
 | Ignores the length rule | The rule asks for 3 to 6 bullets. The short answer has 8, and it starts with a title instead of a sentence. | Clean offline run, Llama 3.2 1B, short article (`v2-local-nvidia-offline.json`) |
 
+![Real model, built-in Intel chip, recorded before the marker fix: the summary begins with the page marker](../screenshots/v2-intel-short-popup.png)
+
+Reading the screenshot: a real-model capture from the clean Intel run, taken before the marker fix. The graphics note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The summary begins with the line "<<<PAGE TEXT START>>>". The current code removes the markers from answers, so this screenshot shows the earlier behaviour.
+
 The run recorded as 207 s was done while other programs were using the processor. Its timing is not used in this report as a clean figure. Its summary text is used only as an example of a quality fault.
 
-The reversed fact is the most serious of these mistakes, because a reader could believe it. The copied markers are the easiest to see. The popup has no way to check a summary against the page after the model writes it, and the project does not check summaries against the source. The tests use a pretend model that returns fixed text, so they cannot find these faults. The real-model runs are the only place where they appear.
+The reversed fact is the most serious of these mistakes, because a reader could believe it. The copied markers are the easiest to see, and the code now removes them. The popup has no way to check a summary against the page after the model writes it, and the project does not check summaries against the source. The tests use a pretend model that returns fixed text, so they cannot find these faults. The real-model runs are the only place where they appear.
 
 The prompts are written to reduce these faults, and their structure has four parts. The page text comes first and one short instruction comes after it, because the code comment says small models follow short, plain instructions best. The page text sits between two markers, and a safety line tells the model that the text is material to summarize and not instructions to follow. The part summaries are asked for in 3 to 5 short sentences with no bullets, so the merge step has less to read. The merge prompt asks for "page order, without repeating yourself".
 
@@ -173,7 +175,7 @@ export function buildChunkPrompt({ title, text, index, total }) {
 }
 ```
 
-The prompts reduce the faults, but they do not remove them. The Intel run copied the markers even with the prompt in place. The merge instruction leaked into the 207-second run's summary. A reader should treat each summary as a guide to the page and check the important facts on the page.
+The prompts reduce the faults, but they do not remove them. The Intel run copied the markers with the prompt in place. Since that run, the code strips the markers from every answer (`stripPageMarkers()` in `src/core/prompts.js`, used by `src/engines/local.js`), and two unit tests check it. The repeated merge wording is not fixed. The merge prompt has neither the markers nor the safety line (chapter 10). A reader should treat each summary as a guide to the page and check the important facts on the page.
 
 **What this means in plain words.** The prompts are short on purpose, because a small model follows short instructions better. They help, but they do not stop a small model from copying text or getting a fact backwards. The summary is a guide to the page, not a checked record.
 
@@ -203,7 +205,7 @@ Start with one sentence saying what the page is about, then give 3 to 6 bullets 
 Use only facts that are in the text above. Do not add anything else.
 ```
 
-This is the answer the Llama 3.2 1B model wrote for that prompt in the clean offline run (`v2-local-nvidia-offline.json`). The full text is 961 characters.
+This is the answer the Llama 3.2 1B model wrote for that prompt in the clean offline run (`v2-local-nvidia-offline.json`). That run was recorded before the label fix, which changed only a popup label, so the answer text is unaffected. The full text is 961 characters.
 
 ```
 How a Lighthouse Lens Works
@@ -230,10 +232,10 @@ The answer's 961 characters are about 240 tokens. The model wrote them at about 
 No. The project cuts the page into parts of about 6,000 characters, which is about 1,500 tokens, and reads one part at a time. Each part gets its own summary, and the summaries are then merged. A page that needs more than 12 parts is refused.
 
 **Why is the answer slow when reading the prompt is fast?**
-The model writes one token at a time, and each token needs a full pass through the model. Reading the prompt is one pass over the text. On the NVIDIA card the speed test measured about 600 tokens a second for reading and about 63 for writing.
+The model writes one token at a time, and each token needs a full pass through the model. Reading the prompt is one pass over the text. On the NVIDIA card an earlier speed test, with no saved run file, measured about 600 tokens a second for reading and about 63 for writing.
 
 **Why does a summary sometimes repeat the instructions or copy the markers?**
-A small model has fewer stored numbers and follows instructions less reliably. In the runs, the Intel summary copied the start and end markers, and the 207-second run's summary repeated the merge instruction. The prompts keep the page text clearly marked, and they reduce these faults, but they do not remove them.
+A small model has fewer stored numbers and follows instructions less reliably. In the runs, the Intel summary copied the start and end markers, and the 207-second run's summary repeated the merge instruction. The code now removes copied markers from answers. The prompts keep the page text clearly marked and reduce these faults, but they do not remove them, and the repeated merge wording is still open.
 
 **Why not use a larger model that writes better summaries?**
 A larger model needs more graphics memory and a larger download, and the 1B model already needs 879 MB. The product requirements note that Phi-3.5-mini would need about 2 GB to download (`prd.md`). The project did not test a larger model, so it does not measure how much better its summaries would be. On the built-in Intel chip, even the 1B model writes only about 2 tokens a second.

@@ -95,8 +95,9 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 **Testing**
 
-- Unit tests: 65 pass. Browser tests: 26 scenarios with a pretend model passed in three runs (`finalsem/docs/test-runs/run-1.md`).
+- Unit tests: 70 pass. Browser tests: 26 scenarios with a pretend model pass. Windows script checks: 15 (`finalsem/docs/test-runs/run-1.md`).
 - Real-model runs on the NVIDIA card and on the built-in Intel chip are recorded in `finalsem/docs/test-runs/`. Two faults in the extension were found by the browser tests and fixed.
+- A code-reading review after the first real-model runs led to further fixes. Copied page markers are removed from answers, a stored model is no longer labelled as downloading, the offscreen page is not closed while a message is running, and a job counts as dead after five minutes without an update.
 
 **Remaining Tasks:**
 

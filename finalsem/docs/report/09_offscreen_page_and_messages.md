@@ -66,9 +66,8 @@ Table: The five message types between the service worker and the offscreen page
 Figure: the message protocol between the two pages.
 
 ![The message protocol between the service worker and the offscreen page: the three requests with replies, the progress message and the keepalive, with the idle close at the end](../figures/V05_offscreen_messages.png)
-<!-- check against figure -->
 
-Reading the figure: as planned, the service worker is on the left and the offscreen page on the right. Arrows to the right carry `LOCAL_STATUS`, `LOCAL_LOAD` and `LOCAL_GENERATE`, and the replies return to the left. Arrows to the left carry `MODEL_PROGRESS` and `KEEPALIVE`, which have no reply. The idle close appears as a five-minute timer at the end of the flow.
+Reading the figure: the service worker is on the left and the offscreen page on the right. Arrows to the right carry `LOCAL_STATUS`, `LOCAL_LOAD` and `LOCAL_GENERATE`, and the replies return to the left. Arrows to the left carry `MODEL_PROGRESS` and `KEEPALIVE`, which have no reply. The "Idle close" box says that each message restarts a five-minute timer, that the timer runs with `idleCloseMs = 300000`, and that the page is closed when it runs out, which frees its graphics memory while the model files stay in IndexedDB. The "Rules" box says that every message carries the `offscreen` target, that answers are made one at a time in the order asked, and that `KEEPALIVE` is sent only while a request runs. The code matches the rules. Its timer wording differs slightly from the box: the timer is cleared when a message starts, and the countdown starts only when the last message finishes (see the idle close section).
 
 The first direction is a request with a reply. The `call()` function in `local.js` sends each request, and it turns a missing reply into an error.
 
@@ -180,37 +179,56 @@ The timer runs while at least one request is in progress. The service worker doe
 
 **What this means in plain words.** While the page is busy, it contacts the service worker every 10 seconds, so Chrome does not put the worker to sleep in the middle of a job.
 
-## The 5-minute idle close, and what it frees
+## The 5-minute idle close, and the in-flight rule
 
-The page does not stay open forever. When no request is running, a timer starts. When it runs out, the page is closed. The timer length is `idleCloseMs`, which is five minutes by default (`src/core/config.js`).
+The page does not stay open forever. When no request is running, a countdown starts, and when it runs out the page is closed. The countdown length is `idleCloseMs`, which is five minutes by default (`src/core/config.js`). The service worker now counts the messages that are still running, and it never closes the page while any of them is still running.
 
 `src/background/offscreen-manager.js`
 ```js
-  async function scheduleIdleClose() {
-    clearTimeout(closeTimer);
-    const { idleCloseMs } = await getSettings();
-    closeTimer = setTimeout(() => void close(), idleCloseMs);
-  }
+  let inFlight = 0; // messages sent and not yet answered; the page is never closed while this is above 0
+```
 
+`src/background/offscreen-manager.js`
+```js
   async function close() {
     clearTimeout(closeTimer);
+    if (inFlight > 0) return; // a load or an answer is still running: closing now would cut it off
     const contexts = await api.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
     if (contexts.length > 0) await api.offscreen.closeDocument();
   }
 ```
 
-The timer is cleared at the start of every `send` and restarted at its end. Closing the page frees the graphics memory the model holds. The manager's comment estimates that as "about a gigabyte", while the model's own figure is 879 MB (`vramMB`), so the comment is an estimate and not a measurement. The download stays in IndexedDB, so the next use reloads the model from the browser. The clean offline run loaded it in about 6.9 seconds.
+`src/background/offscreen-manager.js`
+```js
+  /** Send one message to the offscreen page and wait for its answer. */
+  async function send(message) {
+    inFlight += 1;
+    clearTimeout(closeTimer);
+    try {
+      await ensure();
+      const run = () => api.runtime.sendMessage(message);
+      // Answers are generated one at a time, in the order they were asked.
+      const result = message.type === 'LOCAL_GENERATE' ? (generateChain = generateChain.then(run, run)) : run();
+      return await result;
+    } finally {
+      inFlight -= 1;
+      // Only the last message to finish starts the idle countdown.
+      if (inFlight === 0) void scheduleIdleClose();
+    }
+  }
+```
+
+The countdown is cleared when any message starts. It starts again only when the last running message finishes, and `close()` refuses to run while a message is still in progress. Closing the page frees the graphics memory the model holds. The manager's comment estimates that as "about a gigabyte", while the model's own figure is 879 MB (`vramMB`), so the comment is an estimate and not a measurement. The download stays in IndexedDB, so the next use reloads the model from the browser. The clean offline run loaded it in about 6.9 seconds, and the after-fix offline run in about 11.6 seconds.
 
 Figure: the storage layout, which shows what the close leaves behind.
 
 ![What is stored where and for how long: model files in IndexedDB, the job record in session storage, settings in local storage, and the loaded model in graphics memory](../figures/V10_storage.png)
-<!-- check against figure -->
 
-Reading the figure: as planned, the loaded model is the only store that the idle close frees. The model files and the settings stay in place, so the close costs a reload and not a download.
+Reading the figure: the drawing is a table of four stores. The loaded model, in graphics memory inside the offscreen page, lasts until the page closes: five minutes after the last message, or when the browser closes. That is the only store the idle close frees. The model files stay in IndexedDB, the job record stays in session storage until the browser or its tab closes, and the settings stay in local storage. So the close costs a reload from the browser and never a download.
 
-The timer has one weakness. `send` clears the timer when a request starts, but a timer that an earlier request set when it finished is not cancelled by a later request that is still running. If that later request loads past the timer's length, `close()` closes the page underneath it, and the code does not check for work in progress. No test covers this. It is a risk read from the code, and the repository does not show how often it would happen.
+**Before the in-flight rule.** Earlier, the countdown was started at the end of every message, including a quick status check. If a status check finished while a model load was still running, the countdown could expire in the middle of the load and close the page under it. The page would then have been gone in the middle of the load, and the job would have ended with the generic message. Code reading found this, not a test: the unit tests did not catch it, and the developer log records the finding (DEVLOG, 2026-10-21, "V2 review while writing the report", item 1). A unit test named "a quick status check finishing does not start the idle countdown while a load is still running" now covers it. No browser test covers closing during a load, so the in-flight rule is checked at unit level only.
 
-**What this means in plain words.** After five minutes without work, the page closes and frees the card's memory. The model stays stored, so the next use reloads it. A request still running can be cut off, and the code does not guard against that.
+**What this means in plain words.** After five minutes with no work, the page closes and frees the card's memory. The model stays stored, so the next use reloads it. The page now stays open while any message is still running, so a load is no longer cut off by an earlier, quicker message.
 
 ## Manifest permissions and the content security policy
 
@@ -255,7 +273,7 @@ The content security policy limits what the extension's own pages may run.
 
 ## The pretend model used by the tests
 
-Browser tests cannot depend on a real graphics card or a 695 MB download. The project therefore has a pretend model that follows the same steps as the real one. A page address parameter, `?mock=<mode>`, selects it. The service worker builds that address from a setting in `chrome.storage.local`, which the test code writes.
+Browser tests cannot depend on a real graphics card or a 695 MB download. The project therefore has a pretend model that follows the same steps as the real one. A page address parameter, `?mock=<mode>`, selects it. The service worker builds that address from a setting in `chrome.storage.local`, which the test setup writes.
 
 `src/background/offscreen-manager.js`
 ```js
@@ -289,7 +307,7 @@ Table: The pretend model modes and the browser tests that use them
 | `html` | The model answers with HTML-looking text, which the popup must show as plain text | V14 |
 | `slow` | Each answer takes at least 1.5 seconds | Not used by the browser test file |
 
-The fake download runs eight steps of 120 milliseconds, reporting each step as progress. The pretend model records that a model is stored in the page's `localStorage`, under one key per model. It does not use IndexedDB, so it says nothing about the real cache.
+The fake download runs eight steps of 120 milliseconds, reporting each step as progress. The pretend model records that a model is stored in the page's `localStorage`, under one key per model. It does not use IndexedDB, so it says nothing about the real cache. The pretend model also never sends the "Loading the model into the graphics card" message at the point where the screenshot `ui-03` is taken. That picture was made by writing the job record by hand into session storage, and its caption says so.
 
 The test seam ships with the extension. `loadSettings` accepts any stored `engineMode` that starts with `mock`, and the page reads the `?mock=` address. No screen sets these values, but the code path is in the product that the client receives. The repository does not remove it.
 
@@ -305,7 +323,7 @@ Table: Design decisions for the offscreen page and the messages
 | Where the job lives | In the page; in the service worker | Service worker, with the job record in session storage | The job must survive a closed popup and be readable by the popup | Every progress update is a message and a storage write |
 | Generation order | Parallel; queued | Queued, one at a time | The card does one job at a time (manager comment) | A second tab waits for the first tab's current part |
 | Keepalive | None; every 10 seconds | Every 10 seconds while busy | A load can take minutes, and the worker must not stop in the middle | Messages are sent for as long as the job runs |
-| Idle close | Never close; close after each job; close after 5 minutes idle | Close after 5 minutes idle | Frees the card's memory, and a reload from the browser takes about 7 seconds | A reader who returns after five minutes waits for the load again |
+| Idle close | Never close; close after each job; close after 5 minutes idle, and never while a message runs | Close after 5 minutes idle, with the in-flight rule | Frees the card's memory, and a reload from the browser takes seconds | A reader who returns after five minutes waits for the load again |
 | Pretend model | A separate test build; an address parameter | Address parameter | One code path for the real and pretend engines | The test seam ships with the extension |
 
 **What this means in plain words.** The offscreen page trades simplicity for survival. It works only through messages, but it lives as long as the job needs it.
@@ -322,37 +340,43 @@ Table: Failures in the messaging path
 | A handler throws, for example `requestAdapter()` | The `catch` sends `SERVICE_ERROR` with the error text | The same message, with the detail kept for the console |
 | A generation hangs | After `generateTimeoutMs` (180 seconds) the page calls `interruptGenerate` and reports `TIMEOUT` | "The model took too long to answer. Try again, or use a shorter page." |
 | The page closed between two jobs | The next request calls `ensure()` and creates the page again, and the model reloads from IndexedDB | No message, only a slower start |
-| The page closes during a running request | The request fails, and the job reports `SERVICE_ERROR` | The generic message |
+| A quick message finishes while a load is still running | The countdown does not start, and `close()` refuses to run while a message is in progress | No effect on the load (unit test only) |
 | The service worker stops during a job | `sweepOrphans` marks the job `INTERRUPTED` when the worker starts again (browser test V20) | "The summary was interrupted. Press Summarize to try again." |
+| A job is silent for more than 5 minutes | The popup and the service worker treat it as dead | "The summary was interrupted." |
 | Two requests create the page at once | The shared `creating` promise lets both wait for one creation | No visible effect |
+
+The stale limit is 5 minutes in the service worker and the popup. It was 3 minutes before the fix. At 3 minutes it was the same length as the 180-second generation timeout, so a slow answer could look interrupted while still running. The timeout now fires first (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2). A load with no progress writes for 5 minutes is still shown as interrupted, because the load has no timeout of its own.
 
 None of the browser tests named in this chapter runs two tabs at once, so the queued case is covered only by the unit test.
 
-**What this means in plain words.** Every message failure ends as a short, generic message, and the technical detail goes to the console. The real risk is a page that closes under a request that is still running.
+**What this means in plain words.** Every message failure ends as a short, generic message, and the technical detail goes to the console. The page now stays open while a message is in progress, so a quick request cannot cut off a running load.
 
 ## What went wrong while building it
 
-The developer log records two problems in this part (DEVLOG, 2026-10-21).
+The developer log records these problems in this part (DEVLOG, 2026-10-21).
 
 - The first spike printed nothing for two minutes. The offscreen page has only `chrome.runtime`, so the logging call that used `chrome.storage` failed silently. A later edit that broke the test script's syntax added to the confusion. The page now reports through messages, and the log's lesson is that an offscreen page works by messages only.
 - The first try of WebLLM inside the offscreen page failed because Cache Storage does not work there. IndexedDB was used instead (see the storage section of the previous chapter).
+- Code reading, not a failing test, found the in-flight problem. The countdown could start from a quick status check during a load, and the page could then close under the load. The fix is the in-flight counter and a unit test ("V2 review while writing the report", item 1).
 
-**What this means in plain words.** The offscreen page has fewer tools than a normal page. The first problems came from forgetting that, and each was solved by sending messages or by using a different store.
+**What this means in plain words.** The offscreen page has fewer tools than a normal page. The first problems came from forgetting that, and the last one came from rereading the code, not from a test that failed.
 
 ## How it was tested
 
-The unit tests in `tests/unit/local-engine.test.js` cover the manager. They check that the manager creates the page once, with the `WORKERS` reason, and reuses it. They also check that the mock mode puts its choice and delay in the page address, that generation runs one answer at a time and in order, that the page closes after the idle time, and that progress reaches subscribers until they unsubscribe.
+The unit tests in `tests/unit/local-engine.test.js` cover the manager. They check that the manager creates the page once, with the `WORKERS` reason, and reuses it. They also check that the mock mode puts its choice and delay in the page address, that generation runs one answer at a time and in order, that the page closes after the idle time, that a quick status check does not start the countdown while a load is still running, and that progress reaches subscribers until they unsubscribe.
 
 The browser tests in `tests/e2e/pipeline.test.js` cover the same path with the real extension. V15 closes the popup in the middle of a job and reopens it. V20 stops the service worker in the middle of a job. V22 closes the tab during a job. V23 closes the page after the idle time, with `idleCloseMs` set to 400 ms, and then checks that the next summary still works. V24 checks that nothing opens except the popup window: no tab and no options page.
 
-**What this means in plain words.** The unit tests check the manager's rules, and the browser tests check the same rules through the whole extension.
+The whole suite has 70 unit tests and 26 browser tests, all passing, and 15 Windows script checks (B1 to B10c).
+
+**What this means in plain words.** The unit tests check the manager's rules, and the browser tests check the same rules through the whole extension. The in-flight rule has only the unit test.
 
 ## Limitations
 
-- The idle close can cut off a request that is still running, because the timer is not cancelled by work that started later. No test covers this.
+- The in-flight rule is checked at unit level only. No browser test closes the page during a load.
 - The keepalive interval is the project's own choice. It is not measured against Chrome's actual idle limit on the test laptop.
 - The one-at-a-time rule applies to generation only, and it is enforced in the service worker. A caller that bypassed the manager could overlap.
-- The stale rule that shows a job as interrupted after three minutes is the same length as the generation timeout. A part near the limit can therefore show as interrupted before it times out.
+- A load with no progress writes for 5 minutes is still shown as interrupted, and the load has no timeout of its own.
 - The test seam ships with the extension.
 - The reason for the `*.hf.co` host permission is not written down in the repository.
 
@@ -365,7 +389,7 @@ Chrome can stop a service worker that is idle, and the page's header comment say
 The graphics card does one job at a time, and the manager puts every `LOCAL_GENERATE` on one promise chain, so the parts of two jobs take turns. A unit test checks the order with three requests. Loading has its own guard inside the page.
 
 **What keeps the page alive during a long download, and when does it close?**
-The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it. Five minutes after the last request, the page is closed and the card's memory is freed. The model stays in IndexedDB, so the next use reloads it.
+The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it. The page closes five minutes after the last request has finished, and never while a request is still running. The model stays in IndexedDB, so the next use reloads it.
 
 **What happens if the page disappears during a job?**
 The next message fails, and the call reports `SERVICE_ERROR`. The job then shows the generic message, and the reader can press the button again. A later job creates the page and loads the model from IndexedDB.

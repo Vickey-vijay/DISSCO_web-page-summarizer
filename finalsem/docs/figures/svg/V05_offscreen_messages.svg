@@ -31,10 +31,10 @@
 <text x="800" y="553.62" font-size="22" fill="#1C1B1A" text-anchor="middle">KEEPALIVE, every 10 s while work runs</text>
 <rect x="60" y="620" width="600" height="190" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="360" y="660.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Idle close</text>
-<text x="360" y="696.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Each message restarts a 5-minute timer (idleCloseMs</text>
-<text x="360" y="725.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">= 300000). When it runs out, the offscreen page is</text>
-<text x="360" y="754.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">closed and its graphics memory is freed. The model</text>
-<text x="360" y="783.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">files stay in IndexedDB.</text>
+<text x="360" y="696.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">The 5-minute timer (idleCloseMs = 300000) starts</text>
+<text x="360" y="725.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">when the last running message is done. At zero the</text>
+<text x="360" y="754.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">offscreen page closes and its graphics memory is</text>
+<text x="360" y="783.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">freed. Model files stay in IndexedDB.</text>
 <rect x="980" y="620" width="560" height="190" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="1260" y="660.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="528">Rules</text>
 <text x="1260" y="696.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="528">Every message has target: 'offscreen'.</text>

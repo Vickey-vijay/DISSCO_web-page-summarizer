@@ -1,8 +1,8 @@
 # Problems and solutions
 
-This chapter tells the problems met while building Version 2. The sources are kept narrow on purpose. The entries come from the rows of the development log dated 21 October 2026, which are the Version 2 rows, and from the first browser test run, `docs/test-runs/run-1.md`. The rows dated 20 October 2026 belong to Version 1 and are not repeated here.
+This chapter tells the problems met while building Version 2. The sources are kept narrow on purpose. The stories come from the rows of the development log dated 21 October 2026, which are the Version 2 rows, and from the first browser test run, `docs/test-runs/run-1.md`. The rows dated 20 October 2026 belong to Version 1 and are not repeated here.
 
-Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes are the ones in the code now. Where the record says a cause was not proved, this chapter says so.
+Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the set of faults in the test setup that run 1 found.
 
 ## The model cache refused to open
 
@@ -30,7 +30,7 @@ A library's default storage can fail inside a particular kind of page. Test each
 
 **What was seen.** The first spike printed nothing for two minutes. Later runs printed nothing either.
 
-**Cause.** There were two separate causes. First, an offscreen page has only the runtime messaging API. It has no `chrome.storage`, so the logging call failed silently. Second, a later edit put an apostrophe in "lamp's" inside a single-quoted string, which broke the whole script. The first suspicion fell on the offline setting, which was not the cause.
+**Cause.** There were two separate causes. First, an offscreen page has only the runtime messaging API. It has no `chrome.storage`, so the logging call failed silently. Second, a later edit put an apostrophe in "lamp's" inside a single-quoted string, which broke the whole script. The first suspicion fell on the offline setting, which was not one of the two causes.
 
 **Fix.** The offscreen page reports through messages, and the service worker stores what it receives. The header of `offscreen.js` states the rule: the page "has only the chrome.runtime API (no chrome.storage, no chrome.tabs), so it works purely by messages". Every script is also checked with `node --check` before a run, which catches syntax faults at once.
 
@@ -42,7 +42,7 @@ A broken script looks like a broken environment. Check the syntax first, and rem
 
 **What was seen.** The 1 billion parameter model wrote about 2 tokens a second, and the first answer took 36 seconds. A token is a piece of a word, so this was far too slow for a useful summary.
 
-**Cause.** Chromium picked the Intel graphics built into the processor, although the code asked for the high-performance card. The request is made in `offscreen.js` with `powerPreference: 'high-performance'`, but Chromium did not follow it on this laptop. Starting the browser with `--force_high_performance_gpu` made it choose the NVIDIA RTX 3050. The development log records about 63 tokens a second while writing, about 600 tokens a second while reading the prompt, and about 1.5 seconds for a prompt of 250 tokens on that card. The first answer on either card also spends about 30 seconds compiling the graphics programs.
+**Cause.** Chromium picked the Intel graphics built into the processor, although the code asked for the high-performance card. The request is made in `offscreen.js` with `powerPreference: 'high-performance'`, but Chromium did not follow it on this laptop. Starting the browser with `--force_high_performance_gpu` made it choose the NVIDIA RTX 3050. The development log records about 63 tokens a second while writing, about 600 tokens a second while reading the prompt, and about 1.5 seconds for a prompt of 250 tokens. The log does not say which text was used for those figures, and no saved run file holds them. The first answer on either card also spends about 30 seconds compiling the graphics programs.
 
 **Fix.** The extension warms the model up right after loading, and it shows the message "Warming up the model". The warm-up is the step that compiles the programs, so the first real part does not look frozen.
 
@@ -66,7 +66,7 @@ The same laptop can be about thirty times faster or slower depending on which ch
 
 **Cause.** There were two causes. Playwright's offline mode also blocks the extension's own pages. In addition, the test setup copied the extension into a new temporary folder at every launch. Chrome gave the copy a new extension ID, and the browser storage from earlier runs belonged to the old ID, so the new run could not see it.
 
-**Fix.** Outside sites are now blocked with a host-resolver rule, and the local test server stays reachable because it is excluded from that rule. The measuring script also loads the extension from one fixed folder, so its ID stays the same. The two relevant lines are in `scripts/local-run.mjs`.
+**Fix.** Outside sites are blocked with a host-resolver rule, and the local test server stays reachable because it is excluded from that rule. The measuring script also loads the extension from one fixed folder, so its ID stays the same. The two relevant lines are in `scripts/local-run.mjs`.
 
 `scripts/local-run.mjs` (the offline mode and the fixed folder)
 
@@ -106,7 +106,7 @@ A string from a system interface is data, not a sentence for the reader. It need
 
 **What was seen.** Browser test V22 found that after a tab was closed during a model download, a job record for that tab appeared again in `chrome.storage.session`.
 
-**Cause.** The development log says the most likely cause, though the failure was not caught in the act. Version 2 writes progress many times a second, for the download and the loading percentages. A write that was already queued when the tab closed could finish after the record had been removed, and so it wrote the record back. Run 1 notes that Version 1 had a similar fault (B4), which was fixed by remembering closed tabs. Version 2 adds many more writes, so the gap between checking and writing was wide enough to hit.
+**Cause.** The development log gives the most likely cause, though the failure was not caught in the act. Version 2 writes progress many times a second, for the download and the loading percentages. A write that was already queued when the tab closed could finish after the record had been removed, and so it wrote the record back. Run 1 notes that Version 1 had a similar fault (B4), which was fixed by remembering closed tabs. Version 2 adds many more writes, so the gap between checking and writing was wide enough to hit.
 
 **Fix.** The handler that runs when a tab closes now removes the record only after the queued writes for that tab have finished. A write that finishes after the tab has closed removes its own record.
 
@@ -128,7 +128,7 @@ Once a fault is found and fixed, look for the same pattern wherever the code now
 
 **What was seen.** On the Intel chip, the short article took 199.2 seconds on first use. That time was made up of about 81 seconds of download, about 40 seconds of warm-up and 76 seconds of writing the answer. A two-part article took 149.1 seconds.
 
-**Cause.** The built-in chip writes text slowly. The record shows 4 to 5 tokens a second with the small model SmolLM2, and about 2 tokens a second with the 1 billion parameter model.
+**Cause.** The built-in chip writes text slowly. The record shows 4 to 5 tokens a second with the small model SmolLM2, and about 2 tokens a second with the 1 billion parameter model in the earlier speed test.
 
 **Fix.** The development log records no code change for this run. The automatic switch to the small model was already in place and keeps the chip usable, though not fast. The popup says that a separate graphics card is much faster. `setup.bat --gpu`, or the Windows Graphics setting, moves Chrome to the separate card.
 
@@ -136,9 +136,136 @@ Once a fault is found and fixed, look for the same pattern wherever the code now
 
 A weak chip is not an error. The extension gives a note and uses a smaller model, instead of refusing to run.
 
+## The "Downloading" line for a stored model
+
+**What was seen.** In the clean offline run, the popup said "Downloading the model (first time only): 0%" for about 0.8 seconds, although the model was already stored. The line appeared at 3.9 seconds in that run's timeline.
+
+**Cause.** The progress mapping treated any library message containing "fetch" as a download. The library also says "fetch" at the start of a load from the browser's own storage, so a stored model was labelled as a download.
+
+**Fix.** The offscreen page now checks whether the model is stored before it loads, and it passes that answer to the progress mapping. A stored model is always shown as "loading". A unit test covers the case.
+
+`src/core/gpu-check.js` (the mapping now takes the stored flag)
+
+```
+export function mapInitProgress(report, { cached = false } = {}) {
+  const text = String(report?.text ?? '');
+  const fraction = Math.max(0, Math.min(1, Number(report?.progress) || 0));
+  // "Start to fetch params" and "Fetching param cache[...]" both mean the download is happening.
+  // But WebLLM also says "fetch" at the start of a load from the browser's own storage; when the
+  // model is already stored, nothing is downloaded, so it is always "loading".
+  const phase = !cached && /fetch/i.test(text) ? 'downloading' : 'loading';
+  return { phase, percent: Math.round(fraction * 100), text };
+}
+```
+
+The clean offline run that carries the wrong line is kept for its timings, and its note says so. The repeat after the fix shows no such line (chapter 14).
+
+### What this means in plain words
+
+A word in a library's message is not proof of what the library is doing. Use what the program already knows, here whether the model is stored, before showing a label to the reader.
+
+## Copied markers in the answer
+
+**What was seen.** The short Intel summary began with the prompt's start marker `<<<PAGE TEXT START>>>`. In the main model's merged answer, the line "These are summaries of consecutive parts of one web page" was repeated. Both were real output from real runs.
+
+**Cause.** Small models copy parts of the prompt. The markers exist to stop a page giving orders to the model. They were not meant to be echoed, and nothing removed them from the answer.
+
+**Fix.** Markers are now removed from every answer. The function `stripPageMarkers` in `src/core/prompts.js` takes the two marker strings out and tidies the blank lines that remain. `src/engines/local.js` applies it to every reply before the pipeline sees it. Two unit tests cover it.
+
+`src/core/prompts.js` (removing the markers)
+
+```
+export function stripPageMarkers(text) {
+  return String(text ?? '')
+    .split(PAGE_START).join('')
+    .split(PAGE_END).join('')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+```
+
+The fix is in the code, but the saved Intel summary was made before it, and the Intel run has not been repeated. The repeated preamble was not fixed. It stays on the list of limits of a 1 billion parameter model (chapter 16).
+
+### What this means in plain words
+
+A protection for the model can leak into the output. Check real answers as well as the pretend ones, and remove any text that only the model needed and the reader does not.
+
+## The silent fallback
+
+**What was seen.** After the main model ran out of graphics memory, the small model wrote the summary, and nothing on the screen said so. After both models failed, the model line still showed the main model as "Not downloaded yet".
+
+**Cause.** The job record has a `notice` field, but nothing ever drew it for a finished job. The model line was refreshed only after a successful job.
+
+**Fix.** A finished summary made by the small model after a memory failure now shows the notice "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The notice is worked out in the popup from the job's stats, not stored in the job record, which keeps the `notice` field always empty. The model line is now refreshed once when any job ends, success or failure. Browser test V10 checks the notice.
+
+`src/ui/popup.js` (the notice for a finished job)
+
+```
+function switchNotice(reason) {
+  if (reason === 'GPU_MEMORY' || reason === 'MODEL_LOAD_FAILED') {
+    return 'The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed.';
+  }
+  return null;
+}
+```
+
+The notice does not appear for the integrated-graphics case, because that case already has the graphics note. The picture below shows the notice in the popup, and it is a pretend-model capture.
+
+![Popup after the small model wrote the summary, with the notice (pretend model)](../screenshots/ui-12-fallback-after-out-of-memory.png)
+
+Pretend-model screenshot, state 12. The amber notice sits above the summary. The model line reads "SmolLM2 360M. Downloaded, runs on this computer." The stats line reads 2.3 s, a value the pretend model produces.
+
+When both models fail, the picture below shows the state after the refresh. The error message is drawn, and the model line names SmolLM2 360M, because the saved choice now points to the smaller model. Its text still says "Not downloaded yet", and the size of 300 MB is the pretend model's fixed number.
+
+![Popup after both models ran out of memory (pretend model)](../screenshots/ui-13-out-of-memory-all.png)
+
+Pretend-model screenshot, state 13. The red-bordered message reads "The graphics card ran out of memory. Close other heavy tabs or programs and try again." The Summarize button is enabled again.
+
+### What this means in plain words
+
+A fallback that changes the result must be visible to the person reading it. The reader now sees when the smaller model wrote the summary.
+
+## The code-reading review
+
+**What was seen.** Six weak spots were found by reading the code, not by a failing test. Each one could mislead a reader or cost time in a way the tests had not shown.
+
+**Cause.** Version 1 code had been copied and extended without rereading each assumption. The three-minute job limit was right for short cloud calls, but it was not right for a slow local model.
+
+**Fix.**
+
+- **The idle close during a load.** A quick status check could start the five-minute idle countdown while a model load was still running. The offscreen manager now counts the messages in flight, starts the countdown only when the last one finishes, and does nothing on close while any message is running. A unit test covers this.
+- **The dead-job limit.** A job counted as dead after three minutes without an update, the same length as a slow answer's limit. A slow answer could then look interrupted while it was still running. The dead-job limit is now five minutes in the service worker and in the popup. The 180-second answer limit is unchanged.
+- **The word "oom".** The memory check matched "oom" inside other words, such as "room". It now matches only the whole word, and a unit test covers "room".
+- **The undo command.** `scripts/set-chrome-gpu.ps1 -Remove` failed without `-ChromePath`, so the undo command in the README did not work. The script now finds Chrome itself when the path is not given. Test B10c checks that a plain `-Remove` works.
+- **A silent registry failure.** `setup.bat --gpu` did not report when the registry write failed. It now prints "The graphics setting was NOT changed" and carries on, because the extension works without the setting, only more slowly.
+- **Dead rules in the stylesheet.** Leftover rules for the key box and the options page were removed from `ui.css`, and one small rule was added for the notice's spacing.
+
+The shape of the `oom` fix and the countdown fix is worth showing. The countdown uses a counter of messages in flight.
+
+`src/background/offscreen-manager.js` (the countdown and the close)
+
+```
+  async function close() {
+    clearTimeout(closeTimer);
+    if (inFlight > 0) return; // a load or an answer is still running: closing now would cut it off
+    ...
+  }
+  ...
+    } finally {
+      inFlight -= 1;
+      // Only the last message to finish starts the idle countdown.
+      if (inFlight === 0) void scheduleIdleClose();
+    }
+```
+
+### What this means in plain words
+
+A timeout copied from a fast cloud service does not fit a slow local one. Reading your own code a second time still finds things that the tests did not look for.
+
 ## Three faults in the test setup
 
-Run 1 also found three faults in the tests themselves, not in the extension. Each was fixed in the test code.
+Run 1 also found three faults in the test setup itself, not in the extension. Each was fixed in the test code.
 
 **A leftover popup window.** The second summary in the smoke test acted on a popup window that the first one had left open. The helper now asks Chrome which tab is active, and the test closes any other popup windows first.
 
@@ -161,8 +288,8 @@ Two separate faults were at work. The offscreen page cannot use `chrome.storage`
 **What was the fault in the closed-tab test?**
 A progress write that was already queued could finish after the tab closed and write the job record back. The fix makes the cleanup wait for the queued writes, and it removes any record written after the close.
 
-**Why does the graphics note now name the chip with a capital letter?**
-WebGPU reports the vendor in lowercase, and the popup printed it as it came. The `vendorName()` function maps the known names to their usual spelling.
+**How does the reader now know that the smaller model wrote the summary?**
+A finished summary made by the small model after a memory failure shows a notice above the text. The notice is worked out in the popup from the job's stats, and browser test V10 checks it.
 
 **Did every problem come from the product?**
 No. Three came from the test setup: a leftover popup window, a page from Version 1, and a folder that was still in use. Their fixes were made in the test code and the secret-scan script, not in the extension.

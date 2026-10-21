@@ -4,7 +4,7 @@
 
 Each decision follows the same five parts. The first says what was decided. The second gives the reason. The third lists what else was considered. The fourth states the trade-off. The last is one sentence to say aloud. Learn the last sentence for each, then say it without the notes.
 
-Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the test-run files, or from the code. The repository does not score summary quality, so any claim about quality is marked as not measured.
+Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the saved test-run files, or from the code. Numbers that come from an unsaved speed test are labelled that way. The repository does not score summary quality, so any claim about quality is marked as not measured. Decisions 2, 4, 5 and 8 were revised after the code review, and each one says how.
 
 ## 1. The library is WebLLM, copied in as one file
 
@@ -22,13 +22,15 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **What was decided.** The model is held by an offscreen page, which is a hidden page that Chrome lets an extension open. Inside it, a web worker runs WebLLM's handler. The job itself stays in the service worker.
 
-**Why.** The offscreen page's own comment gives the reason: Chrome stops the service worker when it is idle, and a stopped worker would lose a model that takes seconds to load. The offscreen page stays alive while the model is needed.
+**Why.** The offscreen page's own comment gives the reason: Chrome stops the service worker when it is idle, and a stopped worker would lose a model that takes seconds to load. The page stays open while the model is needed.
 
 **What else was considered.** Keeping the model in the service worker, which Chrome may stop. The decision record does not list any other place for the model.
 
-**The trade-off.** The offscreen page is one more part to start, message and close. It keeps the model in graphics memory until the five-minute idle timer runs out.
+**The trade-off.** The offscreen page is one more part to start, message and close. It keeps the model in graphics memory until the five-minute idle countdown ends.
 
-**What you can say.** "The model runs in a hidden page because Chrome can stop the background worker when it is idle, and the page keeps the model ready."
+**Revised after review.** The page is never closed while a message is running. The manager counts messages in flight, and the countdown starts only when the last one finishes.
+
+**What you can say.** "The model runs in a hidden page because Chrome can stop the background worker when it is idle, and the page keeps the model ready. It is only closed when no work is running."
 
 ## 3. Local only, with no key
 
@@ -36,7 +38,7 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **Why.** The decision record gives the purpose: the summary should need no account, no key and no network after the download, and the page text should never leave the computer.
 
-**What else was considered.** Keeping the cloud engine as a fallback for computers without WebGPU. The record says this was the condition under which the answer would change: if the client's laptop had no WebGPU, the cloud engine would come back.
+**What else was considered.** Keeping the cloud engine as a fallback for computers without WebGPU. The record says the answer would change if the client's laptop had no WebGPU: the cloud engine would come back. The client's laptop has not been checked, so that condition is still open.
 
 **The trade-off.** A computer without WebGPU or without `shader-f16` cannot run Version 2. The popup says so in plain words, and nothing is sent to the cloud instead.
 
@@ -44,15 +46,17 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 ## 4. The model: Llama 3.2 1B by default, SmolLM2 360M as the fallback
 
-**What was decided.** The primary model is Llama 3.2 1B, id `Llama-3.2-1B-Instruct-q4f16_1-MLC`. The fallback is SmolLM2 360M. The fallback is chosen when the computer reports less than 8 GB of memory, when the graphics card is built into the processor, or when the primary model fails to load and the failure was memory or load related.
+**What was decided.** The primary model is Llama 3.2 1B, id `Llama-3.2-1B-Instruct-q4f16_1-MLC`. The fallback is SmolLM2 360M. The fallback is chosen when the computer reports less than 8 GB of memory, when the graphics card is built into the processor, or when the primary model fails to load with a memory or load error.
 
-**Why.** The 1B model was the one measured at a usable speed on the NVIDIA card, at about 34 to 53 tokens a second. The 360M model needs about 376 MB of graphics memory against 879 MB for the 1B, and it was the model measured on the Intel chip. No larger model was tried.
+**Why.** The 1B model was the one measured at a usable speed on the NVIDIA card, at 34 to 53 tokens a second in the saved clean runs. The 360M model needs about 376 MB of graphics memory against 879 MB for the 1B, and it was the model measured on the Intel chip. No larger model was tried.
 
 **What else was considered.** Qwen2.5 0.5B, which needs 945 MB, and which the record calls weaker. Qwen3 0.6B, which needs 1,403 MB and has a thinking mode.
 
 **The trade-off.** The 1B model's summary quality was not measured. The saved outputs show faults, such as meta-comments and repeated facts, which chapter 06 explains.
 
-**What you can say.** "The project uses Llama 3.2 1B and falls back to SmolLM2 360M when the computer is weak or the big model will not load."
+**Revised after review.** When the smaller model writes a summary after a memory or load failure, the popup now says so above the summary: "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." Before the review, nothing on the screen said so. The choice is also kept (`modelOverride`) and is never cleared, which is a limit still standing.
+
+**What you can say.** "The project uses Llama 3.2 1B and falls back to SmolLM2 360M when the computer is weak or the big model will not load, and the popup tells the user when the smaller model wrote the summary."
 
 ## 5. Part size, answer length, the prompt and temperature
 
@@ -64,11 +68,13 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **The trade-off.** The part size was chosen by reasoning and tested for the path, not tuned for quality. The repository does not show that 6,000 characters gives better summaries than another size.
 
-**What you can say.** "Each part is about 1,500 tokens, so the page and the answer fit the model's 4,096-token window, and pages longer than 12 parts are refused."
+**Revised after review.** A small model sometimes copied the start marker into its answer, as the saved Intel summary shows. `stripPageMarkers` now removes the markers from every answer. The saved output and its screenshot were recorded before this fix, so they still show the marker. The repeated opening sentence in the 1B model's merged answer is not fixed. It is listed as a limit.
+
+**What you can say.** "Each part is about 1,500 tokens, so the page and the answer fit the model's 4,096-token window. The page markers are removed from the answer, and pages longer than 12 parts are refused."
 
 ## 6. The model files are kept in IndexedDB, not Cache Storage
 
-**What was decided.** WebLLM is set to store the model in IndexedDB, with `cacheBackend: 'indexeddb'` in `offscreen.js`.
+**What was decided.** WebLLM is set to store the model in IndexedDB, with `cacheBackend: 'indexeddb'` in `offscreen.js`. The page checks whether the model is stored before it loads, so a stored model is always shown as loading and never as a download.
 
 **Why.** WebLLM's default store, Cache Storage, failed inside the extension's hidden page with `UnknownError: Failed to execute 'open' on 'CacheStorage'`. IndexedDB worked there, with about 10.7 GB of quota in the test.
 
@@ -82,11 +88,11 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **What was decided.** When WebGPU reports an Intel chip with the `gen` architecture name, the extension chooses SmolLM2 360M and shows a note that a separate card is much faster.
 
-**Why.** On the Intel chip the 1B model wrote about 2 tokens a second, and its first answer took 36 seconds to prepare in the spike. The record set a warning line of about 60 seconds for one part. The small model was chosen to get below that line on this chip. Even with it, the clean Intel run took 76 seconds to write one short summary, which the record names as above the line.
+**Why.** On the Intel chip the 1B model wrote about 2 tokens a second, in an unsaved speed test (DEVLOG, 21 October), and its first answer took 36 seconds to prepare. The record set a warning line of about 60 seconds for one part. The small model was chosen to get below that line on this chip. Even with it, the saved Intel run took 76 seconds to write one short summary, which the record names as above the line.
 
 **What else was considered.** Refusing to run on integrated graphics. The record chose a note and a slower answer, because a slow answer is more useful than a refusal.
 
-**The trade-off.** Summaries on the Intel chip take minutes, not seconds. The clean runs took 199.2 s for a short article on first use and 149.1 s for a two-part article. The small model's summaries are weaker than the 1B model's, and no quality test was made.
+**The trade-off.** Summaries on the Intel chip take minutes, not seconds. The saved runs took 199.2 s for a short article on first use and 149.1 s for a two-part article. The small model's summaries are weaker than the 1B model's, and no quality test was made.
 
 **What you can say.** "On the built-in graphics the extension switches to the small model by itself, because the big one was too slow there to be useful. It says so on screen."
 
@@ -94,25 +100,27 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **What was decided.** The script `setup.bat --gpu` sets one per-user Windows value, `GpuPreference=2`, that asks Chrome to use the high-performance card. It is never run by default. Undo is `scripts\set-chrome-gpu.ps1 -Remove`.
 
-**Why.** On a laptop with two chips Chrome often starts on the weak one. The high-performance card gave about 63 tokens a second in the spike, against about 2 on the built-in chip. The project owner does not want Windows settings changed without asking.
+**Why.** On a laptop with two chips Chrome often starts on the weak one. The high-performance card gave about 63 tokens a second in the unsaved speed test, against about 2 on the built-in chip. The project owner does not want Windows settings changed without asking.
 
 **What else was considered.** Changing the setting automatically, or leaving it to the user with no help. The record chose the explicit switch and a manual route in the README.
 
 **The trade-off.** The script was tested only against a throw-away registry key, not against a real Chrome. It is not yet proven on the client's laptop.
 
-**What you can say.** "The separate card is used only when the user asks for it, because it changes a Windows setting, and the script can be undone."
+**Revised after review.** The script finds Chrome by itself, so the undo command in the README works as written. If the setting cannot be changed, `setup.bat --gpu` now says so and carries on.
+
+**What you can say.** "The separate card is used only when the user asks for it, because it changes a Windows setting, and one command undoes it."
 
 ## 9. A pretend model for most tests, and one real run for proof
 
-**What was decided.** Most browser tests use a pretend model, selected with `?mock=<mode>`. Real-model runs are separate, through `scripts/local-run.mjs`.
+**What was decided.** Most browser scenarios use a pretend model, selected with `?mock=<mode>`. Real-model runs are separate, through `scripts/local-run.mjs`.
 
 **Why.** A real model cannot be made to fail on demand. The pretend model can produce a download failure, an out-of-memory error, or no WebGPU, so each failure path is tested. The real-model runs prove that the real thing works.
 
-**What else was considered.** Testing only with the real model. That would be slow, need a graphics card on every test, and could not force the failures.
+**What else was considered.** Testing only with the real model. That would be slow, need a graphics card in every scenario, and could not force the failures.
 
-**The trade-off.** The pretend model proves the extension's logic, not the model's quality. The browser tests run in hidden Chromium, not in the daily Chrome.
+**The trade-off.** The pretend model proves the extension's logic, not the model's quality. The browser scenarios run in hidden Chromium, not in the daily Chrome.
 
-**What you can say.** "The tests use a pretend model so that failures can be forced. The real model was run separately, and those runs are the proof that it works."
+**What you can say.** "The browser scenarios use a pretend model so that failures can be forced. The real model was run separately, and those runs are the proof that it works."
 
 ## 10. Version 1 stays untouched
 

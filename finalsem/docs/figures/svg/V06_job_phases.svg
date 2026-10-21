@@ -33,5 +33,5 @@
 <text x="700" y="836" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">The summary is shown, or the error message from Figure V11</text>
 <path d="M200,240 L130,240 L130,436 L200,436" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
 <text x="40" y="346" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">skipped</text>
-<text x="40" y="930" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Later use is meant to skip the Downloading step (dashed). One offline test run showed that line for about 1 s (see FIGURES.md).</text>
+<text x="40" y="930" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Later use is meant to skip the Downloading step (dashed). One offline test run, made before a fix, showed that line for about 0.8 s (see FIGURES.md).</text>
 <text x="40" y="962" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">TOO_LITTLE_TEXT (under 200 characters) and TOO_LONG (more than 12 parts) stop the job before the model is used.</text></svg>
