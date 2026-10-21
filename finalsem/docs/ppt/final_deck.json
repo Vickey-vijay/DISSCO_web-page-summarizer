@@ -1,0 +1,368 @@
+{
+  "deck_title": "Page Summarizer: final-semester review (Version 2)",
+  "footer": "Page Summarizer  |  Final-Semester Review (Version 2)",
+  "slides": [
+    {
+      "layout": "title",
+      "title": "AI-Powered Web Page Summarizer",
+      "subtitle": "A Chrome extension that runs a small language model on this laptop",
+      "logo": "../../../assets/bits-logo.png",
+      "meta": [
+        "Final-Semester Review (Version 2)",
+        "[Insert Student Name]  |  BITS ID [Insert BITS ID]",
+        "[Insert Degree Program]  |  Course No. [Insert Course No.]",
+        "Project carried out at [Insert Organization Name & Location]",
+        "Birla Institute of Technology & Science, Pilani (Rajasthan)",
+        "[Insert Month and Year]"
+      ],
+      "notes": "My name is [Insert Student Name], and this is my final-semester review of the Page Summarizer project. Version 1 sent the page text to a cloud service. Version 2 runs a small language model inside Chrome, on this laptop. I will explain the AI parts in plain words, then show what was built and what was measured."
+    },
+    {
+      "layout": "bullets",
+      "title": "What I will cover",
+      "bullets": [
+        "Version 1 and what it could not do",
+        "What a language model is, and how this one writes",
+        "How the model gets onto the laptop, and the parts that run it",
+        "The popup, the errors and the setup",
+        "Testing, measured results and the problems I met",
+        "What is not done, the demo plan and questions"
+      ],
+      "notes": "I will go through six parts. First, Version 1 and what it could not do. Then I explain what a language model is, how it writes, and how the model gets onto the laptop. Next are the parts that run it, the popup, the errors and the setup. After that come the tests, the measured results and the problems I met. I finish with what is not done yet, the demo plan and questions."
+    },
+    {
+      "layout": "bullets",
+      "title": "Version 1 and its limits",
+      "bullets": [
+        "Version 1 summarizes the open page with a free Gemini key, pasted once into the popup.",
+        "Each part of a page is sent to Google, so the page text leaves this laptop.",
+        "Every summary needs the internet, and the free quota ran out during the live runs.",
+        "Version 2 keeps the popup, the page reader and the job handling. Only the engine changes."
+      ],
+      "notes": "Version 1 has one promise. A reader presses one button on an open page and gets a short summary in the popup. The reader pastes a free key once, and each part of the page is then sent to Google. So the page text leaves this laptop, and every summary needs the internet. Version 2 keeps the same popup, page reader and job handling, and only the engine changes."
+    },
+    {
+      "layout": "table",
+      "title": "What Version 2 changes",
+      "header": ["Measure", "Version 1 (cloud Gemini)", "Version 2 (this laptop)"],
+      "rows": [
+        ["Model", "gemini-3.5-flash-lite, run by Google", "Llama 3.2 1B on the graphics card (SmolLM2 360M on Intel)"],
+        ["API key", "Needed: a free key, pasted in the popup", "Not needed"],
+        ["Internet", "Needed for every summary", "Once, to download about 695 MB"],
+        ["Where page text goes", "Sent to Google over HTTPS", "Stays on this laptop"],
+        ["Free-tier limit", "Quota named by the service (15 a minute for the default model)", "No service quota; a page over 12 parts is refused"],
+        ["Speed", "Measured in the mid-semester deck", "15.3 s to 17.7 s for a short article, model stored"]
+      ],
+      "col_widths": [2.8, 4.4, 4.6],
+      "caption": "Summary quality was not measured in either version. Version 1 timings are in the mid-semester deck.",
+      "notes": "This table shows what changed between the two versions. Version 1 needed a Google key and sent each part of the page to Google. Version 2 downloads the model once, and then works without a key and without the internet. The speed row gives the measured times for this laptop, and I say which run each one comes from."
+    },
+    {
+      "layout": "two_column",
+      "title": "What a language model is, and the numbers",
+      "left_title": "What it is",
+      "left": [
+        "A language model guesses the next piece of text, one piece at a time.",
+        "Learning set its stored numbers, called parameters. The project only reads them.",
+        "The model here is Llama 3.2 1B, tuned to follow plain requests in English."
+      ],
+      "right_title": "The numbers",
+      "right": [
+        "A token is a piece of text, about four characters of English. A rule of thumb.",
+        "A part of 6,000 characters is about 1,500 tokens.",
+        "Context window: 4,096 tokens. Like a desk that holds only so many pages.",
+        "The instructions, the part and the answer must all fit in it at once."
+      ],
+      "notes": "A language model is a program that guesses the next piece of text. Learning set its stored numbers, which are called parameters, and this project only reads them. The model reads and writes tokens, and a token is about four characters of English. Its context window is the text it can hold in one request, which is 4,096 tokens for this model. So the project cuts a long page into parts of about 1,500 tokens."
+    },
+    {
+      "layout": "table",
+      "title": "How a model writes: reading, then one token at a time",
+      "header": ["Stage", "Everyday picture", "Measured on this laptop (NVIDIA RTX 3050)"],
+      "rows": [
+        ["Reading (prefill)", "Reads the whole prompt in one pass, like scanning a page first", "About 600 tokens a second (speed test)"],
+        ["Writing (decode)", "One new token per step, and each step looks back at everything before it", "34 to 53 tokens a second in clean runs; about 63 in the speed test"],
+        ["First answer", "The graphics programs are compiled once, like warming up an oven", "About 30 s on first use; 0.5 s in a later offline run"],
+        ["Answer length", "Stops at the last token, or at 300 tokens a part (320 for the final summary)", "Set in the configuration file; not a measurement"]
+      ],
+      "col_widths": [2.6, 5.2, 4.0],
+      "caption": "The 34 to 53 range is from saved clean runs. The run after the label fix reached 65 and 45 (slide 20). The speed test has no saved run file.",
+      "notes": "The model works in two stages. First it reads the whole prompt in one pass, which the report calls prefill. Then it writes the answer one token at a time, which is called decode, and that stage is the slow one. The saved clean runs wrote 34 to 53 tokens a second on this laptop. A separate speed test measured about 63, and it has no saved run file, so I label it as a test."
+    },
+    {
+      "layout": "two_column",
+      "title": "Getting the model onto the laptop",
+      "left_title": "The 4-bit file, about 695 MB",
+      "left": [
+        "Most stored numbers are kept in 4 bits, not 16. The model name q4f16_1 says so.",
+        "One billion numbers at 4 bits take about 0.5 GB, so some parts keep more bits.",
+        "The cost is precision. The answers can differ a little from the full model."
+      ],
+      "right_title": "WebGPU and the warm-up",
+      "right": [
+        "WebGPU lets Chrome send the work to the graphics card.",
+        "The card must support 16-bit math (shader-f16). Without it the popup refuses to run.",
+        "On first use the graphics programs are compiled: about 30 s of warm-up."
+      ],
+      "notes": "Two ideas make the model small enough to run here. The first is 4-bit compression. Most stored numbers are rounded to 4 bits, which brings the file down to about 695 MB. The second is WebGPU, the browser's way to run work on the graphics card. The first use also waits about half a minute while the card compiles its programs."
+    },
+    {
+      "layout": "table",
+      "title": "First use and later use: the clean timings",
+      "header": ["Measure, short article", "First use, clean run", "Later use, offline, before label fix", "Later use, offline, after label fix"],
+      "rows": [
+        ["Total time", "196.8 s", "15.3 s", "17.7 s"],
+        ["Download", "158.3 s (about 695 MB)", "None: model stored", "None: model stored"],
+        ["Load into the card", "3.8 s", "6.9 s", "11.6 s"],
+        ["Warm-up", "30.5 s", "0.5 s", "0.4 s"],
+        ["Writing speed", "47 tokens a second", "40 tokens a second", "65 tokens a second"]
+      ],
+      "col_widths": [3.0, 2.9, 3.0, 2.9],
+      "caption": "Clean runs only. Offline means the outside websites were blocked. Quote the after-fix column, which matches the current code.",
+      "notes": "This table compares the first use with later use for the short article. The first use downloads about 695 MB, and that download took 158.3 seconds on the developer's connection. Later use skips the download and takes about 15 to 18 seconds. I show the run before the label fix as well, because it had a wrong line on screen. I quote the after-fix run, and I say which run I quote."
+    },
+    {
+      "layout": "table",
+      "title": "The layers, and what each one does",
+      "header": ["Layer", "What it does", "File"],
+      "rows": [
+        ["Popup", "Summarize button and progress lines", "popup.js"],
+        ["Service worker", "Owns the job, the parts and the merge", "service-worker.js"],
+        ["Offscreen page", "Keeps the model loaded; closes after 5 minutes idle", "offscreen.js"],
+        ["Web worker", "Runs WebLLM's handler, so the page stays responsive", "engine-worker.js"],
+        ["WebLLM", "Reads the model, splits text into tokens, runs each answer", "lib/web-llm.js"],
+        ["WebGPU", "Does the calculations on the graphics card", "Chrome feature"]
+      ],
+      "col_widths": [2.8, 6.2, 2.8],
+      "caption": "The popup only shows progress. Closing it does not stop the job.",
+      "notes": "The extension has layers. The popup only has a button and shows progress. The service worker owns the job, and it asks a hidden offscreen page to do the heavy work. That page holds the loaded model and runs a web worker, which runs the WebLLM library. WebLLM sends the calculations to the graphics card through WebGPU."
+    },
+    {
+      "layout": "table",
+      "title": "Where the model files live, and the offline proof",
+      "header": ["Store", "Where", "How long it lasts", "Who writes and reads it"],
+      "rows": [
+        ["Model files", "IndexedDB, about 695 MB", "Kept between runs; no code deletes them", "Offscreen page writes on first use"],
+        ["Job record", "chrome.storage.session", "Until the browser closes; removed when its tab closes", "Service worker writes; popup reads"],
+        ["Settings", "chrome.storage.local", "Kept across restarts", "Service worker reads"],
+        ["Loaded model", "Graphics memory, offscreen page", "Until the page closes, 5 minutes after the last message", "Offscreen page only"]
+      ],
+      "col_widths": [2.3, 3.3, 3.5, 2.9],
+      "caption": "Offline proof: with the outside websites blocked, the short article took 17.7 s after the label fix (15.3 s before it). No API key is stored.",
+      "notes": "The model files are kept in IndexedDB, which is the browser's own storage for the extension. The job record sits in session storage, and it is removed when its tab closes. The loaded model lives in graphics memory and is freed after five idle minutes. For the offline proof, I blocked the outside websites and ran the short article, which took 17.7 seconds after the label fix."
+    },
+    {
+      "layout": "table",
+      "title": "The hidden offscreen page and its messages",
+      "header": ["Message", "Direction", "What it does"],
+      "rows": [
+        ["LOCAL_STATUS", "Service worker to offscreen page", "Asks for the graphics card, whether the model is stored, and its size"],
+        ["LOCAL_LOAD", "Service worker to offscreen page", "Loads the model into the graphics card"],
+        ["MODEL_PROGRESS", "Offscreen page to service worker", "Sends the phase, the percentage and the text, many times"],
+        ["LOCAL_GENERATE", "Service worker to offscreen page", "Asks for one summary; the reply has the text and the stats"],
+        ["KEEPALIVE", "Offscreen page to service worker", "Sent every 10 s while work runs, so the worker stays awake"]
+      ],
+      "col_widths": [3.1, 3.9, 5.0],
+      "caption": "The page has no tabs and no chrome.storage access, so it works by messages only. It closes 5 minutes after its last running message ends.",
+      "notes": "The offscreen page is a hidden page that Chrome lets an extension open for a heavy task. It has no tabs and no storage access, so it talks only by messages. The service worker sends three kinds of request, and the page sends progress and keepalive messages back. The page closes five minutes after its last message ends, and that frees the graphics memory."
+    },
+    {
+      "layout": "table",
+      "title": "Graphics card check and choice of model",
+      "header": ["Situation", "What the extension does, and what the reader sees"],
+      "rows": [
+        ["No WebGPU, or no 16-bit math (shader-f16)", "Refuses before any job. A red line explains why, and the button is disabled."],
+        ["Integrated (Intel) graphics", "Picks SmolLM2 360M by itself and shows a note: answers can be slow."],
+        ["Under 8 GB of memory (rule)", "Picks SmolLM2 360M. The rule has not been seen on real low-memory hardware."],
+        ["Main model runs out of graphics memory", "Tries SmolLM2 360M once. The summary carries a notice that it may be less detailed."],
+        ["A fallback choice is made", "It stays on SmolLM2 360M until the stored settings are cleared."]
+      ],
+      "col_widths": [4.8, 7.0],
+      "caption": "The extension makes these choices, not the reader. The main model is about 695 MB; SmolLM2 360M is about 204 MB.",
+      "notes": "The extension checks the computer before it starts. Without WebGPU or the 16-bit math feature, it refuses with a plain message instead of failing quietly. On an integrated chip it chooses the smaller model and shows a note. If the main model runs out of graphics memory, the small model tries the job, and the popup says so. That choice is saved, so it stays until the stored settings are cleared."
+    },
+    {
+      "layout": "two_column",
+      "title": "Two graphics chips: the default is slow",
+      "left_title": "Intel built-in graphics",
+      "left": [
+        "SmolLM2 360M: 4 to 5 tokens a second in a saved clean run.",
+        "The 1B model wrote about 2 tokens a second in a speed test.",
+        "Short article, first use: 199.2 s, including an 81 s download.",
+        "Chrome used this chip by default on this laptop."
+      ],
+      "right_title": "NVIDIA RTX 3050, 6 GB",
+      "right": [
+        "Llama 3.2 1B: 34 to 53 tokens a second in clean runs.",
+        "Short article, model stored: 15.3 s before the label fix, 17.7 s after it.",
+        "The Windows Graphics setting or setup.bat --gpu (opt-in) moves Chrome to it.",
+        "setup.bat --gpu was tested only against a throw-away registry key."
+      ],
+      "notes": "Many laptops have a weak graphics chip built into the processor and a stronger separate card. On this laptop Chrome used the Intel chip by default, so the extension chose the smaller model and showed a note. With the NVIDIA card, the 1B model wrote 34 to 53 tokens a second in the clean runs. The setting that moves Chrome to the card is opt-in, and it has been tested only against a throw-away registry key."
+    },
+    {
+      "layout": "table",
+      "title": "Long pages are cut into parts",
+      "header": ["Popup line, Lighthouse article (clean run)", "At (s)"],
+      "rows": [
+        ["Summarizing part 1 of 7...", "3.2"],
+        ["Summarizing part 2 of 7...", "7.8"],
+        ["Summarizing part 3 of 7...", "17.0"],
+        ["Summarizing part 4 of 7...", "22.5"],
+        ["Summarizing part 5 of 7...", "30.1"],
+        ["Summarizing part 6 of 7...", "38.1"],
+        ["Summarizing part 7 of 7...", "54.7"],
+        ["Combining 7 summaries...", "60.2"]
+      ],
+      "col_widths": [9.6, 2.2],
+      "caption": "Finished at 74.1 s with the model stored. Parts up to 6,000 characters; a page over 12 parts is refused.",
+      "notes": "Long pages are cut into parts of at most 6,000 characters, which is about 1,500 tokens. Each part gets its own summary, and then one request merges the part summaries. This is the clean run of a Lighthouse article in seven parts. It finished at 74.1 seconds, with the model already stored and loaded."
+    },
+    {
+      "layout": "pair",
+      "title": "The popup on first use: download, then warm-up",
+      "max_height": 3.6,
+      "items": [
+        {
+          "image": "../screenshots/ui-01-not-downloaded.png",
+          "alt": "Popup before the first download. The button reads Download model and summarize.",
+          "caption": "Before the first use, the button asks for the download. Pretend model: the 664 MB size is its fixed number."
+        },
+        {
+          "image": "../screenshots/ui-04-warming.png",
+          "alt": "Popup during the warm-up. The text reads Warming up the model.",
+          "caption": "The warm-up line, after the download and the load. Real first-use warm-up: about 30 s (30.5 s in the clean run)."
+        }
+      ],
+      "notes": "This is what the reader sees on first use. The button says Download model and summarize, and the model line says the model is not downloaded yet. After the download and the load, the popup shows the warm-up line, because the first answer compiles the graphics programs. These pictures were made with the pretend model, so the sizes on them are its fixed numbers. The real download was about 695 MB."
+    },
+    {
+      "layout": "pair",
+      "title": "The popup: a finished summary, and the notice",
+      "max_height": 4.0,
+      "items": [
+        {
+          "image": "../screenshots/ui-07-result.png",
+          "alt": "Popup with a finished summary and its stats line: 1 part, 1 request, 0.2 s, Llama 3.2 1B.",
+          "caption": "A finished summary with its stats line. Pretend model: the 0.2 s is its fixed timing."
+        },
+        {
+          "image": "../screenshots/ui-12-fallback-after-out-of-memory.png",
+          "alt": "Popup with a notice above the summary saying the smaller model wrote it.",
+          "caption": "The main model ran out of graphics memory, so the small model wrote this summary. The notice sits above it."
+        }
+      ],
+      "notes": "Here is a finished summary. The stats line shows the parts, the requests, the time and the model. In the second picture, the main model ran out of graphics memory, so SmolLM2 wrote the summary, and the popup says it may be less detailed. This fallback used to be silent, and I added the notice after a screenshot run showed the gap. Both pictures were made with the pretend model."
+    },
+    {
+      "layout": "table",
+      "title": "Errors and fallbacks: the main messages",
+      "header": ["Code", "Exact message the reader sees"],
+      "rows": [
+        ["NO_WEBGPU", "Chrome cannot use your graphics card for the model (WebGPU is not available). Open chrome://gpu to check."],
+        ["NO_SHADER_F16", "Your graphics card does not support the 16-bit math this model needs, so this computer cannot run Version 2."],
+        ["GPU_MEMORY", "The graphics card ran out of memory. Close other heavy tabs or programs and try again."],
+        ["MODEL_DOWNLOAD_FAILED", "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept."],
+        ["TOO_LONG", "This page is too long for the local model on this computer. Try a shorter page."],
+        ["TIMEOUT", "The model took too long to answer. Try again, or use a shorter page."]
+      ],
+      "col_widths": [3.6, 8.2],
+      "caption": "13 codes in all; six are shown. Also: TOO_LITTLE_TEXT, RESTRICTED_PAGE, INTERRUPTED, MODEL_LOAD_FAILED, EMPTY_ANSWER, EXTRACT_FAILED, SERVICE_ERROR.",
+      "notes": "Every failure has one code and one plain message. The reader sees the message in the popup, and the technical detail goes to the console. The table shows six of the thirteen codes. Two of the refusals happen before any download: a page that is too long, and a page that Chrome does not let an extension read."
+    },
+    {
+      "layout": "table",
+      "title": "Setup for the client: four scripts and one manual step",
+      "header": ["File", "What it does", "When to run it"],
+      "rows": [
+        ["setup.bat", "Checks Chrome 116 or newer and the extension files. Ends with SETUP COMPLETE or SETUP FAILED.", "Once, first"],
+        ["run.bat", "Opens Chrome's extensions page and shows the four steps. The folder path is on the clipboard.", "To load the extension"],
+        ["check-computer.ps1", "Prints the Windows version, memory, graphics chips and free space on drive C.", "Before the visit"],
+        ["setup.bat --gpu", "Opt-in only. Writes one per-user Windows value so Chrome uses the separate card. Undo: set-chrome-gpu.ps1 -Remove.", "Only on two-chip laptops, if asked"]
+      ],
+      "col_widths": [3.0, 6.2, 2.6],
+      "caption": "Chrome 137 and later cannot load an extension from a flag. The user clicks Load unpacked and selects the folder.",
+      "notes": "The client uses four scripts. setup.bat checks Chrome and the files, and it ends with SETUP COMPLETE or SETUP FAILED. run.bat opens the extensions page, and the client clicks Load unpacked by hand. check-computer.ps1 reports the laptop's memory, graphics chips and free space. The setup.bat --gpu option changes a Windows setting, so it runs only when the client asks for it."
+    },
+    {
+      "layout": "stats",
+      "title": "How it was tested",
+      "stats": [
+        {"value": "70", "label": "unit tests, with no browser and no network"},
+        {"value": "26", "label": "browser scenarios, passing in three full runs"},
+        {"value": "15", "label": "Windows script checks, B1 to B10c"},
+        {"value": "4", "label": "clean real-model run files"}
+      ],
+      "caption": "Most browser tests use a pretend model, so failures such as no WebGPU can be forced on purpose. The real model was run separately.",
+      "notes": "The tests run at three levels. There are 70 unit tests, which check the small rules without a browser or a network. There are 26 browser scenarios, which ran in a hidden Chromium with a pretend model, and they passed in three full runs. The 15 Windows script checks test the batch files and the PowerShell scripts. The four clean real-model run files are the only numbers I quote for speed."
+    },
+    {
+      "layout": "table",
+      "title": "Measured results: clean runs only",
+      "header": ["Case", "Total (s)", "Tokens a second"],
+      "rows": [
+        ["Short article, first use (NVIDIA)", "196.8", "47"],
+        ["Two-part article, first use (NVIDIA)", "15.9", "53"],
+        ["Seven-part Lighthouse article (NVIDIA)", "74.1", "34"],
+        ["Short article, offline, before label fix", "15.3", "40"],
+        ["Two-part article, offline, before label fix", "16.5", "42"],
+        ["Short article, offline, after label fix", "17.7", "65"],
+        ["Two-part article, offline, after label fix", "16.0", "45"],
+        ["Short article, Intel, SmolLM2 360M, first use", "199.2", "4"],
+        ["Two-part article, Intel, SmolLM2 360M", "149.1", "5"]
+      ],
+      "col_widths": [7.0, 2.0, 2.8],
+      "caption": "Disturbed runs (other programs running) are excluded: first use 207 s, Lighthouse 101.6 s, short 13.4 s, two-part 32.2 s.",
+      "notes": "These are the clean runs only. Each run file says at the top whether other programs were running, and these runs have no such note. The after-label-fix runs show 65 and 45 tokens a second, which is above the 34 to 53 range of the earlier clean runs, so I show both. The Intel run file has no such note, so I treat it as clean. Runs made while other programs were running are left out, because they are slower for a reason that has nothing to do with the code."
+    },
+    {
+      "layout": "table",
+      "title": "Problems met and how they were fixed",
+      "header": ["Problem", "What we did"],
+      "rows": [
+        ["Chrome used the weak Intel chip: about 2 tokens a second, a 36 s first answer", "Forced the high-performance card in the test setup, added a warm-up step, and an automatic smaller model with a note on Intel."],
+        ["WebLLM's model cache failed inside the offscreen page (CacheStorage error)", "Switched WebLLM to IndexedDB and asked for unlimitedStorage, so the browser keeps the model files."],
+        ["The small model wrote summaries with nothing on screen to say so", "A notice now sits above a summary written by the smaller model. The model line refreshes when a job ends."],
+        ["A stored model was labeled Downloading for about 0.8 s", "The offscreen page checks the store first, so a stored model always shows as loading. Unit test added."]
+      ],
+      "col_widths": [5.0, 6.8],
+      "caption": "Found and fixed on 21 October 2026. Each one is written in the development log.",
+      "notes": "I met four real problems on 21 October, and each one is written in the development log. The first was the graphics chip: Chrome picked the weak Intel chip, so the first answers were very slow. The second was the model cache, which failed inside the hidden page until I switched the storage. The third was silent: the small model wrote summaries with no sign on screen. The fourth was a wrong Downloading line on a model that was already stored."
+    },
+    {
+      "layout": "bullets",
+      "title": "What is not done or not verified",
+      "bullets": [
+        "Client's laptop: not tested yet. Chip, memory and free disk are unknown.",
+        "setup.bat --gpu: tested only on a test registry key, not on real Chrome.",
+        "Visible Chrome: no click-through yet. All tests used hidden Chromium.",
+        "English only. Other languages were not tried.",
+        "Small-model slips: repeated prompt wording, and factual errors.",
+        "Closing a tab does not stop a download; the small-model choice persists."
+      ],
+      "notes": "Some things are not finished, and I want to be exact about them. The client's laptop has not been tested, so its numbers are not known yet. The setting that moves Chrome to the card was tested only against a throw-away registry key. Every browser test and real run used a hidden Chromium, so I have not clicked through the daily Chrome window. The model is meant for English text, and it makes small slips."
+    },
+    {
+      "layout": "bullets",
+      "title": "Demo plan: what I will show, in order",
+      "bullets": [
+        "Show the card loaded from chrome://extensions. There is no key and no cloud box.",
+        "Summarize the Lighthouse article with the model stored: 74.1 s in seven parts (clean run).",
+        "Close the popup, wait five seconds, and reopen it. The job is still there.",
+        "Turn off Wi-Fi and summarize a short article. Say which run: 17.7 s after the label fix, or 15.3 s before it.",
+        "Open chrome://version and a near-empty page to show the two refusals.",
+        "Do not show the first download live: it took 158.3 s. Label any screenshot from a disturbed run."
+      ],
+      "notes": "The demo follows the steps in the knowledge-transfer document. I start from the extensions page, so the audience sees that no key is needed. Then I summarize the Lighthouse article, and after that I turn off the network for a short article. I also show two refusals, so the audience sees that the code stops early."
+    },
+    {
+      "layout": "closing",
+      "title": "Thank you. Questions?",
+      "lines": [
+        "[Insert Student Name]  |  BITS ID [Insert BITS ID]",
+        "The code, the tests and the setup scripts are in the finalsem project folder."
+      ],
+      "notes": "Thank you for listening. The code, the tests and the setup scripts are in the finalsem project folder, and I can show any part of them. The speed figures I quoted are from clean runs, and the other runs are listed with the reason they are left out. I am happy to take questions now. If a question is about something not built or not tested, I will say so."
+    }
+  ]
+}

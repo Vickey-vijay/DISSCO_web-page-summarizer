@@ -14,7 +14,7 @@ Client: Jeffy (CoH 11) · Product requirements: [prd.md](prd.md)
 | Abstract | Done: [abstract/abstract.md](abstract/abstract.md) |
 | V1 plan | Approved: [midsem/V1_PLAN.md](midsem/V1_PLAN.md) |
 | V1 build (midsem) | Done and tested: [midsem/project](midsem/project). Documents (report, KT) are Markdown files in [midsem/docs](midsem/docs). |
-| V2 build (final sem) | Built and under test: [finalsem/project](finalsem/project). The model runs inside Chrome (no key, no cloud). Final-sem documents are not written yet. |
+| V2 build (final sem) | Built and tested: [finalsem/project](finalsem/project) (70 unit tests, 26 hidden browser tests, 15 script checks; real-model runs in [finalsem/docs/test-runs](finalsem/docs/test-runs)). Documents: report and KT in [finalsem/docs](finalsem/docs) (Markdown), 17 figures, popup screenshots, decks in `midsem/docs/ppt` and `finalsem/docs/ppt`. Not yet done: a run on the client's laptop and the click-through in a visible Chrome ([finalsem/docs/MANUAL_SMOKE_TEST.md](finalsem/docs/MANUAL_SMOKE_TEST.md)). |
 
 ## Install V1 (for the client)
 
@@ -53,5 +53,8 @@ midsem/
   V1_PLAN.md       approved plan for V1
   project/         the extension (load this folder in Chrome), setup.bat, run.bat, tests
   docs/            figures, screenshots, test-run reports, report / KT / PPT
-finalsem/          V2 (added later)
+finalsem/
+  README.md        install, requirements, measured results
+  project/         the V2 extension, setup.bat, run.bat, tests
+  docs/            report, KT, figures, screenshots, test runs, decisions, decks
 ```
