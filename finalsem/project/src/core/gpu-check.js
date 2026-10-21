@@ -33,10 +33,12 @@ export function chooseModel({ deviceMemoryGB, override } = {}) {
  * Its text starts with "Fetching param cache" while downloading, and with "Loading model from
  * cache" or "Loading GPU shader modules" afterwards.
  */
-export function mapInitProgress(report) {
+export function mapInitProgress(report, { cached = false } = {}) {
   const text = String(report?.text ?? '');
   const fraction = Math.max(0, Math.min(1, Number(report?.progress) || 0));
   // "Start to fetch params" and "Fetching param cache[...]" both mean the download is happening.
-  const phase = /fetch/i.test(text) ? 'downloading' : 'loading';
+  // But WebLLM also says "fetch" at the start of a load from the browser's own storage; when the
+  // model is already stored, nothing is downloaded, so it is always "loading".
+  const phase = !cached && /fetch/i.test(text) ? 'downloading' : 'loading';
   return { phase, percent: Math.round(fraction * 100), text };
 }

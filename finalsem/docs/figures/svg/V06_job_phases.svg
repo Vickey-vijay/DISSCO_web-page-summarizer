@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="990" viewBox="0 0 1600 990" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="990" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V06  The job phases the popup shows, in order (later use skips the download)</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="200" y="112" width="460" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="430" y="148.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Reading the page</text>
+<text x="700" y="150" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Reading the page...</text>
+<path d="M430,172 L430,210" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="210" width="460" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="430" y="246.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Checking the graphics card</text>
+<text x="700" y="248" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Checking your graphics card...</text>
+<path d="M430,270 L430,308" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="308" width="460" height="60" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="430" y="344.71999999999997" font-size="24" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="428">Downloading (first time only)</text>
+<text x="700" y="346" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Downloading the model (first time only): 0% to 100%</text>
+<path d="M430,368 L430,406" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="406" width="460" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="430" y="442.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Loading into the graphics card</text>
+<text x="700" y="444" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Loading the model into the graphics card: 0% to 100%</text>
+<path d="M430,466 L430,504" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="504" width="460" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="430" y="540.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Warming up</text>
+<text x="700" y="542" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Warming up the model (first time can take about 30 seconds)...</text>
+<path d="M430,564 L430,602" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="602" width="460" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="430" y="638.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Summarizing</text>
+<text x="700" y="640" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Summarizing part 1 of 2...  or  Summarizing...  (one part)</text>
+<path d="M430,662 L430,700" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="700" width="460" height="60" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="430" y="736.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Combining</text>
+<text x="700" y="738" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">Combining 2 summaries...  (only when there is more than one part)</text>
+<path d="M430,760 L430,798" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="200" y="798" width="460" height="60" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="430" y="834.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Done, or an error</text>
+<text x="700" y="836" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="860">The summary is shown, or the error message from Figure V11</text>
+<path d="M200,240 L130,240 L130,436 L200,436" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<text x="40" y="346" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">skipped</text>
+<text x="40" y="930" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Later use is meant to skip the Downloading step (dashed). One offline test run showed that line for about 1 s (see FIGURES.md).</text>
+<text x="40" y="962" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">TOO_LITTLE_TEXT (under 200 characters) and TOO_LONG (more than 12 parts) stop the job before the model is used.</text></svg>

@@ -61,7 +61,7 @@ All numbers below were measured in a hidden Chromium (not the daily Chrome windo
 | Short article, model already downloaded, NVIDIA, no internet | 15.3 s |
 | Two-part article, model already downloaded, NVIDIA, no internet | 16.5 s |
 | Seven-part Wikipedia article (Lighthouse), NVIDIA | 74 s with nothing else running, 101.6 s with other programs running |
-| Speed of the model | Roughly 40 to 50 word-pieces ("tokens") per second while writing, on NVIDIA (the runs ranged from 29 to 53 depending on what else the laptop was doing). About 2 tokens per second on the Intel chip with the 1B model (an earlier speed test), and 4 to 5 with the smaller SmolLM2 model that the extension picks by itself on that chip. |
+| Speed of the model | While writing, 34 to 53 word-pieces ("tokens") per second on NVIDIA in the clean runs (the figure is the last request of each job). A separate speed test on one 6,000-character text measured about 63 tokens per second when writing and about 600 per second when reading. On the Intel chip: 4 to 5 tokens per second with the smaller SmolLM2 model that the extension picks by itself, and about 2 with the 1B model (speed test). |
 | Short article on the Intel chip, first use (downloads the smaller model, 204 MB) | 199.2 s: 81 s download, about 40 s warm-up, 76 s to write the answer |
 | Two-part article on the Intel chip, model already downloaded | 149.1 s |
 

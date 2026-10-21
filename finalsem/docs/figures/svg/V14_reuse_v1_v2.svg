@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="1000" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V14  Reuse: what came from Version 1 unchanged, what changed, what is new</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="40" y="110" width="720" height="50" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="400" y="141.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="688">Reused unchanged: 8 files</text>
+<text x="48" y="192" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">background/extract-tab.js</text>
+<text x="442" y="192" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">runs the extraction</text>
+<line x1="40" y1="201" x2="760" y2="201" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="230" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">content/extract.js</text>
+<text x="442" y="230" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">reads the page text</text>
+<line x1="40" y1="239" x2="760" y2="239" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="268" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">core/chunker.js</text>
+<text x="442" y="268" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">cuts text into parts</text>
+<line x1="40" y1="277" x2="760" y2="277" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="306" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">core/merger.js</text>
+<text x="442" y="306" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">joins part summaries</text>
+<line x1="40" y1="315" x2="760" y2="315" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="344" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">core/url.js</text>
+<text x="442" y="344" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">compares page addresses</text>
+<line x1="40" y1="353" x2="760" y2="353" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="382" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">ui/summary-format.js</text>
+<text x="442" y="382" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">text to paragraphs and lists</text>
+<line x1="40" y1="391" x2="760" y2="391" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="420" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">lib/readability.js</text>
+<text x="442" y="420" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">main-text reader (vendored)</text>
+<line x1="40" y1="429" x2="760" y2="429" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="458" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">lib/READABILITY_LICENSE.md</text>
+<text x="442" y="458" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">licence for readability.js</text>
+<line x1="40" y1="467" x2="760" y2="467" stroke="#D9D2C3" stroke-width="1.2"/>
+<rect x="40" y="486" width="720" height="50" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="400" y="517.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="688">Removed: 3 files</text>
+<text x="48" y="568" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">engines/gemini.js</text>
+<text x="442" y="568" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">Version 1 cloud engine</text>
+<line x1="40" y1="577" x2="760" y2="577" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="606" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">ui/options.html</text>
+<text x="442" y="606" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">Version 1 key page</text>
+<line x1="40" y1="615" x2="760" y2="615" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="48" y="644" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1512">ui/options.js</text>
+<text x="442" y="644" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="1118">Version 1 key page script</text>
+<line x1="40" y1="653" x2="760" y2="653" stroke="#D9D2C3" stroke-width="1.2"/>
+<rect x="800" y="110" width="760" height="50" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1180" y="141.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="728">Changed: 8 files (diff lines first)</text>
+<text x="808" y="192" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">background/service-worker.js</text>
+<text x="1202" y="192" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">83 · local engine, no Gemini</text>
+<line x1="800" y1="201" x2="1560" y2="201" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="230" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/config.js</text>
+<text x="1202" y="230" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">83 · local models, no key</text>
+<line x1="800" y1="239" x2="1560" y2="239" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="268" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/errors.js</text>
+<text x="1202" y="268" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">56 · model error codes</text>
+<line x1="800" y1="277" x2="1560" y2="277" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="306" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/pipeline.js</text>
+<text x="1202" y="306" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">6 · model prepared first</text>
+<line x1="800" y1="315" x2="1560" y2="315" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="344" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/prompts.js</text>
+<text x="1202" y="344" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">48 · shorter prompts</text>
+<line x1="800" y1="353" x2="1560" y2="353" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="382" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">ui/popup.js</text>
+<text x="1202" y="382" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">146 · model line, no key box</text>
+<line x1="800" y1="391" x2="1560" y2="391" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="420" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">ui/popup.html</text>
+<text x="1202" y="420" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">15 · model line, no key box</text>
+<line x1="800" y1="429" x2="1560" y2="429" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="458" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">ui/ui.css</text>
+<text x="1202" y="458" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">5 · styles for the model line</text>
+<line x1="800" y1="467" x2="1560" y2="467" stroke="#D9D2C3" stroke-width="1.2"/>
+<rect x="800" y="486" width="760" height="50" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1180" y="517.72" font-size="24" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="728">New in Version 2: 10 files</text>
+<text x="808" y="568" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">background/offscreen-manager.js</text>
+<text x="1202" y="568" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">hidden page, opened and closed</text>
+<line x1="800" y1="577" x2="1560" y2="577" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="606" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">engines/local.js</text>
+<text x="1202" y="606" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">local engine, replaces Gemini</text>
+<line x1="800" y1="615" x2="1560" y2="615" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="644" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/gpu-check.js</text>
+<text x="1202" y="644" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">graphics check, model choice</text>
+<line x1="800" y1="653" x2="1560" y2="653" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="682" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">core/engine-errors.js</text>
+<text x="1202" y="682" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">WebLLM errors to codes</text>
+<line x1="800" y1="691" x2="1560" y2="691" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="720" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">lib/web-llm.js</text>
+<text x="1202" y="720" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">WebLLM library, no bundler</text>
+<line x1="800" y1="729" x2="1560" y2="729" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="758" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">lib/WEBLLM_LICENSE</text>
+<text x="1202" y="758" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">WebLLM licence (Apache 2.0)</text>
+<line x1="800" y1="767" x2="1560" y2="767" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="796" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">offscreen/offscreen.html</text>
+<text x="1202" y="796" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">the hidden page</text>
+<line x1="800" y1="805" x2="1560" y2="805" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="834" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">offscreen/offscreen.js</text>
+<text x="1202" y="834" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">messages: status, load, answer</text>
+<line x1="800" y1="843" x2="1560" y2="843" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="872" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">offscreen/engine-worker.js</text>
+<text x="1202" y="872" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">web worker for WebLLM</text>
+<line x1="800" y1="881" x2="1560" y2="881" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="808" y="910" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="752">offscreen/mock-engine.js</text>
+<text x="1202" y="910" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="358">pretend model for tests</text>
+<line x1="800" y1="919" x2="1560" y2="919" stroke="#D9D2C3" stroke-width="1.2"/>
+<text x="40" y="960" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Lists come from comparing midsem/project/src with finalsem/project/src (diff).</text>
+<text x="40" y="990" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Diff line counts are old and new lines together: a rough size of each change, not a count of edits.</text></svg>

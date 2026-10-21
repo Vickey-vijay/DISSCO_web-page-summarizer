@@ -54,6 +54,13 @@ test('mapInitProgress tells downloading from loading and clamps the percentage',
   assert.equal(mapInitProgress(undefined).percent, 0);
 });
 
+test('mapInitProgress never says downloading when the model is already stored', () => {
+  // Seen in the offline run: a cached model still reported "Start to fetch params" first.
+  assert.equal(mapInitProgress({ progress: 0, text: 'Start to fetch params' }, { cached: true }).phase, 'loading');
+  assert.equal(mapInitProgress({ progress: 0.1, text: 'Fetching param cache[4/22]' }, { cached: true }).phase, 'loading');
+  assert.equal(mapInitProgress({ progress: 0.1, text: 'Fetching param cache[4/22]' }, { cached: false }).phase, 'downloading');
+});
+
 // ---- error classification -----------------------------------------------------------------------
 
 test('engine errors become the right code', () => {
@@ -65,6 +72,11 @@ test('engine errors become the right code', () => {
   assert.equal(classifyEngineError(new Error('WebGPU is not supported in this environment'), 'load'), 'NO_WEBGPU');
   assert.equal(classifyEngineError(new Error('something strange'), 'load'), 'MODEL_LOAD_FAILED');
   assert.equal(classifyEngineError(new Error('something strange'), 'generate'), 'SERVICE_ERROR');
+});
+
+test('the word "room" is not an out-of-memory error', () => {
+  assert.equal(classifyEngineError(new Error('there is no room for this'), 'generate'), 'SERVICE_ERROR');
+  assert.equal(classifyEngineError(new Error('OOM while allocating'), 'generate'), 'GPU_MEMORY');
 });
 
 test('a network word during generation is not a download failure', () => {

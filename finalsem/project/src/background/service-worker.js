@@ -20,7 +20,7 @@ import { createOffscreenManager } from './offscreen-manager.js';
 const LOG = '[PageSummarizer]';
 const jobKey = (tabId) => `job:${tabId}`;
 // A "running" job that has not been updated for this long is treated as dead.
-const STALE_MS = 3 * 60 * 1000;
+const STALE_MS = 5 * 60 * 1000;
 const bootTime = Date.now();
 
 const manager = createOffscreenManager({ getSettings: () => loadSettings(chrome.storage.local) });

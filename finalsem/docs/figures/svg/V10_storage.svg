@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="756.32" viewBox="0 0 1600 756.32" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="756.32" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V10  What is stored where, and for how long</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="40" y="100" width="260" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="228">Store</text>
+<rect x="320" y="100" width="370" height="46.72" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="336" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="338">Where</text>
+<rect x="710" y="100" width="420" height="46.72" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="726" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="388">How long it lasts</text>
+<rect x="1150" y="100" width="410" height="46.72" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1166" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="378">Who writes and reads it</text>
+<rect x="40" y="154.72" width="260" height="132.16000000000003" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="227.52" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="228">Model files</text>
+<rect x="320" y="154.72" width="370" height="132.16000000000003" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="336" y="182.96" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">IndexedDB (cacheBackend:</text>
+<text x="336" y="212" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">indexeddb). About 695 MB for</text>
+<text x="336" y="241.04" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Llama 3.2 1B; about 204 MB for</text>
+<text x="336" y="270.08" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">SmolLM2.</text>
+<rect x="710" y="154.72" width="420" height="132.16000000000003" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="726" y="182.96" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">Kept between runs. No code deletes</text>
+<text x="726" y="212" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">it. unlimitedStorage asks the</text>
+<text x="726" y="241.04" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">browser not to delete it when disk</text>
+<text x="726" y="270.08" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">space runs low.</text>
+<rect x="1150" y="154.72" width="410" height="132.16000000000003" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1166" y="197.48000000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">Written by the offscreen page on</text>
+<text x="1166" y="226.52" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">first use (WebLLM). Read on every</text>
+<text x="1166" y="255.56" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">load.</text>
+<rect x="40" y="294.88" width="260" height="132.16000000000003" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="367.68" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="228">Job record</text>
+<rect x="320" y="294.88" width="370" height="132.16000000000003" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="336" y="352.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">chrome.storage.session, key</text>
+<text x="336" y="381.20000000000005" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">job:&lt;tabId&gt;</text>
+<rect x="710" y="294.88" width="420" height="132.16000000000003" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="726" y="352.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">Until the browser closes. Removed</text>
+<text x="726" y="381.20000000000005" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">when its tab closes.</text>
+<rect x="1150" y="294.88" width="410" height="132.16000000000003" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1166" y="323.12" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">Service worker writes status,</text>
+<text x="1166" y="352.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">phase, percent, summary and stats.</text>
+<text x="1166" y="381.20000000000005" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">The popup reads it, and again on</text>
+<text x="1166" y="410.24000000000007" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">every change.</text>
+<rect x="40" y="435.04" width="260" height="132.16000000000003" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="507.84000000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="228">Settings</text>
+<rect x="320" y="435.04" width="370" height="132.16000000000003" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="336" y="506.84000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="338">chrome.storage.local</text>
+<rect x="710" y="435.04" width="420" height="132.16000000000003" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="726" y="506.84000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">Kept across restarts.</text>
+<rect x="1150" y="435.04" width="410" height="132.16000000000003" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1166" y="463.28000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">Service worker reads them.</text>
+<text x="1166" y="492.32000000000005" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">modelOverride becomes 'fallback'</text>
+<text x="1166" y="521.36" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">after a failed load. Test-only</text>
+<text x="1166" y="550.4000000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">settings also live here.</text>
+<rect x="40" y="575.2" width="260" height="103.12" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="633.4800000000001" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="228">Loaded model</text>
+<rect x="320" y="575.2" width="370" height="103.12" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="336" y="617.96" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Graphics memory, inside the</text>
+<text x="336" y="647" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">offscreen page</text>
+<rect x="710" y="575.2" width="420" height="103.12" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="726" y="603.44" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">Until the page closes: 5 minutes</text>
+<text x="726" y="632.48" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">after the last message, or when the</text>
+<text x="726" y="661.52" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="388">browser closes.</text>
+<rect x="1150" y="575.2" width="410" height="103.12" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1166" y="603.44" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">Offscreen page only. WebLLM's</text>
+<text x="1166" y="632.48" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">figures: about 879 MB (Llama 3.2</text>
+<text x="1166" y="661.52" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="378">1B) or 376 MB (SmolLM2).</text>
+<text x="40" y="720.32" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Version 2 stores no API key. Version 1 kept its key in chrome.storage.local.</text></svg>

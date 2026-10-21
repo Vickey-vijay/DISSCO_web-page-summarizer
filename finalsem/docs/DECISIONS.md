@@ -27,7 +27,7 @@ WebLLM stores the model in "Cache Storage" by default. Inside the extension's hi
 
 ## D3. Weak graphics chip: switch to the small model by itself (decided after measuring)
 
-On the Intel chip the 1B model wrote about 2 tokens a second and the first answer took 36 s to prepare. On the NVIDIA chip the same model wrote 40 to 63 tokens a second. So when WebGPU reports an integrated chip, the extension chooses SmolLM2 360M (about 204 MB to download) and shows a one-line note that a separate graphics card is much faster. Measured with this rule: short article 199.2 s on first use, two-part article 149.1 s later. It is slow, but it finishes, and that is better than a refusal. The note names the chip ("Intel").
+On the Intel chip the 1B model wrote about 2 tokens a second and the first answer took 36 s to prepare. On the NVIDIA chip the same model wrote about 63 tokens a second in that first speed test (34 to 53 in the later full runs). So when WebGPU reports an integrated chip, the extension chooses SmolLM2 360M (about 204 MB to download) and shows a one-line note that a separate graphics card is much faster. Measured with this rule: short article 199.2 s on first use, two-part article 149.1 s later. It is slow, but it finishes, and that is better than a refusal. The note names the chip ("Intel").
 
 ## D4. Making Chrome use the stronger chip (opt-in only)
 

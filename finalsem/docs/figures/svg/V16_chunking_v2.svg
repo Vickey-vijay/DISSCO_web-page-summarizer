@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="900" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V16  A long page: cut into parts, each summarized, then merged (seven-part example)</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<text x="40" y="112" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Page text: 36,752 characters (Wikipedia: Lighthouse, measured in Version 1), cut into 7 parts.</text>
+<text x="40" y="144" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Each part is at most 6,000 characters (chunkChars). Their sizes vary with the paragraphs.</text>
+<rect x="40" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="140" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 1</text>
+<path d="M140,222 L140,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="40" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="140" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 1</text>
+<path d="M140,370 L140,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="260" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="360" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 2</text>
+<path d="M360,222 L360,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="260" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="360" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 2</text>
+<path d="M360,370 L360,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="480" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="580" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 3</text>
+<path d="M580,222 L580,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="480" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="580" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 3</text>
+<path d="M580,370 L580,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="700" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 4</text>
+<path d="M800,222 L800,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="700" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="800" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 4</text>
+<path d="M800,370 L800,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="920" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1020" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 5</text>
+<path d="M1020,222 L1020,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="920" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1020" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 5</text>
+<path d="M1020,370 L1020,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1140" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1240" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 6</text>
+<path d="M1240,222 L1240,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1140" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1240" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 6</text>
+<path d="M1240,370 L1240,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1360" y="166" width="200" height="56" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1460" y="200.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Part 7</text>
+<path d="M1460,222 L1460,300" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="1360" y="300" width="200" height="70" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1460" y="341.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="168">Summary 7</text>
+<path d="M1460,370 L1460,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="40" y="410" width="1520" height="60" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="800" y="446.71999999999997" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="1488">Merge: one request for the 7 summaries, in page order</text>
+<path d="M800,470 L800,510" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="40" y="510" width="1520" height="60" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="800" y="546.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="1488">Final summary</text>
+<text x="40" y="616" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Measured timeline (clean run, NVIDIA RTX 3050): 74.1 s, with the model already downloaded and loaded</text>
+<rect x="60" y="636" width="63.91363022941971" height="66" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2"/>
+<text x="91.95681511470985" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="143.9136302294197">Start</text>
+<text x="91.95681511470985" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="143.9136302294197">3.2 s</text>
+<rect x="123.91363022941971" y="636" width="91.87584345479084" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="169.85155195681511" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="299.70310391363023">Part 1</text>
+<text x="169.85155195681511" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="299.70310391363023">4.6 s</text>
+<rect x="215.78947368421055" y="636" width="183.75168690958165" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="307.6653171390014" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="575.3306342780028">Part 2</text>
+<text x="307.6653171390014" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="575.3306342780028">9.2 s</text>
+<rect x="399.5411605937922" y="636" width="109.85155195681511" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="454.46693657219976" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="868.9338731443995">Part 3</text>
+<text x="454.46693657219976" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="868.9338731443995">5.5 s</text>
+<rect x="509.3927125506073" y="636" width="151.79487179487188" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="585.2901484480433" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1130.5802968960866">Part 4</text>
+<text x="585.2901484480433" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1130.5802968960866">7.6 s</text>
+<rect x="661.1875843454792" y="636" width="159.78407557354922" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="741.0796221322538" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1442.1592442645076">Part 5</text>
+<text x="741.0796221322538" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1442.1592442645076">8.0 s</text>
+<rect x="820.9716599190284" y="636" width="331.55195681511475" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="986.7476383265857" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1186.5047233468285">Part 6</text>
+<text x="986.7476383265857" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1186.5047233468285">16.6 s</text>
+<rect x="1152.5236167341432" y="636" width="109.85155195681523" height="66" fill="#FBF8F1" stroke="#B4391F" stroke-width="2"/>
+<text x="1207.449392712551" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="745.1012145748982">Part 7</text>
+<text x="1207.449392712551" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="745.1012145748982">5.5 s</text>
+<rect x="1262.3751686909584" y="636" width="277.6248313090416" height="66" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2"/>
+<text x="1401.187584345479" y="664" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="357.62483130904184">Merge</text>
+<text x="1401.187584345479" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="357.62483130904184">13.9 s</text>
+<line x1="60" y1="712" x2="1540" y2="712" stroke="#1C1B1A" stroke-width="2"/>
+<line x1="60" y1="712" x2="60" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="60" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="80">0 s</text>
+<line x1="259.7300944669366" y1="712" x2="259.7300944669366" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="259.7300944669366" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="479.46018893387316">10 s</text>
+<line x1="459.46018893387316" y1="712" x2="459.46018893387316" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="459.46018893387316" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="878.9203778677463">20 s</text>
+<line x1="659.1902834008098" y1="712" x2="659.1902834008098" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="659.1902834008098" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1278.3805668016196">30 s</text>
+<line x1="858.9203778677463" y1="712" x2="858.9203778677463" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="858.9203778677463" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1442.1592442645074">40 s</text>
+<line x1="1058.650472334683" y1="712" x2="1058.650472334683" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1058.650472334683" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1042.699055330634">50 s</text>
+<line x1="1258.3805668016196" y1="712" x2="1258.3805668016196" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1258.3805668016196" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="643.2388663967608">60 s</text>
+<line x1="1458.1106612685562" y1="712" x2="1458.1106612685562" y2="722" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1458.1106612685562" y="750" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="243.77867746288757">70 s</text>
+<text x="40" y="806" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Time per part is the gap between the popup status lines. Start is the check and the load, short because the model was already in memory.</text>
+<text x="40" y="838" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Limit: maxChunks is 12. A page that needs more parts is refused as TOO_LONG before any model work.</text>
+<text x="40" y="870" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Requests: 7 for the parts and 1 for the merge (8 in total, one merge level).</text></svg>

@@ -53,6 +53,12 @@ test('mergeSummaries sends every part summary in order', async () => {
   assert.ok(p.indexOf('first') < p.indexOf('second'));
 });
 
+test('markers the model copied into its answer are removed before the pipeline sees it', async () => {
+  const send = fakePage({ LOCAL_GENERATE: { ok: true, text: '<<<PAGE TEXT START>>>\nA short answer.\n<<<PAGE TEXT END>>>' } });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  assert.equal(await engine.summarizeChunk('t', { total: 1 }), 'A short answer.');
+});
+
 test('an empty answer is EMPTY_ANSWER', async () => {
   const engine = createLocalEngine({ send: fakePage({ LOCAL_GENERATE: { ok: true, text: '   ' } }), settings: SETTINGS });
   assert.equal(await code(engine.summarizeChunk('t', { total: 1 })), 'EMPTY_ANSWER');
@@ -233,6 +239,22 @@ test('the offscreen page is closed after the idle time', async () => {
   await manager.send({ type: 'LOCAL_STATUS' });
   await new Promise((r) => setTimeout(r, 120));
   assert.equal(state.closed, 1);
+});
+
+test('a quick status check finishing does not start the idle countdown while a load is still running', async () => {
+  const { api, state } = fakeChrome({ contexts: [{ contextType: 'OFFSCREEN_DOCUMENT' }] });
+  api.runtime.sendMessage = async (m) => {
+    if (m.type === 'LOCAL_LOAD') await new Promise((r) => setTimeout(r, 120));
+    return { ok: true };
+  };
+  const manager = createOffscreenManager({ api, getSettings: async () => ({ engineMode: 'real', idleCloseMs: 30 }) });
+  const load = manager.send({ type: 'LOCAL_LOAD' });
+  await manager.send({ type: 'LOCAL_STATUS' });
+  await new Promise((r) => setTimeout(r, 70)); // longer than the idle time, shorter than the load
+  assert.equal(state.closed, 0, 'the page must stay open while the load runs');
+  await load;
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(state.closed, 1, 'and close after the last message is done');
 });
 
 test('progress messages reach subscribers until they unsubscribe', () => {

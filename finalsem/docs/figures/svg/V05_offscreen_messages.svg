@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="880" viewBox="0 0 1600 880" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="880" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V05  Messages between the service worker and the offscreen page</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="60" y="100" width="500" height="84" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="310" y="131.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="468">Service worker</text>
+<text x="310" y="166.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="468">Asks for work and keeps the job running</text>
+<rect x="1040" y="100" width="500" height="84" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1290" y="131.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="468">Offscreen page</text>
+<text x="1290" y="166.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="468">Owns the model and the graphics card</text>
+<line x1="310" y1="184" x2="310" y2="760" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<line x1="1290" y1="184" x2="1290" y2="760" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 6"/>
+<path d="M310,240 L1290,240" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="709.7408" y="202" width="180.51839999999999" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="228.61999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace">LOCAL_STATUS</text>
+<path d="M1290,290 L310,290" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="586.31948" y="252" width="427.36104000000006" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="278.62" font-size="22" fill="#1C1B1A" text-anchor="middle">reply: graphics card, stored or not, size</text>
+<path d="M310,350 L1290,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="723.284" y="312" width="153.432" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="338.62" font-size="22" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace">LOCAL_LOAD</text>
+<path d="M1290,400 L310,400" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="491.921" y="362" width="616.158" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="388.62" font-size="22" fill="#1C1B1A" text-anchor="middle">MODEL_PROGRESS: phase, percent, text (many times)</text>
+<path d="M310,455 L1290,455" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="696.1976" y="417" width="207.6048" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="443.62" font-size="22" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace">LOCAL_GENERATE</text>
+<path d="M1290,505 L310,505" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="687.98852" y="467" width="224.02296" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="493.62" font-size="22" fill="#1C1B1A" text-anchor="middle">reply: text and stats</text>
+<path d="M1290,565 L310,565" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="579.0608" y="527" width="441.87840000000006" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="553.62" font-size="22" fill="#1C1B1A" text-anchor="middle">KEEPALIVE, every 10 s while work runs</text>
+<rect x="60" y="620" width="600" height="190" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="360" y="660.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="568">Idle close</text>
+<text x="360" y="696.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">Each message restarts a 5-minute timer (idleCloseMs</text>
+<text x="360" y="725.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">= 300000). When it runs out, the offscreen page is</text>
+<text x="360" y="754.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">closed and its graphics memory is freed. The model</text>
+<text x="360" y="783.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="568">files stay in IndexedDB.</text>
+<rect x="980" y="620" width="560" height="190" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1260" y="660.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="528">Rules</text>
+<text x="1260" y="696.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="528">Every message has target: 'offscreen'.</text>
+<text x="1260" y="725.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="528">Answers are made one at a time, in the order</text>
+<text x="1260" y="754.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="528">asked.</text>
+<text x="1260" y="783.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="528">KEEPALIVE is sent only while a request runs.</text>
+<text x="40" y="856" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Names and fields are from src/background/offscreen-manager.js and src/offscreen/offscreen.js.</text></svg>

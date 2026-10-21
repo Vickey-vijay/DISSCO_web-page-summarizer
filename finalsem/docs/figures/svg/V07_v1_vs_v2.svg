@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="860.0000000000001" viewBox="0 0 1600 860.0000000000001" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="860.0000000000001" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V07  Version 1 (cloud) against Version 2 (on this laptop)</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="40" y="100" width="300" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Measure</text>
+<rect x="360" y="100" width="590" height="46.72" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="558">Version 1: cloud (Gemini)</text>
+<rect x="970" y="100" width="590" height="46.72" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="130.08" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="558">Version 2: on this laptop</text>
+<rect x="40" y="154.72" width="300" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="198.48000000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Model</text>
+<rect x="360" y="154.72" width="590" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="197.48000000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">gemini-3.5-flash-lite, run by Google</text>
+<rect x="970" y="154.72" width="590" height="74.08000000000001" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="182.96" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Llama 3.2 1B on the graphics card (SmolLM2 360M</text>
+<text x="986" y="212" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">on Intel graphics)</text>
+<rect x="40" y="236.8" width="300" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="266.88" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">API key</text>
+<rect x="360" y="236.8" width="590" height="46.72" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="265.88" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Needed: a free key, pasted in the popup</text>
+<rect x="970" y="236.8" width="590" height="46.72" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="265.88" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Not needed</text>
+<rect x="40" y="291.52" width="300" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="335.28" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Internet</text>
+<rect x="360" y="291.52" width="590" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="334.28" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Needed for every summary</text>
+<rect x="970" y="291.52" width="590" height="74.08000000000001" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="319.76" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Needed once to download the model: about 695 MB</text>
+<text x="986" y="348.8" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">(about 204 MB for SmolLM2). Not needed after that.</text>
+<rect x="40" y="373.6" width="300" height="77.44" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="403.68" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Where the page text</text>
+<text x="56" y="434.40000000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">goes</text>
+<rect x="360" y="373.6" width="590" height="77.44" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="418.04" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Sent to Google's service over HTTPS</text>
+<rect x="970" y="373.6" width="590" height="77.44" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="418.04" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Stays on this laptop</text>
+<rect x="40" y="459.04" width="300" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="502.8" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Short article</text>
+<rect x="360" y="459.04" width="590" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="501.8" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">1.7 s, measured with the live service</text>
+<rect x="970" y="459.04" width="590" height="74.08000000000001" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="487.28000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">15.3 s with the model stored (NVIDIA). 196.8 s on</text>
+<text x="986" y="516.32" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">first use, download included.</text>
+<rect x="40" y="541.12" width="300" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="584.88" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Seven-part article</text>
+<rect x="360" y="541.12" width="590" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="583.88" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">17.8 s, five parts of 8,000 characters</text>
+<rect x="970" y="541.12" width="590" height="74.08000000000001" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="569.36" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">74.1 s, seven parts of 6,000 characters (NVIDIA,</text>
+<text x="986" y="598.4" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">model stored)</text>
+<rect x="40" y="623.2" width="300" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="666.9600000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Free-tier limits</text>
+<rect x="360" y="623.2" width="590" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="651.44" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">15 requests a minute named for the default model</text>
+<text x="376" y="680.48" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">(DEVLOG, 20 Oct)</text>
+<rect x="970" y="623.2" width="590" height="74.08000000000001" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="665.96" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">No service quota. A page over 12 parts is refused.</text>
+<rect x="40" y="705.2800000000001" width="300" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="56" y="735.3600000000001" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="268">Summary quality</text>
+<rect x="360" y="705.2800000000001" width="590" height="46.72" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="376" y="734.3600000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Not measured in this study</text>
+<rect x="970" y="705.2800000000001" width="590" height="46.72" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="986" y="734.3600000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="558">Not measured in this study</text>
+<text x="40" y="794.0000000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Version 1 timings: midsem/docs/test-runs/live-measurements.md, rows L01 and L04.</text>
+<text x="40" y="826.0000000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Version 2 timings: finalsem/docs/test-runs, clean runs only (hidden Chromium).</text></svg>

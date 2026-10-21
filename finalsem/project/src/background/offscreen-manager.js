@@ -15,6 +15,7 @@ export function createOffscreenManager({ api = globalThis.chrome, getSettings })
   let closeTimer = null;
   let generateChain = Promise.resolve();
   let creating = null;
+  let inFlight = 0; // messages sent and not yet answered; the page is never closed while this is above 0
 
   async function pageUrl() {
     const { engineMode } = await getSettings();
@@ -52,21 +53,25 @@ export function createOffscreenManager({ api = globalThis.chrome, getSettings })
 
   async function close() {
     clearTimeout(closeTimer);
+    if (inFlight > 0) return; // a load or an answer is still running: closing now would cut it off
     const contexts = await api.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
     if (contexts.length > 0) await api.offscreen.closeDocument();
   }
 
   /** Send one message to the offscreen page and wait for its answer. */
   async function send(message) {
-    await ensure();
+    inFlight += 1;
     clearTimeout(closeTimer);
-    const run = () => api.runtime.sendMessage(message);
     try {
+      await ensure();
+      const run = () => api.runtime.sendMessage(message);
       // Answers are generated one at a time, in the order they were asked.
       const result = message.type === 'LOCAL_GENERATE' ? (generateChain = generateChain.then(run, run)) : run();
       return await result;
     } finally {
-      void scheduleIdleClose();
+      inFlight -= 1;
+      // Only the last message to finish starts the idle countdown.
+      if (inFlight === 0) void scheduleIdleClose();
     }
   }
 

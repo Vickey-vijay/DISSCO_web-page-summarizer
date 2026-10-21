@@ -136,6 +136,7 @@ goto :eof
 :set_gpu
 call :say "  --gpu was given: asking Windows to run Chrome on the separate graphics card..."
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\set-chrome-gpu.ps1" -ChromePath "%CHROME%" -LogFile "%LOG%"
+if errorlevel 1 call :say "  The graphics setting was NOT changed (see the message above). Setup goes on; the extension works without it, only slower."
 goto :eof
 :find_chrome
 for %%P in ("%ProgramFiles%\Google\Chrome\Application\chrome.exe" "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" "%LocalAppData%\Google\Chrome\Application\chrome.exe") do (

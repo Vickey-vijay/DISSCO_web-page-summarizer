@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="660" viewBox="0 0 1600 660" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="660" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V09  First use, step by step: the download is most of the wait</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="60" y="250" width="3.700000000000003" height="70" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="63.7" y="250" width="1171.42" height="70" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<rect x="1235.1200000000001" y="250" width="28.11999999999989" height="70" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="1263.24" y="250" width="225.70000000000005" height="70" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<rect x="1488.94" y="250" width="27.38000000000011" height="70" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="649.4100000000001" y="292" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="1258.8200000000002">Download: 158.3 s (0% to 100%)</text>
+<text x="1376.0900000000001" y="292" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="407.8199999999997">Warm-up: 30.5 s</text>
+<text x="60" y="226" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1500">Read and check: 0.5 s</text>
+<line x1="62" y1="232" x2="62" y2="250" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1249.1200000000001" y="226" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="end" data-fit="1209.1200000000001">Load into the card: 3.8 s</text>
+<line x1="1249.18" y1="232" x2="1249.18" y2="250" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1516" y="226" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="end" data-fit="1476">Summarize: 3.7 s</text>
+<line x1="1502.63" y1="232" x2="1502.63" y2="250" stroke="#1C1B1A" stroke-width="2"/>
+<line x1="60" y1="352" x2="1516.3200000000002" y2="352" stroke="#1C1B1A" stroke-width="2"/>
+<line x1="60" y1="352" x2="60" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="60" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="80">0 s</text>
+<line x1="282" y1="352" x2="282" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="282" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="524">30 s</text>
+<line x1="504" y1="352" x2="504" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="504" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="968">60 s</text>
+<line x1="726" y1="352" x2="726" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="726" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1412">90 s</text>
+<line x1="948" y1="352" x2="948" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="948" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1264">120 s</text>
+<line x1="1170" y1="352" x2="1170" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1170" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="820">150 s</text>
+<line x1="1392" y1="352" x2="1392" y2="362" stroke="#1C1B1A" stroke-width="2"/>
+<text x="1392" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="376">180 s</text>
+<text x="40" y="440" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">0 s: the button is pressed. 0.5 s: the download starts (popup shows 0%).</text>
+<text x="40" y="472" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">158.8 s: the download is done; loading into the card runs from 21% to 100%.</text>
+<text x="40" y="504" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">162.6 s: warm-up starts ('Warming up the model (first time can take about 30 seconds)').</text>
+<text x="40" y="536" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">193.1 s: the answer starts ('Summarizing...'). 196.8 s: the summary is shown.</text>
+<text x="40" y="600" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Source: docs/test-runs/v2-local-nvidia-cold-first-attempt.md, timeline of the short article (clean run, NVIDIA RTX 3050).</text>
+<text x="40" y="632" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Segment times are the differences between the timeline's stamps. A 'Loading 0%' line at 5.1 s, during the download, is not shown.</text></svg>

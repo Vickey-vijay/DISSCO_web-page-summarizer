@@ -1,0 +1,99 @@
+# Introduction
+
+## The problem
+
+Long web pages hide the one fact a reader needs. A news article, a documentation page or an encyclopedia entry can run to several thousand words. Menus, banners, cookie notices and lists of related links surround the text. To learn whether a page is worth reading, the reader has to scroll through much of it first.
+
+A one-click summary saves that time. The reader presses one button while the page is open and gets a short account of what the page says, beside the page and without leaving it.
+
+Two more concerns apply to many summary tools. The first is where the text goes. A summary tool reads the page, and that text travels to whoever runs the tool. For a public article this does not matter. For a private document, an internal wiki or an email, it may matter a great deal. The second is access. Many summary tools need an account, a subscription or a key before the first summary is made.
+
+## Where Version 1 stopped
+
+Version 1 is a Google Chrome extension in the folder `midsem/`. It works. When the reader presses Summarize, the extension reads the main text of the open tab with Mozilla's Readability library, splits long text into parts of about 8,000 characters, sends each part to Google's Gemini service, and merges the part summaries into one. The summary appears in the popup, the small window that opens from the toolbar button.
+
+On real pages, Version 1 worked. Seven live pages were summarized in 1.7 to 23 seconds each (`midsem/docs/test-runs/live-measurements.md`). The limits come from the cloud service and from the design of the cloud route, not from a fault in the code. Each limit is a reason for Version 2.
+
+Table: The limits met in Version 1 and what Version 2 does about each
+
+| Limit in Version 1 | What was seen | What Version 2 does |
+|---|---|---|
+| A key is needed | The reader creates a free key with Google's AI Studio website and pastes it into the popup once. | No key. The model runs inside Chrome. |
+| The free allowance runs out | On 20 October 2026 the first three live pages worked with gemini-3.8-flash. The next four failed with HTTP 429, "Quota exceeded ... limit: 20", and a retry time of about 7 hours (`DEVLOG.md`). The smaller models have per-minute limits. | No service quota. Once the model is stored, the only limit is the laptop itself. |
+| The page text leaves the computer | The extracted text, a short instruction and the page title are sent to Google for every request. The connection is encrypted, but Google receives the text. | The page text stays in the browser. The model runs on the laptop. |
+| The internet is needed every time | The project requirements list the network as needed on every summary (`prd.md`). | The internet is needed once, to download the model. After that the summary works offline. |
+
+The first version chose the cloud route on purpose. A local model needed a capable graphics card and a large first download, and nobody yet knew how good its summaries would be. The cloud route let the core flow (read, split, summarize, merge, show) be built and tested first. Version 2 is the local route that Version 1 left open.
+
+![Version 1 and Version 2 compared: the cloud engine against the engine on the laptop](../figures/V07_v1_vs_v2.png)
+<!-- check against figure -->
+
+Reading the figure: the left column describes Version 1, with the key, the internet needed for every summary and the text sent to Google. The right column describes Version 2, with no key, the internet needed once for the download, and the text kept on the laptop. Each row states a fact that comes from the code or from a measured run.
+
+## What Version 2 changes
+
+Version 2 is in the folder `finalsem/`. It keeps everything around the summarizing step and replaces only the engine. Reading the page, splitting long text, merging the part summaries and the popup come from Version 1. The shared files were copied, not linked, so each version runs from its own folder (`finalsem/docs/DECISIONS.md`, D6).
+
+The new parts are these.
+
+- A small language model runs inside Chrome, on the graphics card. The default is Llama 3.2 1B. A smaller model, SmolLM2 360M, is used on a computer that has a weak built-in graphics chip or too little memory.
+- The WebLLM library loads the model and runs it. It is copied into the project as one file, so the project needs no build step.
+- The model is downloaded once, with a progress bar, and stored in the browser's IndexedDB storage. Later summaries use the stored copy.
+- At start, the extension checks that Chrome can use the graphics card for the model. If it cannot, the popup says why in plain words.
+- The cloud engine and the key box are removed from Version 2. Version 1 stays as it was.
+
+![What the extension is made of, and where the model lives, compared with the reader and the page](../figures/V01_context.png)
+<!-- check against figure -->
+
+Reading the figure: the reader presses the button in the popup in Chrome. The page is read in the browser, and the summary is made by the model on the laptop. The only arrow that leaves the laptop is the dashed one to the model host, used once for the first download. No arrow leads to a cloud service for the summary.
+
+## Objectives
+
+The objectives come from the project abstract and the product requirements. The table shows what Version 2 delivers and what remains open.
+
+Table: Project objectives and the state of Version 2
+
+| No. | Objective | State in Version 2 |
+|---|---|---|
+| 1 | Run a small language model inside the browser, with no key and no network once it is stored. | Delivered. One run with outside websites blocked gave a summary (`v2-local-nvidia-offline.md`). |
+| 2 | Download the model once, with a progress bar, and cache it. | Delivered. The first-use runs show the download and the percentages. |
+| 3 | Check at startup whether WebGPU and the 16-bit math are available, and show a clear message if not. | Delivered. The codes NO_WEBGPU and NO_SHADER_F16 are shown in the popup, and the button is disabled. |
+| 4 | Choose a small model of about 1 to 3 billion parameters after testing it. | Partly. Llama 3.2 1B and SmolLM2 360M were chosen and measured. Other models in the library's list were set aside for the reasons in `DECISIONS.md`, D1. None of them was run. |
+| 5 | Make summaries work with no network. | Delivered for one computer and two pages, with outside websites blocked. The client's laptop is not tested. |
+| 6 | Compare the cloud engine and the local engine on speed, summary quality and memory use. | Partly. Speed was measured for both. Memory use and summary quality were not compared side by side. |
+| 7 | Confirm the client laptop's system, memory and graphics card, because they set the model size. | Open. The details were requested and have not come back. |
+
+## Scope
+
+### What is built
+
+- The local engine, with the model download, the cache in IndexedDB and the load into the graphics card.
+- The graphics card check, with the messages for missing WebGPU and missing 16-bit math.
+- The switch to the smaller model on a weak built-in chip, with a one-line note in the popup.
+- A fallback to the smaller model after a memory failure, remembered for later.
+- The offscreen page that holds the model and its messages, and the job that runs in the background.
+- Setup and run scripts for Windows (`setup.bat`, `run.bat`), a computer check (`scripts/check-computer.ps1`) and an opt-in script that asks Windows to run Chrome on the separate graphics card.
+- Tests: 65 unit tests, 26 browser scenarios that use a pretend model, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
+
+### What is not built or not verified
+
+- Other models beyond the two in `src/core/config.js`.
+- The step that halves the part size and tries again when a model reports that its window is too small. The design allowed for it. No run needed it, and the part limit refuses very long pages first, so it was not built (`DECISIONS.md`, D1, item 4).
+- A summary-quality comparison between Version 1 and Version 2.
+- Languages other than English. The model is small and is meant for English text.
+- Chrome's built-in Summarizer API. It was studied as background only.
+- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a manual click-through in the visible Chrome window. All runs so far used a hidden Chromium browser.
+
+## Test machines
+
+The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is not known yet, so the report describes what the developer laptop does and says so wherever a number depends on it.
+
+## How to read this report
+
+The chapters after this one explain the AI in plain terms, then the browser work, then the design and the choices. Chapter 2 explains what a language model is, what its numbers and tokens are, how it reads and writes, and why it makes mistakes. Chapter 3 explains how the model gets into Chrome and runs on the graphics card, and why the first use is slow. The later chapters cover the requirements, the design, the technology choices, the offscreen page and its messages, the user interface, the errors and fallbacks, setup, testing, the problems that were met, the limits, and the conclusion. The appendices list the files and the messages.
+
+Each technical section ends with a short paragraph headed "What this means in plain words". Numbers come from the test-run files and the source code. Where a number was not measured, the report says so. Runs that were disturbed by other programs on the same laptop are labelled as such, and their times are not used as clean figures. Personal details are left as placeholders.
+
+### What this means in plain words
+
+Version 1 works, but it needs a key, a service quota and a network connection, and it sends the page text to Google. Version 2 keeps the same reading, splitting and merging steps and runs the summary on the laptop. It is slower on a weak chip, its first use is long, and its summaries are written by a much smaller model. The rest of the report explains each of these points with the measured numbers.

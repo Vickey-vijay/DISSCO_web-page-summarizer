@@ -100,10 +100,11 @@ const realEngine = {
     loading = (async () => {
       const t0 = performance.now();
       try {
+        const wasCached = await hasModelInCache(modelId, APP_CONFIG).catch(() => false);
         const worker = new Worker(new URL('./engine-worker.js', import.meta.url), { type: 'module' });
         engine = await CreateWebWorkerMLCEngine(worker, modelId, {
           appConfig: APP_CONFIG,
-          initProgressCallback: (report) => emitProgress(mapInitProgress(report)),
+          initProgressCallback: (report) => emitProgress(mapInitProgress(report, { cached: wasCached })),
         });
         loadedId = modelId;
         // The first answer compiles the graphics-card programs (about half a minute on a slow

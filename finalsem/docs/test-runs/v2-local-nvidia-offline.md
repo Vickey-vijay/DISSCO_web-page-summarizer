@@ -1,5 +1,7 @@
 # V2 local model run: nvidia-offline
 
+> Note: this is the clean offline run made before the popup label fix. Its short-article timeline has one line, "Downloading the model (first time only): 0%" at 3.9 s, that was a wrong label: the model was already stored. The repeat after the fix is in [v2-local-nvidia-offline-after-label-fix.md](v2-local-nvidia-offline-after-label-fix.md).
+
 Hidden Chromium, V2 extension, real model. Flags: `--force_high_performance_gpu --host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1`. Outside websites blocked (cache only).
 
 | Case | Outcome | Total (s) | Model | Graphics | Parts | Requests | Load (ms) | Decode (tok/s) |

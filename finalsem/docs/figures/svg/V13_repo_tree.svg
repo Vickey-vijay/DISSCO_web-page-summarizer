@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="960" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V13  Folder tree of finalsem/, with one line per folder or key file</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<line x1="72" y1="154" x2="72" y2="558" stroke="#6B665C" stroke-width="2"/>
+<line x1="72" y1="168" x2="106" y2="168" stroke="#6B665C" stroke-width="2"/>
+<line x1="72" y1="198" x2="106" y2="198" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="214" x2="128" y2="528" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="228" x2="162" y2="228" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="258" x2="162" y2="258" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="288" x2="162" y2="288" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="304" x2="184" y2="408" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="318" x2="218" y2="318" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="348" x2="218" y2="348" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="378" x2="218" y2="378" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="408" x2="218" y2="408" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="438" x2="162" y2="438" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="468" x2="162" y2="468" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="498" x2="162" y2="498" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="528" x2="162" y2="528" stroke="#6B665C" stroke-width="2"/>
+<line x1="72" y1="558" x2="106" y2="558" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="574" x2="128" y2="918" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="588" x2="162" y2="588" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="618" x2="162" y2="618" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="648" x2="162" y2="648" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="664" x2="184" y2="858" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="678" x2="218" y2="678" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="708" x2="218" y2="708" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="738" x2="218" y2="738" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="768" x2="218" y2="768" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="798" x2="218" y2="798" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="828" x2="218" y2="828" stroke="#6B665C" stroke-width="2"/>
+<line x1="184" y1="858" x2="218" y2="858" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="888" x2="162" y2="888" stroke="#6B665C" stroke-width="2"/>
+<line x1="128" y1="918" x2="162" y2="918" stroke="#6B665C" stroke-width="2"/>
+<text x="60" y="146" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1500">finalsem/</text>
+<text x="700" y="146" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Version 2 (final semester): all of it</text>
+<text x="116" y="176" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1444">README.md</text>
+<text x="700" y="176" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">What it is, install, measured results</text>
+<text x="116" y="206" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1444">docs/</text>
+<text x="700" y="206" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Decisions, test results, figures, report parts</text>
+<text x="172" y="236" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">DECISIONS.md</text>
+<text x="700" y="236" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The big choices for Version 2, and why</text>
+<text x="172" y="266" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">build/</text>
+<text x="700" y="266" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Writing guide and the script that assembles the Markdown</text>
+<text x="172" y="296" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">figures/</text>
+<text x="700" y="296" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The Version 2 figures (this set) and their build script</text>
+<text x="228" y="326" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">build-figures.mjs</text>
+<text x="700" y="326" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Draws V01 to V17 (copied from midsem)</text>
+<text x="228" y="356" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">svg/</text>
+<text x="700" y="356" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The drawings as SVG, one file each</text>
+<text x="228" y="386" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1332">V01_*.png to V17_*.png</text>
+<text x="700" y="386" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Rendered figures</text>
+<text x="228" y="416" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">FIGURES.md</text>
+<text x="700" y="416" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Caption and source files for each figure</text>
+<text x="172" y="446" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">kt/</text>
+<text x="700" y="446" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Knowledge-transfer document (not written yet)</text>
+<text x="172" y="476" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">report/</text>
+<text x="700" y="476" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The report (not written yet)</text>
+<text x="172" y="506" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">screenshots/</text>
+<text x="700" y="506" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Pictures from the real-model runs</text>
+<text x="172" y="536" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">test-runs/</text>
+<text x="700" y="536" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Raw results (JSON) and tables (Markdown)</text>
+<text x="116" y="566" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1444">project/</text>
+<text x="700" y="566" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The extension: load this folder in Chrome</text>
+<text x="172" y="596" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">manifest.json</text>
+<text x="700" y="596" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Manifest V3: permissions and hosts</text>
+<text x="172" y="626" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1388">setup.bat, run.bat</text>
+<text x="700" y="626" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Install check and launch steps</text>
+<text x="172" y="656" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">src/</text>
+<text x="700" y="656" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The code, in the folders below</text>
+<text x="228" y="686" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">background/</text>
+<text x="700" y="686" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Service worker and offscreen manager</text>
+<text x="228" y="716" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">content/</text>
+<text x="700" y="716" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Page text extraction (injected into the tab)</text>
+<text x="228" y="746" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">core/</text>
+<text x="700" y="746" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Chunker, merger, pipeline, errors, config</text>
+<text x="228" y="776" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">engines/</text>
+<text x="700" y="776" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">The local engine (the cloud engine is gone)</text>
+<text x="228" y="806" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">lib/</text>
+<text x="700" y="806" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">WebLLM and Readability</text>
+<text x="228" y="836" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">offscreen/</text>
+<text x="700" y="836" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Hidden model page and its web worker</text>
+<text x="228" y="866" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1332">ui/</text>
+<text x="700" y="866" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Popup and summary formatting</text>
+<text x="172" y="896" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">tests/</text>
+<text x="700" y="896" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Unit tests, browser tests, fixtures</text>
+<text x="172" y="926" font-size="22" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="1388">scripts/</text>
+<text x="700" y="926" font-size="22" font-weight="400" fill="#6B665C" text-anchor="start" data-fit="860">Computer check, Chrome GPU setting, real-model runs</text></svg>

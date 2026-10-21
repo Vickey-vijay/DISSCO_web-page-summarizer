@@ -8,7 +8,7 @@
 import { AppError, ERROR_CODES, fromWire } from '../core/errors.js';
 import { MODELS } from '../core/config.js';
 import { chooseModel } from '../core/gpu-check.js';
-import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt } from '../core/prompts.js';
+import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, stripPageMarkers } from '../core/prompts.js';
 
 // A failed load with the primary model is retried once with the smaller one.
 const RETRY_WITH_FALLBACK = new Set([ERROR_CODES.GPU_MEMORY, ERROR_CODES.MODEL_LOAD_FAILED]);
@@ -38,7 +38,7 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
       temperature: settings.temperature,
       timeoutMs: settings.generateTimeoutMs,
     });
-    const text = String(reply.text ?? '').trim();
+    const text = stripPageMarkers(reply.text);
     if (!text) throw new AppError(ERROR_CODES.EMPTY_ANSWER, 'the model answered with no text');
     engine.lastStats = reply.stats ?? null;
     return text;

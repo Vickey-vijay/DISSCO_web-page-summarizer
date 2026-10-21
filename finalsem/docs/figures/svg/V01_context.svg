@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="800" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V01  Context: the model runs on this laptop, and page text stays here</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="420" y="100" width="280" height="130" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="560" y="154.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">You</text>
+<text x="560" y="189.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Presses Summarize</text>
+<rect x="40" y="300" width="1020" height="370" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="2.2"/>
+<rect x="56" y="282" width="470.9302784000001" height="38" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="69" y="308" font-size="24" font-weight="700" fill="#1C1B1A">Your laptop (Windows and Chrome)</text>
+<rect x="70" y="350" width="240" height="120" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="190" y="384.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="208">Web page</text>
+<text x="190" y="420.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">Its text is read by</text>
+<text x="190" y="449.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="208">the extension</text>
+<rect x="420" y="350" width="280" height="150" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="560" y="399.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Page Summarizer</text>
+<text x="560" y="435.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">Popup, service worker</text>
+<text x="560" y="464.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">and offscreen page</text>
+<rect x="800" y="350" width="230" height="150" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="915" y="383.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="198">Model on the</text>
+<text x="915" y="415.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="198">graphics card</text>
+<text x="915" y="451.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="198">WebLLM,</text>
+<text x="915" y="480.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="198">WebGPU</text>
+<rect x="420" y="540" width="280" height="120" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="560" y="574.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="248">Model files</text>
+<text x="560" y="610.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">IndexedDB, kept</text>
+<text x="560" y="639.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="248">between runs</text>
+<rect x="1100" y="350" width="440" height="130" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1320" y="389.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="408">Cloud service (not used)</text>
+<text x="1320" y="425.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">No page text, prompt or summary is</text>
+<text x="1320" y="454.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="408">sent to it</text>
+<circle cx="1100" cy="350" r="22" fill="#FBF8F1" stroke="#B4391F" stroke-width="5"/>
+<line x1="1084.6" y1="365.4" x2="1115.4" y2="334.6" stroke="#B4391F" stroke-width="5"/>
+<rect x="1100" y="540" width="440" height="110" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
+<text x="1320" y="584.48" font-size="25" font-weight="700" fill="#6B665C" text-anchor="middle" data-fit="408">Hugging Face and GitHub</text>
+<text x="1320" y="619.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="408">Model files: first use only</text>
+<path d="M560,230 L560,350" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="453.26324" y="240" width="213.47352" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="560" y="266.62" font-size="22" fill="#1C1B1A" text-anchor="middle">presses the button</text>
+<path d="M310,410 L420,410" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="326.28812" y="391" width="77.42376" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="365" y="417.62" font-size="22" fill="#1C1B1A" text-anchor="middle">reads</text>
+<path d="M700,425 L800,425" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="717.8934" y="406" width="64.2132" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="750" y="432.62" font-size="22" fill="#1C1B1A" text-anchor="middle">runs</text>
+<path d="M560,500 L560,540" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="578" y="526" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="982">saves and loads</text>
+<path d="M1100,595 L700,595" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="824.31756" y="576" width="151.36488" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="900" y="602.62" font-size="22" fill="#1C1B1A" text-anchor="middle">first use only</text>
+<text x="40" y="706" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Solid arrows: data stays on this laptop. Dashed arrow: model files, first download only.</text>
+<text x="40" y="742" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Page text, prompts and summaries are never sent to a service in Version 2.</text></svg>

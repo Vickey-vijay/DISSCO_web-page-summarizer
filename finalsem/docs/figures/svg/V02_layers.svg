@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="940" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V02  Layers: four kinds of page and worker, one model, three stores</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="60" y="110" width="460" height="84" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="290" y="141.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Popup</text>
+<text x="290" y="176.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="428">Summarize button and progress</text>
+<rect x="580" y="110" width="460" height="84" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="810" y="141.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="428">Web page (tab)</text>
+<text x="810" y="176.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="428">Text read by an injected script</text>
+<rect x="60" y="246" width="980" height="84" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="550" y="277.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="948">Service worker (service-worker.js)</text>
+<text x="550" y="312.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="948">Owns the job, the parts and the merge; asks the offscreen page</text>
+<rect x="60" y="382" width="980" height="84" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="550" y="413.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="948">Offscreen page (offscreen.js)</text>
+<text x="550" y="448.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="948">Keeps the model loaded; closes after 5 minutes idle</text>
+<rect x="60" y="518" width="980" height="84" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="550" y="549.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="948">Web worker (engine-worker.js)</text>
+<text x="550" y="584.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="948">Runs WebLLM's handler, so the page stays responsive</text>
+<rect x="60" y="654" width="980" height="84" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="550" y="685.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="948">WebLLM (lib/web-llm.js)</text>
+<text x="550" y="720.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="948">Reads the model, splits text into tokens, runs each answer</text>
+<rect x="60" y="790" width="980" height="84" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="550" y="821.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="948">WebGPU on the graphics card</text>
+<text x="550" y="856.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="948">NVIDIA RTX 3050 in the tests; Intel built-in graphics when Chrome picks it</text>
+<rect x="1160" y="110" width="380" height="84" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1350" y="141.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="348">chrome.storage.local</text>
+<text x="1350" y="176.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">Settings and model choice</text>
+<rect x="1160" y="246" width="380" height="84" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1350" y="277.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="348">chrome.storage.session</text>
+<text x="1350" y="312.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">Job record per tab</text>
+<rect x="1160" y="382" width="380" height="84" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1350" y="413.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="348">IndexedDB</text>
+<text x="1350" y="448.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">Model files (about 695 MB)</text>
+<rect x="1160" y="518" width="380" height="262" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1350" y="551.36" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="348">Messages</text>
+<text x="1350" y="586.6" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">LOCAL_STATUS,</text>
+<text x="1350" y="615.64" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">LOCAL_LOAD and</text>
+<text x="1350" y="644.68" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">LOCAL_GENERATE go from</text>
+<text x="1350" y="673.7199999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">the service worker to the</text>
+<text x="1350" y="702.7599999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">offscreen page</text>
+<text x="1350" y="731.7999999999998" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">MODEL_PROGRESS and</text>
+<text x="1350" y="760.8399999999998" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="348">KEEPALIVE go back</text>
+<path d="M290,194 L290,246" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="192.9692" y="201.5" width="194.0616" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="290" y="228.11999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace">START_SUMMARY</text>
+<path d="M800,246 L800,194" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="707.81624" y="201.5" width="184.36751999999998" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="800" y="228.11999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle">injects extractor</text>
+<path d="M290,330 L290,382" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="173.37908" y="337.5" width="233.24184" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="290" y="364.12" font-size="22" fill="#1C1B1A" text-anchor="middle">LOCAL_* messages</text>
+<path d="M290,466 L290,518" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="187.9202" y="473.5" width="204.1596" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="290" y="500.12" font-size="22" fill="#1C1B1A" text-anchor="middle">worker messages</text>
+<path d="M290,602 L290,654" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="257.24" y="609.5" width="65.52000000000001" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="290" y="636.12" font-size="22" fill="#1C1B1A" text-anchor="middle">calls</text>
+<path d="M290,738 L290,790" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="191.21096" y="745.5" width="197.57808000000003" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="290" y="772.12" font-size="22" fill="#1C1B1A" text-anchor="middle">shader programs</text>
+<path d="M1040,270 L1100,270 L1100,152 L1160,152" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M1040,290 L1160,290" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<path d="M1040,424 L1160,424" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<text x="40" y="902" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Solid arrows: calls and messages. Dashed arrows: storage access.</text></svg>

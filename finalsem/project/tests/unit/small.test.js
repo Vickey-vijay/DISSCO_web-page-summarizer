@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { parseSummary } from '../../src/ui/summary-format.js';
 import { loadSettings, DEFAULTS, MODELS } from '../../src/core/config.js';
 import { AppError, describeError, fromWire, toAppError, USER_MESSAGES, ERROR_CODES } from '../../src/core/errors.js';
-import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, PAGE_END, PAGE_START } from '../../src/core/prompts.js';
+import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, PAGE_END, PAGE_START, stripPageMarkers } from '../../src/core/prompts.js';
 import { isRestrictedUrl } from '../../src/background/extract-tab.js';
 import { samePage } from '../../src/core/url.js';
 
@@ -92,6 +92,13 @@ test('prompts put the page text between markers, first, then one instruction', (
     assert.ok(prompt.indexOf(PAGE_END) < prompt.lastIndexOf('Summarize'), 'the instruction comes after the text');
   }
   assert.match(buildChunkPrompt({ title: 'T', text: 'x', index: 2, total: 5 }), /part 2 of 5/);
+});
+
+test('stripPageMarkers removes copied markers and tidies the blank lines left behind', () => {
+  const copied = `${PAGE_START}\nA lens.\n\n\n\nMore.\n${PAGE_END}`;
+  assert.equal(stripPageMarkers(copied), 'A lens.\n\nMore.');
+  assert.equal(stripPageMarkers('no markers here'), 'no markers here');
+  assert.equal(stripPageMarkers(undefined), '');
 });
 
 test('the merge prompt numbers the parts in order', () => {

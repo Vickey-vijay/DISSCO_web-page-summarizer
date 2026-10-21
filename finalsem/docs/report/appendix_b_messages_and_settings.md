@@ -1,0 +1,126 @@
+# [nonum] Appendix B: Messages, settings and error codes
+
+This appendix is a reference for the three parts that talk to each other: the popup, the service worker and the offscreen page. It lists every message type with its payload, the fields of the job record, every stored setting with its default, every error code with its exact message, and the modes of the pretend model. Each row was checked against the source named in its heading.
+
+## Messages between the popup and the service worker
+
+Source: `src/ui/popup.js` (the senders) and `src/background/service-worker.js` (the listener). The popup sends these with `chrome.runtime.sendMessage`.
+
+Table: Messages from the popup to the service worker
+
+| Type | Payload fields | Reply |
+|---|---|---|
+| `START_SUMMARY` | `tabId` (a whole number) | `{ok: true}` when a job starts. `{ok: false, reason: "already_running"}` when this page is already being summarized. `{ok: false, reason: <error code>}` when starting fails for another reason |
+| `GET_MODEL_STATE` | none | `{ok: true, model, switchReason, cached, downloadMB, gpu}` with `model` set to the chosen model object. `{ok: false, error: {code, message, detail}}` when the check fails |
+
+The service worker also receives two messages from the offscreen page, `MODEL_PROGRESS` and `KEEPALIVE`, which are listed in the next table. A test-only message, `{type: "noop"}`, is sent by test V20 to wake the worker. The worker ignores it.
+
+## Messages between the service worker and the offscreen page
+
+Source: `src/engines/local.js` (the calls), `src/background/offscreen-manager.js` (the sender) and `src/offscreen/offscreen.js` (the listener). Every message to the offscreen page carries `target: 'offscreen'`. The page ignores any message without that field.
+
+Table: Messages between the service worker and the offscreen page
+
+| Direction | Type | Payload fields | Reply or effect |
+|---|---|---|---|
+| Worker to page | `LOCAL_STATUS` | `modelId` | `{ok: true, gpu: {vendor, architecture, integrated}, deviceMemoryGB, cached, downloadMB, model: {id}}`, or `{ok: false, error: {code, detail}}` |
+| Worker to page | `LOCAL_LOAD` | `modelId` | `{ok: true, loadMs}`, or `{ok: true, alreadyLoaded: true, loadMs: 0}` when the model is already loaded. Or `{ok: false, error}` |
+| Worker to page | `LOCAL_GENERATE` | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `{ok: true, text, stats: {promptTokens, completionTokens, prefillTps, decodeTps}}`, or `{ok: false, error}` |
+| Page to worker | `MODEL_PROGRESS` | `phase`, `percent`, `text` | No reply. The worker passes it on to the job. Phases are `downloading` and `loading`, and the warm-up is sent as `loading` at 100% with the text "Warming up the model (first time only)" |
+| Page to worker | `KEEPALIVE` | none | No reply. Sent every 10 seconds while the page is busy, so the worker stays awake |
+
+`LOCAL_GENERATE` requests are made one at a time, in the order they were asked. The offscreen manager keeps a chain for them.
+
+## The job record in session storage
+
+Source: `src/background/service-worker.js`. The record is stored under the key `job:<tabId>` in `chrome.storage.session`, which lasts until the browser restarts. The popup reads it and listens for changes to it.
+
+Table: Fields of the job record
+
+| Field | What it holds |
+|---|---|
+| `jobId` | Random identifier of the job. A newer job for the same tab replaces it, and its writes are dropped |
+| `status` | `running`, `done` or `error` |
+| `phase` | `extracting`, `checking`, `downloading`, `loading`, `summarizing`, `merging`, `done` or `error` |
+| `current`, `total`, `parts` | Parts done and parts in all, while summarizing. The number of parts being merged |
+| `percent`, `detail` | The download or loading percentage, and the progress text from the page |
+| `notice` | Always `null` in the Version 2 code. The popup hides the element it would fill |
+| `summary` | The final summary text, once done |
+| `error` | `{code, message, detail}` when the job fails |
+| `stats` | Parts, requests, time, extraction method, model label, switch reason, graphics details, load time and writing speed |
+| `url`, `pageUrl`, `title` | The tab's address when the job started, the page's address at the end, and the page title |
+| `startedAt`, `updatedAt` | Time stamps in milliseconds. A running job not updated for three minutes counts as stale |
+
+## Settings in chrome.storage.local
+
+Source: `src/core/config.js`. `loadSettings()` reads the six keys listed in `STORAGE_KEYS`, and it accepts a stored value only when it is within the limit shown. Any other stored value is ignored and the default is used.
+
+Table: Stored settings, their defaults and what each does
+
+| Key | Default | Accepted values | What it does |
+|---|---|---|---|
+| `modelOverride` | not set | Only `fallback` | Chooses the smaller model from then on. The worker writes it after a memory error or a failed load with the larger model. No code clears it |
+| `chunkChars` | 6000 | Whole number, at least 500 | Largest number of characters in one part |
+| `maxChunks` | 12 | Whole number, at least 1 | Largest number of parts. A page that needs more is refused as too long |
+| `engineMode` | `real` | Text starting with `mock` | Test seam. `real` runs the real model. Any `mock` value runs the pretend model in the mode named after the colon |
+| `idleCloseMs` | 300000 (five minutes) | Whole number, at least 1 | Idle time after which the offscreen page is closed |
+| `generateTimeoutMs` | 180000 (three minutes) | Whole number, at least 1 | Time limit for one answer. An answer past the limit fails with `TIMEOUT` |
+
+Four more settings are defaults in the code and cannot be changed through storage: `minTextChars` (200, a page with less readable text is refused), `maxTokensPart` (300, the longest part summary), `maxTokensFinal` (320, the longest final summary and the one-part answer) and `temperature` (0.2, low values make the answers more predictable). A fifth value, `mockDelayMs`, is read directly by the offscreen manager and not by `loadSettings()`. It sets the pause in milliseconds for each pretend answer, and its default is 0.
+
+Table: The two models and their sizes, from `src/core/config.js`
+
+| Role | Model identifier | Label | Graphics memory listed by WebLLM |
+|---|---|---|---|
+| Primary | `Llama-3.2-1B-Instruct-q4f16_1-MLC` | Llama 3.2 1B | 879 MB |
+| Fallback | `SmolLM2-360M-Instruct-q4f16_1-MLC` | SmolLM2 360M | 376 MB |
+
+## Error codes and the messages the reader sees
+
+Source: `src/core/errors.js` for the codes and messages. The table also says where each code is raised. Every message below is shown exactly as written in the code.
+
+Table: The 14 error codes, their exact messages and when each is raised
+
+| Code | Exact message | When it is raised |
+|---|---|---|
+| `NO_WEBGPU` | Chrome cannot use your graphics card for the model (WebGPU is not available). Open chrome://gpu to check. | No WebGPU interface, or no graphics adapter (`src/core/gpu-check.js`) |
+| `NO_SHADER_F16` | Your graphics card does not support the 16-bit math this model needs, so this computer cannot run Version 2. | The adapter lacks the `shader-f16` feature |
+| `GPU_MEMORY` | The graphics card ran out of memory. Close other heavy tabs or programs and try again. | An engine error that names memory. The larger model is retried once with the smaller one |
+| `MODEL_DOWNLOAD_FAILED` | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | A load error that names a network or fetch problem. Not retried with the other model |
+| `MODEL_LOAD_FAILED` | The model could not be started. Press the button to try again. | Other load errors, and a request for an answer before the model is loaded. A failed primary load is retried once with the smaller model |
+| `TIMEOUT` | The model took too long to answer. Try again, or use a shorter page. | One answer takes longer than `generateTimeoutMs` |
+| `EMPTY_ANSWER` | The model returned no summary for this page. | The answer is empty after trimming spaces (`src/engines/local.js`) |
+| `TOO_LITTLE_TEXT` | This page has too little readable text to summarize. | Readable text is shorter than `minTextChars` (`src/core/pipeline.js`) |
+| `TOO_LONG` | This page is too long for the local model on this computer. Try a shorter page. | The page needs more parts than `maxChunks` |
+| `RESTRICTED_PAGE` | Chrome does not allow extensions to read this page. | A browser-internal, file or Chrome Web Store address (`src/background/extract-tab.js`) |
+| `EXTRACT_FAILED` | Could not read the text of this page. | The extractor cannot run in the tab for another reason, or returns nothing |
+| `SERVICE_ERROR` | Something went wrong inside the extension. Try again. | Any error not covered above, such as an unreachable offscreen page or an unknown message |
+| `INTERRUPTED` | The summary was interrupted. Press Summarize to try again. | A job still marked running when the worker starts again. The popup shows the same words for a job not updated for three minutes, but from its own text rather than this code |
+| `CANCELLED` | Cancelled. | The job's page changed or its tab closed. The worker writes nothing for it |
+
+The popup shows the message of the code it receives. The technical detail is kept for the console and is not shown to the reader.
+
+## The pretend model's modes
+
+Source: `src/offscreen/mock-engine.js` and the mode check in `src/offscreen/offscreen.js`. The mode is read from the page address, as `offscreen.html?mock=<mode>&delay=<ms>`, and the test sets it through `engineMode`. A mode of `mock` alone means `ok`.
+
+Table: The pretend model's modes and what each one makes the extension do
+
+| Mode | What the pretend model does |
+|---|---|
+| `ok` | Everything works (the default) |
+| `nowebgpu` | The graphics check fails with `NO_WEBGPU` |
+| `nof16` | The graphics check fails with `NO_SHADER_F16` |
+| `intel` | Reports built-in Intel graphics, so the small model and the note appear |
+| `oom` | The larger model runs out of memory. The small model works |
+| `oomall` | Every model runs out of memory |
+| `downloadfail` | The download fails when the model is not stored |
+| `empty` | The model answers with no text |
+| `html` | The model answers with markup-looking text, so the test can check that it is shown as plain text |
+| `slow` | Each answer takes at least 1.5 seconds |
+
+The pretend download runs in eight steps, 120 milliseconds apart, each with the progress text `Fetching param cache[i/8]`. The pretend sizes are 664 MB for the larger model and 300 MB for the smaller one, and the model line shows them. "Stored" is remembered in the extension's own browser storage under a key that starts with `page-summarizer-mock-model-cached:`.
+
+### What this means in plain words
+
+These tables are the contract between the three parts of the extension. A message that is not in the first two tables does not exist in the product, and an error code that is not in the last table cannot reach the reader.

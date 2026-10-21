@@ -1,0 +1,268 @@
+{
+  "deck_title": "Page Summarizer: mid-semester review (Version 1)",
+  "footer": "Page Summarizer  |  Mid-Semester Review (Version 1)",
+  "slides": [
+    {
+      "layout": "title",
+      "title": "AI-Powered Web Page Summarizer",
+      "subtitle": "A Chrome extension that summarizes the page you are reading",
+      "logo": "../../../assets/bits-logo.png",
+      "meta": [
+        "Mid-Semester Review (Version 1)",
+        "[Insert Student Name]  |  BITS ID [Insert BITS ID]",
+        "[Insert Degree Program]  |  Course No. [Insert Course No.]",
+        "Birla Institute of Technology & Science, Pilani (Rajasthan)",
+        "[Insert Month and Year]"
+      ],
+      "notes": "My name is [Insert Student Name], and this is my mid-semester review of the Page Summarizer project. The project is a Chrome extension that summarizes the page the reader has open. Today I present Version 1, the version built so far. I will keep the talk simple and show what the code does and what was measured."
+    },
+    {
+      "layout": "bullets",
+      "title": "What I will cover",
+      "bullets": [
+        "The problem, and what Version 1 promises",
+        "How one summary is made, step by step",
+        "Long pages, the cloud service and the error messages",
+        "The popup, saved jobs and setup",
+        "Testing, live results, problems met and what is not done yet",
+        "What comes next"
+      ],
+      "notes": "I will go through the project in six parts. First, the problem and what Version 1 promises. Then I show how one summary is made, including long pages and errors. After that come the popup, the saved jobs and the setup. Next are the tests, the live results and the problems I met. I finish with what is still open and what comes next."
+    },
+    {
+      "layout": "bullets",
+      "title": "The problem: the key fact is buried",
+      "bullets": [
+        "A news article or a documentation page can run to several thousand words.",
+        "Menus, banners and cookie notices surround the text, so the reader scrolls first.",
+        "Many summary tools need an account or a subscription before the first summary.",
+        "Many of them send the page text to the vendor's cloud, and the reader cannot see how it is handled."
+      ],
+      "notes": "Many web pages are long, and the one fact a reader needs is often hidden in the text. Menus, banners and cookie notices make the page slower to read. Many summary tools need an account before the first summary. Many of them also send the page text to a company's cloud, and the reader cannot see how it is handled."
+    },
+    {
+      "layout": "quote",
+      "title": "What Version 1 does",
+      "text": "Press one button on any open page. Get a short summary in the popup, using your own free Gemini key.",
+      "source": "The page text still goes to Google for each summary, so Version 1 is not a private tool.",
+      "notes": "Version 1 has one promise. A reader presses one button on an open page and gets a short summary in the popup. The reader pastes a free Gemini key once, and the key stays in this browser. The page text still goes to Google for each summary, and I say that clearly, because privacy is not solved in this version."
+    },
+    {
+      "layout": "table",
+      "title": "How one summary is made, step by step",
+      "header": ["Step", "Who", "What happens"],
+      "rows": [
+        ["1", "User", "Clicks Summarize in the popup."],
+        ["2", "Popup", "Sends a start message. The job is recorded as running."],
+        ["3", "Service worker", "Injects the page reader into the open tab."],
+        ["4", "Page reader", "Returns the article text, the title and the address."],
+        ["5", "Pipeline", "Checks the length, then sends one request per part."],
+        ["6", "Gemini service", "Returns a summary for each part, then one merge request."],
+        ["7", "Service worker", "Writes the job as done, with the summary and stats."],
+        ["8", "Popup", "Shows the summary, with parts, requests and time."]
+      ],
+      "col_widths": [0.9, 3.0, 8.0],
+      "caption": "Gemini is a language model that Google hosts. It writes the reply to the text it is sent.",
+      "notes": "This table shows the order of steps for one summary. The user clicks Summarize, and the popup sends a start message. The service worker runs the job in the background and asks the page reader for the text. Each part of the page goes to Google, and a merge request follows when there is more than one part. The summary then appears in the popup."
+    },
+    {
+      "layout": "table",
+      "title": "Five layers, and each calls only the one below",
+      "header": ["Layer", "What it holds", "Main files"],
+      "rows": [
+        ["User interface", "Popup, Options page, summary formatter", "src/ui/"],
+        ["Orchestration", "Service worker: owns the job and writes its progress", "service-worker.js"],
+        ["Core", "Page reader, pipeline, chunker, merger, errors, prompts, config", "src/core/"],
+        ["Engine", "Gemini engine: the only file that calls Google", "engines/gemini.js"],
+        ["Platform", "Chrome calls: scripting, storage, tabs, runtime messages", "chrome.* calls"]
+      ],
+      "col_widths": [2.6, 6.2, 3.4],
+      "caption": "Only the engine file talks to Google. The core files do not depend on Chrome, so they are tested without a browser.",
+      "notes": "The code is split into five layers, and each layer calls only the one below it. The popup and the Options page form the user interface. The service worker owns the job and writes its progress to storage. The core files read the page, split and merge the text, and hold the error messages. Only the Gemini engine file talks to Google, and the core files are tested without a browser."
+    },
+    {
+      "layout": "image",
+      "title": "Reading the page text",
+      "image": "../figures/F05_extraction_flow.png",
+      "crop": true,
+      "alt": "Flow chart: the service worker checks the tab address, injects the reader, and receives the page text from a copy of the page inside the tab.",
+      "bullets": [
+        "The page is copied, so the page on screen is not changed.",
+        "Readability finds the article and drops menus, adverts and footers.",
+        "Pages with almost no article text use the visible text instead."
+      ],
+      "caption": "Left: the service worker. Right: a copy of the page, read inside the tab.",
+      "notes": "This step finds the words of the page. The service worker first checks that the page is not one that Chrome forbids extensions to read. A copy of the page is made, and the Readability library picks out the main article. If the article has under 200 characters, the visible text of the page is used when it is longer. In the test article, about a fifth of the visible characters were removed, and none of the menu or cookie text reached the model."
+    },
+    {
+      "layout": "image",
+      "title": "Long pages are cut into parts",
+      "image": "../figures/F06_chunking_flow.png",
+      "crop": true,
+      "alt": "Flow chart of the splitter: the text is kept whole if it fits, otherwise it is split at paragraphs, then sentences, then spaces, and packed back up to the part size.",
+      "bullets": [
+        "A part holds at most 8,000 characters. A short page is one part.",
+        "Cuts fall at paragraph breaks first, then at sentence ends.",
+        "A page that needs more than 30 parts is refused before any request."
+      ],
+      "caption": "How the text is cut. The order of the parts is kept.",
+      "notes": "The project splits long pages, so each request stays small and finishes within 25 seconds. The text is cut into parts of at most 8,000 characters. The cut prefers paragraph breaks, then sentence ends, and only then a space. A page that would need more than 30 parts is refused at once, before any request, to protect the free quota. The plan notes that a large model does not strictly need splitting, so this step is kept as a tested path with an adjustable size."
+    },
+    {
+      "layout": "image",
+      "title": "Part summaries are merged in small groups",
+      "image": "../figures/F07_merge_tree.png",
+      "crop": true,
+      "alt": "Merge tree: eight part summaries are merged in pairs, then in groups of four, then into one final summary.",
+      "bullets": [
+        "Part summaries are joined in small groups that fit one request.",
+        "The groups are merged again until one summary is left.",
+        "The merge sends only the part summaries, not the page text."
+      ],
+      "caption": "An illustration with a small example limit, not a measured run.",
+      "notes": "After the parts are summarized, the part summaries are combined. They are packed into small groups that fit one request, and each group is merged. The groups are merged again until one summary remains. The figure is an illustration with a small example limit, not a measured run. One known weak point is that a merge can send more text than intended, but only when the part summaries are very long."
+    },
+    {
+      "layout": "image",
+      "title": "The cloud service: retries and time limits",
+      "image": "../figures/F08_retry_sequence.png",
+      "crop": true,
+      "alt": "Sequence diagram of a busy reply: the service worker waits 2 seconds, retries, waits 4 seconds, retries again and receives a successful answer.",
+      "bullets": [
+        "The key goes in a request header, never in the web address.",
+        "A busy or server error is retried up to three times, after 2, 4 and 8 seconds.",
+        "No answer within 25 seconds is stopped and reported as too slow."
+      ],
+      "caption": "A busy reply (429) is retried. A wrong key is not.",
+      "notes": "The extension sends one request for each part, with the key in a header. A busy reply or a server error is retried up to three times. The wait is the server's own time when it gives one, and otherwise 2, 4 and 8 seconds. A wrong key is not retried, because waiting cannot fix it. A request with no answer within 25 seconds is stopped and reported."
+    },
+    {
+      "layout": "table",
+      "title": "Each failure has one code and one plain message",
+      "header": ["Code", "What the reader sees", "Retried?"],
+      "rows": [
+        ["NO_KEY", "No API key yet. Paste your Gemini key in the Key box and save it.", "No request sent"],
+        ["INVALID_KEY", "Your API key was rejected. Paste a correct key in the Key box.", "No"],
+        ["RATE_LIMIT", "The free tier is busy right now. Wait a minute and try again.", "Yes, 3 times"],
+        ["TIMEOUT", "The service took too long to answer. Try again.", "No"],
+        ["TOO_LITTLE_TEXT", "This page has too little readable text to summarize.", "No request sent"],
+        ["RESTRICTED_PAGE", "Chrome does not allow extensions to read this page.", "No request sent"],
+        ["TOO_LONG", "This page is too long for Version 1 to summarize. Try a shorter page.", "No request sent"]
+      ],
+      "col_widths": [3.4, 7.2, 2.2],
+      "caption": "There are 14 error codes in all. The technical detail goes only to the console log.",
+      "notes": "Each failure has one short code and one plain message. The reader sees the message in the popup, and the technical detail goes only to the console. The table shows seven of the 14 codes. Temporary failures are retried, while a wrong key or a bad request stops at once. Pages that are refused never reach Google."
+    },
+    {
+      "layout": "image",
+      "title": "The popup shows progress, retries and the result",
+      "image": "../screenshots/ui-states-2.png",
+      "crop": true,
+      "alt": "Three popup panels: progress on part 2 of 4, a busy notice with a retry, and a finished summary with its stats line.",
+      "caption": "Panels D to F. The summaries here come from a test service, so the sentences are test text, not Google's answer.",
+      "notes": "This is the popup in the middle of a run. Panel D shows progress on part 2 of 4. Panel E shows a busy notice with a retry. Panel F shows a finished summary, with a stats line for parts, requests and time. The summaries in these screenshots came from a test service, so the sentences are test text and not the real model's answer."
+    },
+    {
+      "layout": "image",
+      "title": "The job is saved, so closing the popup is safe",
+      "image": "../figures/F12_job_states.png",
+      "crop": true,
+      "alt": "State diagram of one job: idle, then running through extracting, summarizing and merging, ending as done, as an error, or as interrupted after a stale period.",
+      "bullets": [
+        "The service worker writes each step to a record for the tab.",
+        "Closing the popup does not stop the summary. Reopening it shows the result.",
+        "After 3 minutes with no update, the job is shown as interrupted."
+      ],
+      "caption": "The states of one job. An interrupted job can be started again.",
+      "notes": "The popup only shows the state of the job. The service worker does the work and writes each step to a record for the tab. Closing the popup does not stop the summary, and reopening it shows the progress or the result. Chrome can stop the background worker, so after three minutes without an update the job is shown as interrupted. The reader can then press Summarize again."
+    },
+    {
+      "layout": "image",
+      "title": "Setting it up: two batch files and one manual step",
+      "image": "../figures/F13_deployment.png",
+      "crop": true,
+      "alt": "Deployment diagram: the web page, extractor, popup, service worker and storage run on the user's Windows computer, and the Gemini service runs on the internet.",
+      "bullets": [
+        "setup.bat checks Chrome 116 or newer and that the extension files are complete.",
+        "run.bat opens the extensions page and copies the folder path.",
+        "The user clicks Load unpacked and selects the folder by hand."
+      ],
+      "caption": "Where things run: on the computer, except the Gemini service.",
+      "notes": "Setup is a checklist, not an installer. setup.bat finds Chrome, checks that it is version 116 or newer, and checks that the extension files are complete. run.bat opens the extensions page and copies the folder path. Chrome no longer lets a script load an extension by itself, so the user clicks Load unpacked and selects the folder. The setup check ended with SETUP COMPLETE on the developer laptop."
+    },
+    {
+      "layout": "stats",
+      "title": "How it was tested",
+      "stats": [
+        {"value": "65", "label": "unit tests, all passing"},
+        {"value": "28", "label": "browser scenarios, all passing"},
+        {"value": "10", "label": "setup script checks, all passing"},
+        {"value": "9", "label": "live runs: 7 summaries, 2 error checks"}
+      ],
+      "caption": "Counts from the run-3 record, the setup checks and the live-measurements file. Browser tests use a test service.",
+      "notes": "The tests run at three levels. Sixty-five unit tests check the small rules without a browser, and all of them passed. Twenty-eight browser scenarios run the extension in Chromium with a test service in place of Google, and all of them passed. Ten setup checks run the batch files on copies of the project, and all of them passed. Seven pages were summarized by the real service, and two error cases were checked on it. The manual check in the real Chrome toolbar is written, but its result is not recorded yet."
+    },
+    {
+      "layout": "table",
+      "title": "Live runs: seven pages summarized by the real service",
+      "header": ["Case", "Page", "Parts", "Requests", "Time (s)"],
+      "rows": [
+        ["L01", "Short article (fixture)", "1", "1", "1.7"],
+        ["L02", "Long article (fixture)", "2", "3", "5.9"],
+        ["L03", "Same article, 3,000-character parts", "4", "5", "7.2"],
+        ["L04", "Wikipedia: Lighthouse article", "5", "6", "17.8"],
+        ["L05", "Wikipedia: Fresnel lens article", "7", "8", "23.0"],
+        ["L06", "Chrome docs: Manifest V3", "1", "1", "1.9"],
+        ["L07", "MDN: WebGPU API", "4", "5", "7.5"]
+      ],
+      "col_widths": [1.1, 5.6, 1.2, 1.5, 1.6],
+      "caption": "L08 (a very long article, limit set to 10 parts) was refused in 0.6 s. L09 (wrong key) was rejected in 0.5 s.",
+      "notes": "These are the live runs against Google's real service, with the default model and parts of 8,000 characters. The times come from the test's own timers, in seconds. The short article took 1.7 seconds with one request. The longest success, the Fresnel lens article, took 23 seconds with eight requests. Nobody has scored these summaries for accuracy yet, so I do not claim they are correct."
+    },
+    {
+      "layout": "table",
+      "title": "Problems met and how they were fixed",
+      "header": ["Problem", "What we did"],
+      "rows": [
+        ["Chrome 137 and later dropped the flag that loads an extension", "run.bat now opens the extensions page and prints the Load unpacked steps. Automated tests run on Playwright's Chromium."],
+        ["The first model took 11 to 13 seconds per request", "That was close to the 25-second limit. A faster model, gemini-3.5-flash-lite, took 1.6 to 2.0 seconds in the benchmark."],
+        ["Table cells ran together, and the summary still looked normal", "The model read fused numbers such as Q14.5M12%. Cells are now separated by a vertical bar, and a browser test checks it."],
+        ["Free quota ran out during the live runs", "A long wait from the service now stops at once, with a message that says when to try again."]
+      ],
+      "col_widths": [3.8, 8.0],
+      "notes": "I met four real problems, and each one is written in the development log. The first was a Chrome change that removed the flag I wanted to use to load the extension. The second was a model that was too slow for the 25-second limit. The third was silent: table cells ran together, so the model read wrong numbers, while the popup looked normal. The fourth was the free quota running out during the live runs. Each one changed the design or added a test."
+    },
+    {
+      "layout": "bullets",
+      "title": "What is not done yet",
+      "bullets": [
+        "Manual check in the real Chrome toolbar: the steps are written, the result is not recorded yet.",
+        "Setup scripts on a clean copy of the project: not run yet.",
+        "Summary quality: no reader has scored the summaries.",
+        "Page text is not private: it goes to Google for each part of a page.",
+        "Pages behind a login were not tested.",
+        "One rare merge case: very long part summaries can share one request. Not fixed."
+      ],
+      "notes": "Some things are not finished, and I want to say so clearly. The manual check in the real Chrome toolbar is written down, but its result is not recorded. The setup scripts have not yet been run on a clean copy of the project. No reader has scored the summaries for quality. The page text is not private, and the key is stored unencrypted on this computer. Pages behind a login were not tested, and one rare merge case is known but not fixed."
+    },
+    {
+      "layout": "bullets",
+      "title": "What Version 2 adds",
+      "bullets": [
+        "A small model runs inside the browser, so no API key is needed.",
+        "Page text stays on the computer, and summaries work offline once the model is downloaded.",
+        "The popup, the page reader and the job handling stay the same. Only the engine changes."
+      ],
+      "notes": "Version 2 is planned, not built. It would keep the same popup, page reader and job handling. The summary engine would change, so a small model would run in the browser and no key would be needed. Page text would stay on the computer, and summaries would work offline after the first download. That is the plan for the final semester."
+    },
+    {
+      "layout": "closing",
+      "title": "Thank you. Questions?",
+      "lines": [
+        "[Insert Student Name]  |  BITS ID [Insert BITS ID]",
+        "The code, the tests and the setup scripts are in the project folder."
+      ],
+      "notes": "Thank you for listening. The code, the tests and the setup scripts are in the project folder, and I can show any part of them. I am happy to take questions now. If a question is about something not built yet, I will say so."
+    }
+  ]
+}

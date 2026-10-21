@@ -30,7 +30,7 @@ if ($gpus.Count -eq 0) { Say "  Graphics: none found. Version 2 needs a graphics
 
 $system = (Get-Item $env:SystemDrive).PSDrive
 $freeGB = [math]::Round((Get-PSDrive -Name $system.Name).Free / 1GB, 1)
-Say "  Free space on $($env:SystemDrive): $freeGB GB (the model download is about 700 MB)"
+Say "  Free space on drive $($env:SystemDrive) $freeGB GB (the model download is about 700 MB)"
 
 if ($hasDiscrete -and $hasIntel) {
     Say "  Tip: this computer has built-in AND separate graphics. Chrome may pick the slow built-in one."

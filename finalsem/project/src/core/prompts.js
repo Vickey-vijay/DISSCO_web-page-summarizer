@@ -8,6 +8,19 @@ export const PROMPT_VERSION = 'v2.0';
 export const PAGE_START = '<<<PAGE TEXT START>>>';
 export const PAGE_END = '<<<PAGE TEXT END>>>';
 
+/**
+ * Small models sometimes copy the page markers into their answer (seen with SmolLM2 on the
+ * Intel chip: the summary began with the start marker). The markers mean nothing to a reader.
+ */
+export function stripPageMarkers(text) {
+  return String(text ?? '')
+    .split(PAGE_START).join('')
+    .split(PAGE_END).join('')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 const FORMAT_RULES = [
   'Write plain text only, using "- " at the start of each bullet.',
   'Start with one sentence saying what the page is about, then give 3 to 6 bullets with the key facts.',

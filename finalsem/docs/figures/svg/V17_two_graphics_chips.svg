@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="900" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V17  A laptop with two graphics chips: the default is slow, the separate card is fast</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="620" y="110" width="360" height="70" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="151.72" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="328">Chrome</text>
+<rect x="80" y="260" width="640" height="100" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="400" y="299.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">Intel built-in graphics</text>
+<text x="400" y="334.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Part of the processor; Chrome used it by default here</text>
+<rect x="880" y="260" width="640" height="100" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1200" y="299.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">NVIDIA RTX 3050</text>
+<text x="1200" y="334.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Separate card with 6 GB</text>
+<path d="M700,180 L400,260" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="431.37136" y="201.5" width="237.25728" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="550" y="228.11999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle">default on this laptop</text>
+<path d="M900,180 L1200,260" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+<rect x="857.4421199999999" y="201.5" width="385.1157600000001" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="1050" y="228.11999999999998" font-size="22" fill="#1C1B1A" text-anchor="middle">Windows setting or setup.bat --gpu</text>
+<rect x="80" y="400" width="640" height="130" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="400" y="439.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">Measured: 4 to 5 tokens a second</text>
+<text x="400" y="475.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">SmolLM2 360M, chosen by the extension. Short article,</text>
+<text x="400" y="504.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">first use: 199.2 s.</text>
+<rect x="880" y="400" width="640" height="130" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="1200" y="454.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">Measured: 34 to 53 tokens a second</text>
+<text x="1200" y="489.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Llama 3.2 1B. Short article, stored and offline: 15.3 s.</text>
+<rect x="80" y="580" width="1440" height="250" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="800" y="650.92" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="1408">How a real Chrome gets the NVIDIA card (two ways, both set by the user)</text>
+<text x="800" y="686.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">1. By hand: Windows Settings, System, Display, Graphics, add Chrome, Options, High performance. Restart Chrome.</text>
+<text x="800" y="715.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">2. setup.bat --gpu (opt-in): writes one per-user value, GpuPreference=2, for Chrome in the Windows graphics settings. Tested only</text>
+<text x="800" y="744.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">against a test registry key, not yet against a real Chrome.</text>
+<text x="800" y="773.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="1408">Undo: powershell -File scripts\set-chrome-gpu.ps1 -ChromePath &lt;chrome.exe&gt; -Remove</text>
+<text x="40" y="866" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The flag --force_high_performance_gpu is used only by the test script to start its browser; it is not what a user gets.</text></svg>

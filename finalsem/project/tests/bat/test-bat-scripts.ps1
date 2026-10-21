@@ -106,6 +106,13 @@ try {
     $o2 = powershell -NoProfile -ExecutionPolicy Bypass -File "$project\scripts\set-chrome-gpu.ps1" -ChromePath $fakeChrome -RegistryPath $tmpKey -Remove 2>&1
     $gone = $null -eq (Get-ItemProperty -Path $tmpKey -Name $fakeChrome -ErrorAction SilentlyContinue).$fakeChrome
     Check 'B10b' 'set-chrome-gpu.ps1 -Remove undoes it' $gone ($o2 -join "`n")
+    # B10c: without -ChromePath the script finds Chrome itself, so plain -Remove works (still only the throw-away key)
+    $o3 = powershell -NoProfile -ExecutionPolicy Bypass -File "$project\scripts\set-chrome-gpu.ps1" -RegistryPath $tmpKey 2>&1
+    $names = @((Get-Item -Path $tmpKey -ErrorAction SilentlyContinue).Property)
+    $found = $names.Count -eq 1 -and $names[0] -match 'chrome\.exe$'
+    $o4 = powershell -NoProfile -ExecutionPolicy Bypass -File "$project\scripts\set-chrome-gpu.ps1" -RegistryPath $tmpKey -Remove 2>&1
+    $left = @((Get-Item -Path $tmpKey -ErrorAction SilentlyContinue).Property).Count
+    Check 'B10c' 'set-chrome-gpu.ps1 finds Chrome by itself, and plain -Remove undoes it' ($found -and $left -eq 0) ((($o3 + $o4) -join "`n") + " names=$($names -join ',') left=$left")
     Remove-Item -Path $tmpKey -Recurse -Force -ErrorAction SilentlyContinue} finally {
     foreach ($t in $temps) { try { Remove-Item $t -Recurse -Force -ErrorAction SilentlyContinue } catch { } }
 }

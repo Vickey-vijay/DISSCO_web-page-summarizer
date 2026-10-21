@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="992.1600000000003" viewBox="0 0 1600 992.1600000000003" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="992.1600000000003" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V11  Errors: the code, when it happens, and the exact message the user sees</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="40" y="92" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="135.76000000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">NO_WEBGPU</text>
+<rect x="410" y="92" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="134.76000000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">No WebGPU or no adapter</text>
+<rect x="800" y="92" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="120.24000000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">Chrome cannot use your graphics card for the model (WebGPU is</text>
+<text x="816" y="149.28" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">not available). Open chrome://gpu to check.</text>
+<rect x="40" y="170.08" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="213.84000000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">NO_SHADER_F16</text>
+<rect x="410" y="170.08" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="212.84000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Card lacks 16-bit math</text>
+<rect x="800" y="170.08" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="198.32000000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">Your graphics card does not support the 16-bit math this model</text>
+<text x="816" y="227.36" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">needs, so this computer cannot run Version 2.</text>
+<rect x="40" y="248.16000000000003" width="350" height="74.08000000000001" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="48" y="291.92" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">GPU_MEMORY</text>
+<rect x="410" y="248.16000000000003" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="290.92" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Out of memory while loading</text>
+<rect x="800" y="248.16000000000003" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="276.40000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The graphics card ran out of memory. Close other heavy tabs or</text>
+<text x="816" y="305.44000000000005" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">programs and try again.</text>
+<rect x="40" y="326.24" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="370" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">MODEL_DOWNLOAD_FAILED</text>
+<rect x="410" y="326.24" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="369" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Download stopped (network)</text>
+<rect x="800" y="326.24" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="354.48" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The model download stopped. Check your internet connection and</text>
+<text x="816" y="383.52000000000004" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">press the button again. What was already downloaded is kept.</text>
+<rect x="40" y="404.32000000000005" width="350" height="46.72" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="48" y="434.40000000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">MODEL_LOAD_FAILED</text>
+<rect x="410" y="404.32000000000005" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="433.40000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Model would not start</text>
+<rect x="800" y="404.32000000000005" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="433.40000000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The model could not be started. Press the button to try again.</text>
+<rect x="40" y="455.0400000000001" width="350" height="46.72" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="485.12000000000006" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">TIMEOUT</text>
+<rect x="410" y="455.0400000000001" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="484.12000000000006" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">No answer within 3 minutes</text>
+<rect x="800" y="455.0400000000001" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="484.12000000000006" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The model took too long to answer. Try again, or use a shorter page.</text>
+<rect x="40" y="505.7600000000001" width="350" height="46.72" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="535.8400000000001" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">EMPTY_ANSWER</text>
+<rect x="410" y="505.7600000000001" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="534.8400000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Model returned no text</text>
+<rect x="800" y="505.7600000000001" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="534.8400000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The model returned no summary for this page.</text>
+<rect x="40" y="556.4800000000001" width="350" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="48" y="586.5600000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">TOO_LITTLE_TEXT</text>
+<rect x="410" y="556.4800000000001" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="585.5600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Under 200 characters of text</text>
+<rect x="800" y="556.4800000000001" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="585.5600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">This page has too little readable text to summarize.</text>
+<rect x="40" y="607.2000000000002" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="48" y="650.9600000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">TOO_LONG</text>
+<rect x="410" y="607.2000000000002" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="649.9600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">More than 12 parts</text>
+<rect x="800" y="607.2000000000002" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="635.4400000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">This page is too long for the local model on this computer. Try a</text>
+<text x="816" y="664.4800000000001" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">shorter page.</text>
+<rect x="40" y="685.2800000000002" width="350" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="48" y="715.3600000000002" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">RESTRICTED_PAGE</text>
+<rect x="410" y="685.2800000000002" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="714.3600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">chrome:// or Web Store page</text>
+<rect x="800" y="685.2800000000002" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="714.3600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">Chrome does not allow extensions to read this page.</text>
+<rect x="40" y="736.0000000000002" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="48" y="779.7600000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">INTERRUPTED</text>
+<rect x="410" y="736.0000000000002" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="764.2400000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">Worker stopped, or 5 min with</text>
+<text x="426" y="793.2800000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">no update</text>
+<rect x="800" y="736.0000000000002" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="778.7600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The summary was interrupted. Press Summarize to try again.</text>
+<rect x="40" y="814.0800000000003" width="350" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="48" y="857.8400000000003" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">CANCELLED</text>
+<rect x="410" y="814.0800000000003" width="370" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="426" y="842.3200000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">New page or tab closed. Not</text>
+<text x="426" y="871.3600000000002" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">shown.</text>
+<rect x="800" y="814.0800000000003" width="760" height="74.08000000000001" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="816" y="856.8400000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="728">Cancelled.</text>
+<rect x="40" y="908.1600000000003" width="40" height="26" rx="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="92" y="928.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1468">retries once with SmolLM2 360M</text>
+<rect x="477.9456" y="908.1600000000003" width="40" height="26" rx="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="529.9456" y="928.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1030.0544">job stops, message shown</text>
+<rect x="849.90968" y="908.1600000000003" width="40" height="26" rx="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="901.90968" y="928.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="658.09032">refused early, or not shown</text>
+<text x="40" y="958.1600000000003" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Messages are copied from src/core/errors.js (USER_MESSAGES). The technical detail goes only to the console.</text></svg>

@@ -372,6 +372,7 @@ test('V10 primary model out of memory: a summary still works with SmolLM2, the c
   await ext.shot(popup, 'V10-fallback-done');
   assert.equal(outcome, 'done', `expected a summary after the fallback, popup said: ${text}`);
   assert.match(await popup.locator('#stats').innerText(), /SmolLM2 360M/);
+  assert.match(await popup.locator('#result-notice').innerText(), /smaller model wrote this summary/, 'the user is told the smaller model was used');
   assert.equal(await storedValue('modelOverride'), 'fallback', 'the fallback choice must be saved');
 
   await popup.close();

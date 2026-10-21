@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="990" viewBox="0 0 1600 990" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="990" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V04  Preparing the model: the steps of prepare(), and what happens on errors</text>
+<line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
+<rect x="60" y="100" width="580" height="86" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="350" y="132.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">prepare() starts</text>
+<text x="350" y="167.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Called by the pipeline before the first part</text>
+<rect x="60" y="226" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="350" y="258.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Check the graphics card</text>
+<text x="350" y="293.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">LOCAL_STATUS: card, shader-f16, stored or not</text>
+<rect x="60" y="352" width="580" height="86" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="350" y="384.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">WebGPU and shader-f16 available?</text>
+<text x="350" y="419.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Checked by the offscreen page</text>
+<rect x="60" y="478" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="350" y="510.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Choose the model</text>
+<text x="350" y="545.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Llama 3.2 1B, unless a rule applies</text>
+<rect x="60" y="604" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="350" y="636.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="548">LOCAL_LOAD</text>
+<text x="350" y="671.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Download if not stored, then load into the card</text>
+<rect x="60" y="730" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="350" y="762.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Warm-up</text>
+<text x="350" y="797.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">One one-token answer; about 30 s the first time</text>
+<rect x="60" y="856" width="580" height="86" rx="4" ry="4" fill="#EEF2E3" stroke="#3F5F2A" stroke-width="2.2"/>
+<text x="350" y="888.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Ready</text>
+<text x="350" y="923.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Parts are summarized with LOCAL_GENERATE</text>
+<rect x="900" y="352" width="640" height="86" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
+<text x="1220" y="384.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">NO_WEBGPU or NO_SHADER_F16</text>
+<text x="1220" y="419.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Stop. The popup says why and disables the button.</text>
+<rect x="900" y="478" width="640" height="112" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
+<text x="1220" y="508.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">SmolLM2 360M is chosen when</text>
+<text x="1220" y="544.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">integrated graphics (Intel), under 8 GB memory, or a</text>
+<text x="1220" y="573.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">saved fallback</text>
+<rect x="900" y="604" width="640" height="236" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
+<text x="1220" y="638.88" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">Error during LOCAL_LOAD</text>
+<text x="1220" y="674.12" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">GPU_MEMORY or MODEL_LOAD_FAILED with Llama</text>
+<text x="1220" y="703.16" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">3.2 1B: save the fallback, retry once with SmolLM2 360M.</text>
+<text x="1220" y="732.1999999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Any other error, for example</text>
+<text x="1220" y="761.2399999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">MODEL_DOWNLOAD_FAILED: stop, show its message,</text>
+<text x="1220" y="790.2799999999999" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">no retry.</text>
+<text x="1220" y="819.3199999999998" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">A second failure: stop and show its message.</text>
+<path d="M330,186 L330,226" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M330,312 L330,352" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M330,438 L330,478" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M330,564 L330,604" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M330,690 L330,730" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M330,816 L330,856" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="340" y="460" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1220">yes</text>
+<path d="M640,395 L900,395" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<rect x="747.78944" y="376.5" width="44.42112" height="37.4" rx="4" fill="#FBF8F1" stroke="#D9D2C3" stroke-width="1.6"/>
+<text x="770" y="403.12" font-size="22" fill="#1C1B1A" text-anchor="middle">no</text>
+<path d="M640,521 L900,521" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<path d="M640,647 L900,647" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
+<text x="40" y="974" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Sizes from the test runs: Llama 3.2 1B about 695 MB, SmolLM2 360M about 204 MB.</text></svg>

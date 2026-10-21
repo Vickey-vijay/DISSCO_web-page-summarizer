@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-21T04:44:54.903Z",
+  "mode": "nvidia-offline",
+  "plan": {
+    "args": [
+      "--force_high_performance_gpu",
+      "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"
+    ],
+    "online": false
+  },
+  "results": [
+    {
+      "mode": "nvidia-offline",
+      "id": "short",
+      "name": "Short article (fixture)",
+      "startedAt": "2026-10-21T04:44:08.664Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": null,
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 17.7,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.6,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 1.9,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 8,
+          "text": "Loading the model into the graphics card: 21%"
+        },
+        {
+          "s": 8.4,
+          "text": "Loading the model into the graphics card: 26%"
+        },
+        {
+          "s": 8.8,
+          "text": "Loading the model into the graphics card: 35%"
+        },
+        {
+          "s": 9.3,
+          "text": "Loading the model into the graphics card: 41%"
+        },
+        {
+          "s": 9.7,
+          "text": "Loading the model into the graphics card: 50%"
+        },
+        {
+          "s": 10.1,
+          "text": "Loading the model into the graphics card: 55%"
+        },
+        {
+          "s": 10.6,
+          "text": "Loading the model into the graphics card: 61%"
+        },
+        {
+          "s": 11,
+          "text": "Loading the model into the graphics card: 65%"
+        },
+        {
+          "s": 11.4,
+          "text": "Loading the model into the graphics card: 74%"
+        },
+        {
+          "s": 11.8,
+          "text": "Loading the model into the graphics card: 80%"
+        },
+        {
+          "s": 12.2,
+          "text": "Loading the model into the graphics card: 85%"
+        },
+        {
+          "s": 12.7,
+          "text": "Loading the model into the graphics card: 96%"
+        },
+        {
+          "s": 13.1,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 13.5,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "decodeTps": 64.731935463697,
+        "elapsedMs": 17512,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "ampere",
+          "integrated": false,
+          "vendor": "nvidia"
+        },
+        "loadMs": 11621,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "textChars": 1711
+      },
+      "summary": "How a Lighthouse Lens Works\n\n• A lighthouse lamp is weak and spreads its glow in every direction, fading before it reaches a ship over the horizon.\n• The trick that made lighthouses useful for ships far out at sea was not a stronger flame, but a better way of aiming the light that already existed.\n• Augustin Fresnel built a lens in 1822 that did exactly this, using many thin glass rings and prisms arranged in a circle.\n• Each ring bends the light from the lamp at the centre, leaving in a flat, narrow beam instead of spreading out.\n• The result is a lens that is far lighter than a solid one and captures much more of the lamp's light.\n• Large lenses turn slowly on a bed of liquid mercury or on ball bearings, driven by a clockwork motor.\n• The time between flashes is a signature, indicating the location of a lighthouse.\n• Some lights use red or green panels to mark dangerous sectors, while others use white or coloured lights to indicate safe courses."
+    },
+    {
+      "mode": "nvidia-offline",
+      "id": "long",
+      "name": "Long article (fixture)",
+      "startedAt": "2026-10-21T04:44:32.621Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": null,
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 16,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 2.4,
+          "text": "Summarizing part 1 of 2..."
+        },
+        {
+          "s": 7,
+          "text": "Summarizing part 2 of 2..."
+        },
+        {
+          "s": 10.8,
+          "text": "Combining 2 summaries..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 3,
+        "chunks": 2,
+        "decodeTps": 45.28284713462291,
+        "elapsedMs": 15709,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "ampere",
+          "integrated": false,
+          "vendor": "nvidia"
+        },
+        "loadMs": 0,
+        "mergeLevels": 1,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "textChars": 10532
+      },
+      "summary": "Lighthouses: A Short History of Light on the Coast\n\n- Page title provides a brief overview of the content within.\n- The page discusses the history of lighthouses, starting with their use for navigation and safety in ancient civilizations.\n- Key facts about lighthouses include:\n  - The first lighthouse was built on the island of Pharos in ancient Egypt.\n  - The design of the Pharos lighthouse was later adopted by other civilizations.\n  - The French engineer Augustin Fresnel improved the design of the Pharos lighthouse with his invention of the Fresnel lens.\n- The history of lighthouses continues with their use as beacons for navigation, guiding ships and other vessels.\n- The use of radio beacons and radar systems has replaced the need for lighthouses, and automation of their lighting has become the norm.\n- The page concludes with the current state of lighthouses, with many being saved and preserved, and some becoming museums or tourist attractions."
+    }
+  ]
+}

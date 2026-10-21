@@ -13,7 +13,7 @@ export function classifyEngineError(err, stage) {
   if (/webgpu|gpu adapter|navigator\.gpu/.test(text) && /(not\s+|un)(supported|available)|no (gpu )?adapter|unavailable/.test(text)) {
     return ERROR_CODES.NO_WEBGPU;
   }
-  if (/out of memory|oom|device (was )?lost|maxbuffersize|exceeds the max|too large|allocation/.test(text)) {
+  if (/out of memory|\boom\b|device (was )?lost|maxbuffersize|exceeds the max|too large|allocation/.test(text)) {
     return ERROR_CODES.GPU_MEMORY;
   }
   if (stage === 'load' && /(fetch|network|failed to fetch|net::|timeout|offline|http \d{3}|cache)/.test(text)) {

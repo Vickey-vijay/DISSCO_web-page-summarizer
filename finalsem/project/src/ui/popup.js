@@ -18,6 +18,7 @@ const els = {
   progressText: $('progress-text'),
   progressBar: $('progress-bar'),
   notice: $('notice'),
+  resultNotice: $('result-notice'),
   error: $('error'),
   errorText: $('error-text'),
   result: $('result'),
@@ -25,10 +26,11 @@ const els = {
   stats: $('stats'),
 };
 
-const STALE_MS = 3 * 60 * 1000;
+const STALE_MS = 5 * 60 * 1000;
 let tab = null;
 let lastJob = null; // kept so an open popup can notice a dead job without a storage event
 let modelBlocked = false; // true when this computer cannot run the model at all
+let refreshedFor = null; // id of the job whose end already refreshed the model line
 
 async function getTargetTab() {
   const forced = Number(new URLSearchParams(location.search).get('tabId'));
@@ -74,6 +76,21 @@ function renderModelState(state) {
     els.gpuNote.textContent = `Graphics: ${vendorName(gpu.vendor)} (built into the processor). Answers can be slow. A separate graphics card is much faster.`;
     show(els.gpuNote, true);
   }
+}
+
+/** After a job ends the model line may be out of date (downloaded now, or switched to the smaller model). */
+function refreshModelLineOnce(job) {
+  if (refreshedFor === job.jobId) return;
+  refreshedFor = job.jobId;
+  void loadModelState();
+}
+
+/** Tells the user when the summary was made by the smaller model after the main one failed. */
+function switchNotice(reason) {
+  if (reason === 'GPU_MEMORY' || reason === 'MODEL_LOAD_FAILED') {
+    return 'The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed.';
+  }
+  return null;
 }
 
 async function loadModelState() {
@@ -147,6 +164,8 @@ function render(job) {
   show(els.error, live?.status === 'error' || stale);
   show(els.result, live?.status === 'done');
 
+  show(els.notice, false);
+  show(els.resultNotice, false);
   if (stale) {
     els.errorText.textContent = 'The summary was interrupted. Press Summarize to try again.';
     return;
@@ -165,13 +184,18 @@ function render(job) {
     } else {
       els.progressBar.removeAttribute('value'); // indeterminate
     }
-    show(els.notice, false);
   } else if (live.status === 'error') {
     els.errorText.textContent = live.error?.message ?? 'Something went wrong.';
+    refreshModelLineOnce(live); // a fallback may have been saved even though the job failed
   } else if (live.status === 'done') {
     renderSummary(live.summary);
     els.stats.textContent = formatStats(live.stats);
-    void loadModelState(); // the model is downloaded now: refresh the line and the button
+    const why = switchNotice(live.stats?.modelSwitchReason);
+    if (why) {
+      els.resultNotice.textContent = why;
+      show(els.resultNotice, true);
+    }
+    refreshModelLineOnce(live); // the model is downloaded now: refresh the line and the button
   }
 }
 
