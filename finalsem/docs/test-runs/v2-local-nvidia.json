@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-20T21:44:49.923Z",
+  "date": "2026-10-20T21:51:53.371Z",
   "mode": "nvidia",
   "plan": {
     "args": [
@@ -12,138 +12,154 @@
       "mode": "nvidia",
       "id": "short",
       "name": "Short article (fixture)",
-      "startedAt": "2026-10-20T21:39:46.565Z",
+      "startedAt": "2026-10-20T21:46:06.121Z",
       "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only).",
       "gpuNote": null,
       "buttonBefore": "Download model and summarize",
-      "wallSeconds": 196.8,
+      "wallSeconds": 207,
       "timeline": [
         {
           "s": 0.1,
           "text": "Reading the page..."
         },
         {
-          "s": 0.5,
+          "s": 1.8,
           "text": "Downloading the model (first time only): 0%"
         },
         {
-          "s": 5.1,
+          "s": 8.6,
           "text": "Loading the model into the graphics card: 0%"
         },
         {
-          "s": 21.9,
+          "s": 24.2,
+          "text": "Downloading the model (first time only): 2%"
+        },
+        {
+          "s": 24.6,
           "text": "Downloading the model (first time only): 7%"
         },
         {
-          "s": 48.6,
+          "s": 43.5,
           "text": "Downloading the model (first time only): 11%"
         },
         {
-          "s": 49,
-          "text": "Downloading the model (first time only): 15%"
-        },
-        {
-          "s": 49.5,
+          "s": 44.3,
           "text": "Downloading the model (first time only): 18%"
         },
         {
-          "s": 81.1,
+          "s": 68.2,
           "text": "Downloading the model (first time only): 23%"
         },
         {
-          "s": 82.4,
+          "s": 69.1,
+          "text": "Downloading the model (first time only): 27%"
+        },
+        {
+          "s": 69.6,
           "text": "Downloading the model (first time only): 32%"
         },
         {
-          "s": 106.7,
+          "s": 89.4,
           "text": "Downloading the model (first time only): 36%"
         },
         {
-          "s": 107.5,
+          "s": 91.5,
           "text": "Downloading the model (first time only): 45%"
         },
         {
-          "s": 109.2,
+          "s": 93.6,
           "text": "Downloading the model (first time only): 64%"
         },
         {
-          "s": 124.6,
+          "s": 107.1,
           "text": "Downloading the model (first time only): 67%"
         },
         {
-          "s": 129.2,
+          "s": 110.1,
           "text": "Downloading the model (first time only): 71%"
         },
         {
-          "s": 131.7,
-          "text": "Downloading the model (first time only): 76%"
-        },
-        {
-          "s": 133,
+          "s": 114.4,
           "text": "Downloading the model (first time only): 80%"
         },
         {
-          "s": 139.2,
+          "s": 120.9,
           "text": "Downloading the model (first time only): 85%"
         },
         {
-          "s": 139.6,
+          "s": 122.2,
           "text": "Downloading the model (first time only): 87%"
         },
         {
-          "s": 150.4,
-          "text": "Downloading the model (first time only): 91%"
-        },
-        {
-          "s": 150.8,
+          "s": 131.1,
           "text": "Downloading the model (first time only): 95%"
         },
         {
-          "s": 158,
+          "s": 138.7,
           "text": "Downloading the model (first time only): 100%"
         },
         {
-          "s": 158.8,
+          "s": 140.4,
           "text": "Loading the model into the graphics card: 21%"
         },
         {
-          "s": 159.2,
+          "s": 140.9,
+          "text": "Loading the model into the graphics card: 26%"
+        },
+        {
+          "s": 141.3,
           "text": "Loading the model into the graphics card: 30%"
         },
         {
-          "s": 159.6,
+          "s": 141.7,
+          "text": "Loading the model into the graphics card: 37%"
+        },
+        {
+          "s": 142.1,
           "text": "Loading the model into the graphics card: 41%"
         },
         {
-          "s": 160.1,
+          "s": 142.6,
           "text": "Loading the model into the graphics card: 50%"
         },
         {
-          "s": 160.5,
+          "s": 143,
+          "text": "Loading the model into the graphics card: 57%"
+        },
+        {
+          "s": 143.4,
           "text": "Loading the model into the graphics card: 61%"
         },
         {
-          "s": 160.9,
+          "s": 143.9,
           "text": "Loading the model into the graphics card: 70%"
         },
         {
-          "s": 161.3,
+          "s": 144.3,
+          "text": "Loading the model into the graphics card: 77%"
+        },
+        {
+          "s": 144.7,
           "text": "Loading the model into the graphics card: 85%"
         },
         {
-          "s": 161.7,
-          "text": "Loading the model into the graphics card: 96%"
+          "s": 145.1,
+          "text": "Loading the model into the graphics card: 89%"
         },
         {
-          "s": 162.2,
+          "s": 145.5,
+          "text": "Loading the model into the graphics card: 94%"
+        },
+        {
+          "s": 146,
           "text": "Loading the model into the graphics card: 100%"
         },
         {
-          "s": 162.6,
+          "s": 146.4,
           "text": "Warming up the model (first time can take about 30 seconds)..."
         },
         {
-          "s": 193.1,
+          "s": 202.4,
           "text": "Summarizing..."
         }
       ],
@@ -151,50 +167,50 @@
       "stats": {
         "apiCalls": 1,
         "chunks": 1,
-        "decodeTps": 46.5532009945871,
-        "elapsedMs": 196735,
+        "decodeTps": 38.102935659177334,
+        "elapsedMs": 206538,
         "extractMethod": "readability",
         "gpu": {
           "architecture": "ampere",
           "integrated": false,
           "vendor": "nvidia"
         },
-        "loadMs": 192580,
+        "loadMs": 200316,
         "mergeLevels": 0,
         "model": "Llama 3.2 1B",
         "modelSwitchReason": null,
         "textChars": 1711
       },
-      "summary": "How a Lighthouse Lens Works\n\n• The original Fresnel lighthouse used a single thick piece of curved glass, which was very heavy.\n• The Fresnel lighthouse used many thin glass rings and prisms arranged in a circle to bend light and capture more of the lamp's light.\n• The lens turns slowly on a bed of liquid mercury or on ball bearings, driven by a clockwork motor.\n• The time between flashes is a signature, indicating the location of the lighthouse.\n• Some lighthouses use red or green panels to mark dangerous sectors, while others use white or colored lights to indicate safe course."
+      "summary": "How a Lighthouse Lens Works\n\n• The original Fresnel lighthouse used a single thick piece of curved glass, which would have been very heavy.\n• The Fresnel lighthouse used many thin glass rings and prisms arranged in a circle to bend light, resulting in a lens that is far lighter than a solid one.\n• The lens turns slowly on a bed of liquid mercury or on ball bearings, driven by a clockwork motor.\n• The time between flashes is a signature, indicating the location of the lighthouse.\n• Some lighthouses use red or green panels to mark dangerous sectors, while others use white or colored lights to indicate safe course."
     },
     {
       "mode": "nvidia",
       "id": "long",
       "name": "Long article (fixture)",
-      "startedAt": "2026-10-20T21:43:08.167Z",
+      "startedAt": "2026-10-20T21:49:38.794Z",
       "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
       "gpuNote": null,
       "buttonBefore": "Summarize this page",
-      "wallSeconds": 15.9,
+      "wallSeconds": 17,
       "timeline": [
         {
-          "s": 0,
+          "s": 0.1,
           "text": "Reading the page..."
         },
         {
-          "s": 0.6,
+          "s": 0.5,
           "text": "Checking your graphics card..."
         },
         {
-          "s": 1.7,
+          "s": 2.6,
           "text": "Summarizing part 1 of 2..."
         },
         {
-          "s": 6.3,
+          "s": 7.7,
           "text": "Summarizing part 2 of 2..."
         },
         {
-          "s": 10.5,
+          "s": 12,
           "text": "Combining 2 summaries..."
         }
       ],
@@ -202,8 +218,8 @@
       "stats": {
         "apiCalls": 3,
         "chunks": 2,
-        "decodeTps": 52.833707015857165,
-        "elapsedMs": 15681,
+        "decodeTps": 43.91526936583799,
+        "elapsedMs": 16823,
         "extractMethod": "readability",
         "gpu": {
           "architecture": "ampere",
@@ -216,20 +232,20 @@
         "modelSwitchReason": null,
         "textChars": 10532
       },
-      "summary": "Lighthouses: A Short History of Light on the Coast\n\n- Page title: Lighthouses: A Short History of Light on the Coast\n- These are summaries of consecutive parts of one web page\n- Part 1: Lighthouses have been used for navigation and safety for thousands of years\n- The first lighthouse was built on the island of Pharos in Egypt around 3000 BC\n- Over time, lighthouses have evolved to use various technologies, such as Argand lamps and Fresnel lenses, to improve their effectiveness\n- Today, lighthouses are used around the world to guide ships and other vessels safely through treacherous waters\n- Part 2: Lighthouses have been used for navigation for centuries, with keepers playing a crucial role in maintaining and operating them\n- The development of electronic aids such as radio beacons, radar, and satellites has significantly reduced the role of keepers\n- Automation has also reduced the need for keepers, with many lighthouses now being automated\n- Despite this, many lighthouses remain on the coast as landmarks and tourist attractions, with some being saved and restored by communities and charities"
+      "summary": "Lighthouses: A Short History of Light on the Coast\n\n- Page title: Lighthouses: A Short History of Light on the Coast\n- These are summaries of consecutive parts of one web page\n- Part 1: Lighthouses have been used for navigation and safety for thousands of years\n- The first lighthouse was built on the island of Pharos in Egypt around 3000 BC\n- Over time, different types of lighthouses were developed, including open fires and coal beacons, and oil lamps with mirrors\n- The Fresnel lens was invented in the 1820s and revolutionized lighthouse design\n- Part 2: Lighthouses played a crucial role in maritime navigation\n- The development of radio beacons and radar systems replaced the need for keepers\n- GPS receivers became a reliable alternative to lighthouses\n- Automation of lighthouses has been implemented in many countries"
     },
     {
       "mode": "nvidia",
       "id": "wikipedia",
       "name": "Wikipedia: Lighthouse",
-      "startedAt": "2026-10-20T21:43:28.235Z",
+      "startedAt": "2026-10-20T21:50:00.744Z",
       "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
       "gpuNote": null,
       "buttonBefore": "Summarize this page",
-      "wallSeconds": 74.1,
+      "wallSeconds": 101.6,
       "timeline": [
         {
-          "s": 0,
+          "s": 0.1,
           "text": "Reading the page..."
         },
         {
@@ -237,35 +253,35 @@
           "text": "Checking your graphics card..."
         },
         {
-          "s": 3.2,
+          "s": 5.1,
           "text": "Summarizing part 1 of 7..."
         },
         {
-          "s": 7.8,
+          "s": 12.4,
           "text": "Summarizing part 2 of 7..."
         },
         {
-          "s": 17,
+          "s": 21.7,
           "text": "Summarizing part 3 of 7..."
         },
         {
-          "s": 22.5,
+          "s": 30.6,
           "text": "Summarizing part 4 of 7..."
         },
         {
-          "s": 30.1,
+          "s": 37.2,
           "text": "Summarizing part 5 of 7..."
         },
         {
-          "s": 38.1,
+          "s": 50.1,
           "text": "Summarizing part 6 of 7..."
         },
         {
-          "s": 54.7,
+          "s": 65.8,
           "text": "Summarizing part 7 of 7..."
         },
         {
-          "s": 60.2,
+          "s": 80.5,
           "text": "Combining 7 summaries..."
         }
       ],
@@ -273,8 +289,8 @@
       "stats": {
         "apiCalls": 8,
         "chunks": 7,
-        "decodeTps": 33.624995398334136,
-        "elapsedMs": 73758,
+        "decodeTps": 38.52865219259133,
+        "elapsedMs": 101162,
         "extractMethod": "readability",
         "gpu": {
           "architecture": "ampere",
@@ -287,7 +303,7 @@
         "modelSwitchReason": null,
         "textChars": 36752
       },
-      "summary": "Lighthouse Summary\n\n1. Lighthouses have been used for navigation and warning ships of hazards since the 18th century.\n2. The Argand lamp was a significant innovation in lighthouse illumination, using whale oil, colza, olive oil, or other vegetable oil as fuel.\n3. The Sumburgh Head lighthouse was the first tower to successfully use an electric light in 1875.\n4. The Chance Brothers Incandescent Petroleum Vapour Installation produced the light for the Sumburgh Head lighthouse until 1976.\n5. The Dalén light was invented by Gustaf Dalén, who used Agamassan as a substrate to absorb gas and store it safely.\n6. The Stevenson family is known for their work in lighthouse building, with multiple generations contributing to the profession.\n7. The Lighthouse was a key feature in the development of maritime trade and commerce, particularly in the 18th and 19th centuries.\n8. The Lighthouse was used for navigation, communication, and observation, and its design and construction varied across different regions and cultures.\n9. The Lighthouse was an important part of the maritime industry, and its importance was reflected in the development of new technologies and techniques.\n10. The Lighthouse was a significant structure in the world, serving as a beacon for navigation and communication."
+      "summary": "Lighthouse Summary\n\n- Lighthouses have been used for navigation and warning ships of hazards since ancient times.\n- The first lighthouse built was the Pharos of Alexandria in Egypt, which collapsed in 1323.\n- The modern era of lighthouses began in the 18th century with the construction of the Eddystone Rocks lighthouse.\n- The first lighthouse to use electric illumination was the South Foreland Lighthouse in 1875.\n- The first lighthouse to use a gas burner was the Sumburgh Head lighthouse.\n- The first lighthouse to use a solar-powered system was the Sumburgh Head lighthouse.\n- The first practical installation of laser lights was at Point Danger lighthouse in Queensland.\n- Lighthouse construction involves a rotating lens assembly to concentrate light.\n- Lighthouse lantern rooms are typically glassed-in with metal muntins and have stormproof ventilators.\n- Lighthouse towers can be painted in unique patterns to aid recognition.\n- Lighthouses are used for various purposes such as aviation obstruction lighting, crib lighthouses, and day beacons.\n- The use of lighthouses has been declining over time, but many groups are working to restore and save them.\n- Lighthouse structures are being transferred to local governments and private non-profit groups through the National Historic Lighthouse Preservation Act of 2000."
     }
   ]
 }

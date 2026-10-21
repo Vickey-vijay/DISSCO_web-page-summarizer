@@ -45,6 +45,13 @@ function show(el, visible) {
 
 // ---- the model line: graphics card, model, downloaded or not ------------------------------------
 
+// WebGPU reports vendors in lowercase ("intel", "nvidia"); show them the way people write them.
+const VENDOR_NAMES = { intel: 'Intel', nvidia: 'NVIDIA', amd: 'AMD', apple: 'Apple', qualcomm: 'Qualcomm', arm: 'Arm' };
+export function vendorName(vendor) {
+  const v = String(vendor ?? '').toLowerCase();
+  return VENDOR_NAMES[v] ?? (v ? v[0].toUpperCase() + v.slice(1) : 'built-in');
+}
+
 function renderModelState(state) {
   els.modelLine.className = 'modelline';
   show(els.gpuNote, false);
@@ -64,7 +71,7 @@ function renderModelState(state) {
     : `Model: ${model.label}. Not downloaded yet (about ${downloadMB ?? 'several hundred'} MB, first use only).`;
   els.button.textContent = cached ? 'Summarize this page' : 'Download model and summarize';
   if (gpu?.integrated) {
-    els.gpuNote.textContent = `Graphics: ${gpu.vendor} (built into the processor). Answers can be slow. A separate graphics card is much faster.`;
+    els.gpuNote.textContent = `Graphics: ${vendorName(gpu.vendor)} (built into the processor). Answers can be slow. A separate graphics card is much faster.`;
     show(els.gpuNote, true);
   }
 }

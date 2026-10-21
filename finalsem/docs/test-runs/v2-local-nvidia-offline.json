@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-20T21:45:39.370Z",
+  "date": "2026-10-21T04:13:40.471Z",
   "mode": "nvidia-offline",
   "plan": {
     "args": [
@@ -13,49 +13,139 @@
       "mode": "nvidia-offline",
       "id": "short",
       "name": "Short article (fixture)",
-      "startedAt": "2026-10-20T21:45:26.333Z",
-      "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about several hundred MB, first use only).",
+      "startedAt": "2026-10-21T04:12:57.001Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
       "gpuNote": null,
-      "buttonBefore": "Download model and summarize",
-      "wallSeconds": 1,
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 15.3,
       "timeline": [
         {
-          "s": 0.2,
+          "s": 0,
           "text": "Reading the page..."
         },
         {
           "s": 0.6,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 1.3,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 3.9,
           "text": "Downloading the model (first time only): 0%"
+        },
+        {
+          "s": 4.7,
+          "text": "Loading the model into the graphics card: 21%"
+        },
+        {
+          "s": 5.1,
+          "text": "Loading the model into the graphics card: 35%"
+        },
+        {
+          "s": 5.6,
+          "text": "Loading the model into the graphics card: 46%"
+        },
+        {
+          "s": 6,
+          "text": "Loading the model into the graphics card: 55%"
+        },
+        {
+          "s": 6.4,
+          "text": "Loading the model into the graphics card: 65%"
+        },
+        {
+          "s": 6.8,
+          "text": "Loading the model into the graphics card: 77%"
+        },
+        {
+          "s": 7.2,
+          "text": "Loading the model into the graphics card: 89%"
+        },
+        {
+          "s": 7.6,
+          "text": "Loading the model into the graphics card: 100%"
+        },
+        {
+          "s": 8.1,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 8.6,
+          "text": "Summarizing..."
         }
       ],
-      "outcome": "error",
-      "error": {
-        "code": "MODEL_DOWNLOAD_FAILED",
-        "message": "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept.",
-        "detail": "Error: Failed to store https://huggingface.co/mlc-ai/Llama-3.2-1B-Instruct-q4f16_1-MLC/resolve/main/mlc-chat-config.json with error: TypeError: Failed to fetch"
-      }
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "decodeTps": 40.26742191971936,
+        "elapsedMs": 14844,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "ampere",
+          "integrated": false,
+          "vendor": "nvidia"
+        },
+        "loadMs": 6890,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "textChars": 1711
+      },
+      "summary": "How a Lighthouse Lens Works\n\n• A lighthouse lamp is weak and spreads its glow in every direction, fading before it reaches a ship over the horizon.\n• The trick that made lighthouses useful for ships far out at sea was not a stronger flame, but a better way of aiming the light that already existed.\n• Augustin Fresnel built a lens in 1822 that did exactly this, using many thin glass rings and prisms arranged in a circle.\n• Each ring bends the light from the lamp at the centre, leaving in a flat, narrow beam instead of spreading out.\n• The result is a lens that is far lighter than a solid one and captures much more of the lamp's light.\n• Large lenses turn slowly on a bed of liquid mercury or on ball bearings, driven by a clockwork motor.\n• The time between flashes is a signature, indicating the location of the lighthouse.\n• Some lights use red or green panels to mark dangerous sectors, while others use white or coloured lights to indicate safe areas."
     },
     {
       "mode": "nvidia-offline",
       "id": "long",
       "name": "Long article (fixture)",
-      "startedAt": "2026-10-20T21:45:33.392Z",
-      "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about several hundred MB, first use only).",
+      "startedAt": "2026-10-21T04:13:18.281Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
       "gpuNote": null,
-      "buttonBefore": "Download model and summarize",
-      "wallSeconds": 0.5,
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 16.5,
       "timeline": [
         {
           "s": 0.1,
           "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 2.4,
+          "text": "Summarizing part 1 of 2..."
+        },
+        {
+          "s": 7.4,
+          "text": "Summarizing part 2 of 2..."
+        },
+        {
+          "s": 12.3,
+          "text": "Combining 2 summaries..."
         }
       ],
-      "outcome": "error",
-      "error": {
-        "code": "MODEL_DOWNLOAD_FAILED",
-        "message": "The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept.",
-        "detail": "Error: Failed to store https://huggingface.co/mlc-ai/Llama-3.2-1B-Instruct-q4f16_1-MLC/resolve/main/mlc-chat-config.json with error: TypeError: Failed to fetch"
-      }
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 3,
+        "chunks": 2,
+        "decodeTps": 41.531238715678285,
+        "elapsedMs": 16427,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "ampere",
+          "integrated": false,
+          "vendor": "nvidia"
+        },
+        "loadMs": 0,
+        "mergeLevels": 1,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "textChars": 10532
+      },
+      "summary": "**Lighthouses: A Short History of Light on the Coast**\n\n- Page title provides a brief overview of the content within.\n- The keeper's life was a crucial aspect of lighthouse operations, with responsibilities including maintaining the light, ensuring it remained lit and visible, and making sure the light was directed correctly.\n- Lighthouses have a long history of providing navigation aid to ships and coastal communities, with their signals often accompanied by fog signals to help ships navigate through fog.\n- The use of lighthouses declined with the advent of electronic aids, but many still remain as landmarks and tourist attractions.\n- Today, many lighthouses are automated and no longer require human keepers."
     }
   ]
 }

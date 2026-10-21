@@ -42,6 +42,8 @@ function writeJob(tabId, jobId, patch) {
       const current = (await chrome.storage.session.get(key))[key];
       if (!current || current.jobId !== jobId) return; // replaced by a newer job, or removed
       await chrome.storage.session.set({ [key]: { ...current, ...patch, updatedAt: Date.now() } });
+      // The tab may have closed while this write was in flight: do not leave the record behind.
+      if (closedTabs.has(tabId)) await chrome.storage.session.remove(key);
     });
   queues.set(tabId, next);
   return next;
@@ -190,8 +192,10 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   closedTabs.add(tabId);
   controllers.get(tabId)?.controller.abort();
   controllers.delete(tabId);
+  // Remove the record AFTER any write already queued for this tab, so it cannot be recreated.
+  const pending = queues.get(tabId) ?? Promise.resolve();
   queues.delete(tabId);
-  void chrome.storage.session.remove(jobKey(tabId));
+  pending.catch(() => {}).finally(() => void chrome.storage.session.remove(jobKey(tabId)));
 });
 
 // If Chrome stopped this worker mid-job, the job record still says "running" but nothing

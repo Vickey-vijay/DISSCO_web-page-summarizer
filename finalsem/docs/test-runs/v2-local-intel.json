@@ -1,0 +1,152 @@
+{
+  "date": "2026-10-21T04:19:41.306Z",
+  "mode": "intel",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel",
+      "id": "short",
+      "name": "Short article (fixture)",
+      "startedAt": "2026-10-21T04:13:43.000Z",
+      "modelLineBefore": "Model: SmolLM2 360M. Not downloaded yet (about 204 MB, first use only).",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Download model and summarize",
+      "wallSeconds": 199.2,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 0.9,
+          "text": "Downloading the model (first time only): 0%"
+        },
+        {
+          "s": 59,
+          "text": "Downloading the model (first time only): 33%"
+        },
+        {
+          "s": 59.4,
+          "text": "Downloading the model (first time only): 65%"
+        },
+        {
+          "s": 69,
+          "text": "Downloading the model (first time only): 82%"
+        },
+        {
+          "s": 79.1,
+          "text": "Downloading the model (first time only): 98%"
+        },
+        {
+          "s": 81.2,
+          "text": "Downloading the model (first time only): 100%"
+        },
+        {
+          "s": 81.6,
+          "text": "Loading the model into the graphics card: 16%"
+        },
+        {
+          "s": 82,
+          "text": "Loading the model into the graphics card: 33%"
+        },
+        {
+          "s": 82.5,
+          "text": "Loading the model into the graphics card: 65%"
+        },
+        {
+          "s": 82.9,
+          "text": "Loading the model into the graphics card: 82%"
+        },
+        {
+          "s": 83.3,
+          "text": "Loading the model into the graphics card: 100%"
+        },
+        {
+          "s": 83.7,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 123.1,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "decodeTps": 3.9427574699794383,
+        "elapsedMs": 199016,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "loadMs": 122438,
+        "mergeLevels": 0,
+        "model": "SmolLM2 360M",
+        "modelSwitchReason": "integrated-graphics",
+        "textChars": 1711
+      },
+      "summary": "<<<PAGE TEXT START>>>\nA lighthouse lens works by using many thin glass rings to bend the light. This lens is much lighter than a single, thick piece of curved glass, and it captures more light than a single, strong flame.\n\nIn 1822, the French engineer Augustin Fresnel built a lens that did exactly this. Instead of one thick piece of curved glass, it used many thin glass rings and prisms to bend the light. This lens turned slowly on a bed of liquid mercury or on ball bearings, driven by a clockwork motor.\n\nAs the lens turned, its beams swept across the sea like the spokes of a wheel, capturing much more light than a single, strong flame.\n\nThe time between flashes is a signature, and some lights use red or green panels to mark dangerous sectors, so a ship sees a white light when it drifts toward rocks.\n\nModern lights often use small electric lamps and plastic lenses, and some have no keeper. But the oldest Fresnel lenses, some of which are still working after more than a century, remain a good example of solving an engineering problem with geometry instead of brute force.\n\n<<<PAGE TEXT END>>>"
+    },
+    {
+      "mode": "intel",
+      "id": "long",
+      "name": "Long article (fixture)",
+      "startedAt": "2026-10-21T04:17:08.131Z",
+      "modelLineBefore": "Model: SmolLM2 360M. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 149.1,
+      "timeline": [
+        {
+          "s": 0,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 0.9,
+          "text": "Summarizing part 1 of 2..."
+        },
+        {
+          "s": 65.7,
+          "text": "Summarizing part 2 of 2..."
+        },
+        {
+          "s": 122.6,
+          "text": "Combining 2 summaries..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 3,
+        "chunks": 2,
+        "decodeTps": 4.693492584299225,
+        "elapsedMs": 148741,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "loadMs": 0,
+        "mergeLevels": 1,
+        "model": "SmolLM2 360M",
+        "modelSwitchReason": "integrated-graphics",
+        "textChars": 10532
+      },
+      "summary": "The 1820s saw the introduction of the Fresnel lens, a solid glass lens that captured more light and sent it out as a narrow, powerful beam. The first keepers' lives were often hazardous, with many dying from fires started by the lamps. In 1999, the Cape Hatteras lighthouse in North Carolina was moved to save it from erosion and damage. The tower was lifted onto rails and moved about 2,900 feet inland to save it from the eroding shore."
+    }
+  ]
+}

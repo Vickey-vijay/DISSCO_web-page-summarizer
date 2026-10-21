@@ -3,7 +3,7 @@
 A Chrome extension that summarizes the page you are reading in one click.
 
 - **V1 (midsem):** sends the page text to Google's Gemini API using your own free key, entered once in the extension's Options page.
-- **V2 (final sem):** runs a small model inside the browser, so no API key is needed and the page text stays on your machine. *(not built yet)*
+- **V2 (final sem):** runs a small language model inside the browser (WebLLM on WebGPU), so no API key is needed and the page text never leaves your computer. The model (about 700 MB) downloads once on first use; after that it works with no internet. Needs a graphics card that supports WebGPU. See [finalsem/README.md](finalsem/README.md).
 
 Client: Jeffy (CoH 11) · Product requirements: [prd.md](prd.md)
 
@@ -13,8 +13,8 @@ Client: Jeffy (CoH 11) · Product requirements: [prd.md](prd.md)
 |---|---|
 | Abstract | Done: [abstract/abstract.md](abstract/abstract.md) |
 | V1 plan | Approved: [midsem/V1_PLAN.md](midsem/V1_PLAN.md) |
-| V1 build (midsem) | In progress: extension, unit tests, setup scripts done; browser tests and documents under way |
-| V2 build (final sem) | Not started |
+| V1 build (midsem) | Done and tested: [midsem/project](midsem/project). Documents (report, KT) are Markdown files in [midsem/docs](midsem/docs). |
+| V2 build (final sem) | Built and under test: [finalsem/project](finalsem/project). The model runs inside Chrome (no key, no cloud). Final-sem documents are not written yet. |
 
 ## Install V1 (for the client)
 
