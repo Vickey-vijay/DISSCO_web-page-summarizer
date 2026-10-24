@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-24T11:19:58.372Z",
+  "mode": "intel-wikipedia",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel-wikipedia",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-24T11:09:29.974Z",
+      "modelLineBefore": "Model: SmolLM2 360M. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 615.6,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 1.6,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 4.1,
+          "text": "Loading the model into the graphics card: 16%"
+        },
+        {
+          "s": 4.5,
+          "text": "Loading the model into the graphics card: 33%"
+        },
+        {
+          "s": 4.9,
+          "text": "Loading the model into the graphics card: 49%"
+        },
+        {
+          "s": 5.4,
+          "text": "Loading the model into the graphics card: 82%"
+        },
+        {
+          "s": 5.8,
+          "text": "Loading the model into the graphics card: 100%"
+        },
+        {
+          "s": 6.2,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 39.9,
+          "text": "Summarizing part 1 of 7..."
+        },
+        {
+          "s": 116,
+          "text": "Summarizing part 2 of 7..."
+        },
+        {
+          "s": 243.1,
+          "text": "Summarizing part 3 of 7..."
+        },
+        {
+          "s": 309,
+          "text": "Summarizing part 4 of 7..."
+        },
+        {
+          "s": 358.5,
+          "text": "Summarizing part 5 of 7..."
+        },
+        {
+          "s": 435.8,
+          "text": "Summarizing part 6 of 7..."
+        }
+      ],
+      "outcome": "error",
+      "error": {
+        "code": "TIMEOUT",
+        "message": "The model took too long to answer. Try again, or use a shorter page.",
+        "detail": "generation timed out"
+      }
+    }
+  ]
+}

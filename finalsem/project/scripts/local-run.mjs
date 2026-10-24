@@ -5,9 +5,10 @@
 //   node scripts/local-run.mjs nvidia           cold start on the separate graphics card (downloads the model)
 //   node scripts/local-run.mjs nvidia-offline   same profile, every outside website blocked (cache only)
 //   node scripts/local-run.mjs intel            the processor's built-in graphics (the automatic small model)
+//   node scripts/local-run.mjs intel-wikipedia  the same, on the long Wikipedia article (7 parts; slow)
 //
 // Output: docs/test-runs/v2-local-<mode>.json and .md, screenshots in docs/screenshots/v2-*.png
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startFixtureServer } from '../tests/helpers/fixtures-server.mjs';
@@ -26,9 +27,16 @@ const PLANS = {
   nvidia: { profile: '.model-profile', args: ['--force_high_performance_gpu'], online: true, cases: ['short', 'long', 'wikipedia'] },
   'nvidia-offline': { profile: '.model-profile', args: ['--force_high_performance_gpu', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1'], online: false, cases: ['short', 'long'] },
   intel: { profile: '.model-profile-intel', args: [], online: true, cases: ['short', 'long'] },
+  'intel-wikipedia': { profile: '.model-profile-intel', args: [], online: true, cases: ['wikipedia'] },
+  'intel-short': { profile: '.model-profile-intel', args: [], online: true, cases: ['short'] },
 };
 const plan = PLANS[mode];
 if (!plan) throw new Error(`unknown mode ${mode}; use ${Object.keys(PLANS).join(', ')}`);
+
+// A persistent profile keeps the extension's service worker scripts, so a changed service worker
+// would not run on the next launch (seen: the "halvedParts" stat was missing after the code changed).
+// Deleting only that folder is safe: the downloaded model lives in IndexedDB, which stays.
+for (const dir of ['Service Worker', 'Code Cache']) rmSync(path.join(root, plan.profile, 'Default', dir), { recursive: true, force: true });
 
 const fixtures = await startFixtureServer();
 const CASES = {

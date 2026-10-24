@@ -669,3 +669,55 @@ test('V24 nothing opens: a normal summary adds only the popup window (no tab, no
   assert.deepEqual(unexpected, [], `pages opened during a summary: ${unexpected.join(', ')}`);
   assert.equal(added.filter(isPopup).length, 1, 'exactly one popup window was opened by the test');
 });
+
+test('V25 a part that does not fit the model window is cut in half and the page is still summarized', async () => {
+  await resetScenario({ engineMode: 'mock:longprompt' }, { cached: true });
+  const page = await openTarget('article-long.html');
+  const tabId = await ext.tabIdOf(page);
+  const popup = await ext.openPopup(tabId);
+  await popup.click('#summarize');
+  const { outcome, text } = await waitOutcome(popup, 90000);
+  await ext.shot(popup, 'V25-halved');
+  assert.equal(outcome, 'done', `expected a summary after cutting the parts, popup said: ${text}`);
+  assert.match(text, /Combined overview/, 'the final text is the merged summary');
+  const job = await ext.getJob(tabId);
+  assert.ok(job.stats.halvedParts >= 1, `the job should record cut parts, stats: ${JSON.stringify(job.stats)}`);
+});
+
+test('V26 a long answer keeps the job alive: its record is refreshed while the model is still working', async () => {
+  await resetScenario({ mockDelayMs: 16000 }, { cached: true });
+  const page = await openTarget('article-short.html');
+  const tabId = await ext.tabIdOf(page);
+  const popup = await ext.openPopup(tabId);
+  await popup.click('#summarize');
+
+  // wait until the model is working on the answer
+  let first = null;
+  const deadline = Date.now() + 20000;
+  while (Date.now() < deadline) {
+    const job = await ext.getJob(tabId);
+    if (job?.status === 'running' && job.phase === 'summarizing') {
+      first = job;
+      break;
+    }
+    await sleep(200);
+  }
+  assert.ok(first, 'the job should reach the summarizing phase');
+  await sleep(13000); // longer than the 10 s heartbeat, shorter than the 16 s answer
+  const later = await ext.getJob(tabId);
+  assert.equal(later.status, 'running', 'the answer is still being written');
+  assert.ok(later.updatedAt - first.updatedAt >= 5000, `the record should have been refreshed, updatedAt moved ${later.updatedAt - first.updatedAt} ms`);
+  const { outcome } = await waitOutcome(popup, 60000);
+  assert.equal(outcome, 'done');
+});
+
+test('V27 an unexpected failure shows the technical detail under the vague message', async () => {
+  await resetScenario({ engineMode: 'mock:crash' }, { cached: true });
+  const page = await openTarget('article-short.html');
+  const { popup, outcome, text } = await summarize(ext, page, { timeoutMs: 60000 });
+  await ext.shot(popup, 'V27-detail');
+  assert.equal(outcome, 'error', `expected an error, popup said: ${text}`);
+  assert.match(text, /Something went wrong inside the extension/);
+  const detail = await popup.locator('#error-detail').innerText();
+  assert.match(detail, /Technical detail: mock: something unexpected happened/);
+});

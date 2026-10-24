@@ -21,6 +21,7 @@ const els = {
   resultNotice: $('result-notice'),
   error: $('error'),
   errorText: $('error-text'),
+  errorDetail: $('error-detail'),
   result: $('result'),
   summary: $('summary'),
   stats: $('stats'),
@@ -166,6 +167,7 @@ function render(job) {
 
   show(els.notice, false);
   show(els.resultNotice, false);
+  show(els.errorDetail, false);
   if (stale) {
     els.errorText.textContent = 'The summary was interrupted. Press Summarize to try again.';
     return;
@@ -186,6 +188,13 @@ function render(job) {
     }
   } else if (live.status === 'error') {
     els.errorText.textContent = live.error?.message ?? 'Something went wrong.';
+    // For the vague messages, show what the extension knows, so a person (or the developer) can say what happened.
+    const code = live.error?.code;
+    const detail = String(live.error?.detail ?? '').replace(/\s+/g, ' ').trim();
+    if (detail && (code === 'SERVICE_ERROR' || code === 'MODEL_LOAD_FAILED')) {
+      els.errorDetail.textContent = `Technical detail: ${detail.slice(0, 240)}`;
+      show(els.errorDetail, true);
+    }
     refreshModelLineOnce(live); // a fallback may have been saved even though the job failed
   } else if (live.status === 'done') {
     renderSummary(live.summary);

@@ -11,6 +11,8 @@
 //   empty         the model answers with no text
 //   html          the model answers with HTML-looking text (the popup must show it as plain text)
 //   slow          each answer takes at least 1.5 s
+//   crash         every answer fails with an unexpected error (SERVICE_ERROR, with a technical detail)
+//   longprompt    a prompt over 3500 characters is refused like WebLLM does (context window exceeded)
 // "Downloaded" is remembered per model in localStorage, so a second run skips the fake download.
 import { classifyEngineError } from '../core/engine-errors.js';
 
@@ -96,6 +98,11 @@ export function createMockEngine({ mode, delayMs, emitProgress }) {
       if (!loadedId) return { ok: false, error: { code: 'MODEL_LOAD_FAILED', detail: 'mock model not loaded' } };
       const wait = mode === 'slow' ? Math.max(delayMs, 1500) : delayMs;
       if (wait) await sleep(wait);
+      if (mode === 'crash') return { ok: false, error: { code: 'SERVICE_ERROR', detail: 'mock: something unexpected happened' } };
+      if (mode === 'longprompt' && prompt.length > 3500) {
+        const detail = 'Prompt tokens exceed context window size: number of prompt tokens: 5000; context window size: 4096';
+        return { ok: false, error: { code: classifyEngineError(new Error(detail), 'generate'), detail } };
+      }
       const text = mode === 'empty' ? '' : answerFor(prompt, mode);
       return { ok: true, text, stats: { promptTokens: Math.round(prompt.length / 4), completionTokens: 40, decodeTps: 50, prefillTps: 500 } };
     },

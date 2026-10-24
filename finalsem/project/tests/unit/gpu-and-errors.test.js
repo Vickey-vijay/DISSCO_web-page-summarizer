@@ -74,6 +74,11 @@ test('engine errors become the right code', () => {
   assert.equal(classifyEngineError(new Error('something strange'), 'generate'), 'SERVICE_ERROR');
 });
 
+test('a prompt that does not fit the context window is CONTEXT_TOO_LONG, not a vague service error', () => {
+  const webllm = 'Prompt tokens exceed context window size: number of prompt tokens: 4300; context window size: 4096\nConsider shortening the prompt';
+  assert.equal(classifyEngineError(new Error(webllm), 'generate'), 'CONTEXT_TOO_LONG');
+});
+
 test('the word "room" is not an out-of-memory error', () => {
   assert.equal(classifyEngineError(new Error('there is no room for this'), 'generate'), 'SERVICE_ERROR');
   assert.equal(classifyEngineError(new Error('OOM while allocating'), 'generate'), 'GPU_MEMORY');

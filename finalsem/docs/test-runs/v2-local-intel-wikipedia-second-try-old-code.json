@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-24T11:36:51.089Z",
+  "mode": "intel-wikipedia",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel-wikipedia",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-24T11:25:00.222Z",
+      "modelLineBefore": "Model: SmolLM2 360M. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 704.5,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 1,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 2.8,
+          "text": "Loading the model into the graphics card: 16%"
+        },
+        {
+          "s": 3.2,
+          "text": "Loading the model into the graphics card: 49%"
+        },
+        {
+          "s": 3.6,
+          "text": "Loading the model into the graphics card: 82%"
+        },
+        {
+          "s": 4,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 5.3,
+          "text": "Summarizing part 1 of 7..."
+        },
+        {
+          "s": 80.3,
+          "text": "Summarizing part 2 of 7..."
+        },
+        {
+          "s": 204.4,
+          "text": "Summarizing part 3 of 7..."
+        },
+        {
+          "s": 277.6,
+          "text": "Summarizing part 4 of 7..."
+        },
+        {
+          "s": 333.6,
+          "text": "Summarizing part 5 of 7..."
+        },
+        {
+          "s": 423.2,
+          "text": "Summarizing part 6 of 7..."
+        },
+        {
+          "s": 544.7,
+          "text": "Summarizing part 7 of 7..."
+        },
+        {
+          "s": 604.9,
+          "text": "Combining 7 summaries..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 8,
+        "chunks": 7,
+        "decodeTps": 4.025147588784776,
+        "elapsedMs": 704213,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "loadMs": 4140,
+        "mergeLevels": 1,
+        "model": "SmolLM2 360M",
+        "modelSwitchReason": "integrated-graphics",
+        "textChars": 36752
+      },
+      "summary": "Summary:\n\nThe 18th century saw the introduction of the Argand lamp, which used a carbon arc to produce a steady, smokeless light. The use of gas as an illuminant began in 1901 with the Dalén light, which used Agamassan (Aga) as the substrate. The 19th century saw the development of the multi-part Fresnel lens, which allowed for the construction of lenses of large aperture and short focal length. The Cordouan Lighthouse at the mouth of the Gironde estuary was the first to use a Fresnel lens in 1823. The 19th century saw the introduction of prefabricated, iron or steel, or even concrete, lighthouses constructed in the 20th century to provide a visual signal to ships to warn of rocks, reefs or other hazards. The 1611 lighthouse in France, the 1611 lighthouse in Portugal, and the 1611 lighthouse in Ireland are examples of historic lighthouses. The 1939 National Historic Lighthouse Preservation Act and the 2000 Heritage Lighthouse Protection Act have helped to preserve and restore lighthouses around the world."
+    }
+  ]
+}

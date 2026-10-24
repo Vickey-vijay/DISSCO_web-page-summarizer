@@ -763,7 +763,7 @@ registerFigure('V11_error_flow', () => {
     ['GPU_MEMORY', 'Out of memory while loading', 'The graphics card ran out of memory. Close other heavy tabs or programs and try again.', 'amber'],
     ['MODEL_DOWNLOAD_FAILED', 'Download stopped (network)', 'The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept.', 'red'],
     ['MODEL_LOAD_FAILED', 'Model would not start', 'The model could not be started. Press the button to try again.', 'amber'],
-    ['TIMEOUT', 'No answer within 3 minutes', 'The model took too long to answer. Try again, or use a shorter page.', 'red'],
+    ['TIMEOUT', 'No answer within 10 minutes', 'The model took too long to answer. Try again, or use a shorter page.', 'red'],
     ['EMPTY_ANSWER', 'Model returned no text', 'The model returned no summary for this page.', 'red'],
     ['TOO_LITTLE_TEXT', 'Under 200 characters of text', 'This page has too little readable text to summarize.', 'neutral'],
     ['TOO_LONG', 'More than 12 parts', 'This page is too long for the local model on this computer. Try a shorter page.', 'neutral'],

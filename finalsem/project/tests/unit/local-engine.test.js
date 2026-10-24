@@ -165,6 +165,51 @@ test('the pipeline prepares the model once, before the first part, and then summ
   assert.equal(out.summary, 'summary');
 });
 
+// ---- parts that do not fit the model's window ---------------------------------------------------
+
+const paragraph = `${'word '.repeat(90).trim()}.`;
+const longText = Array.from({ length: 10 }, () => paragraph).join('\n\n');
+const tooLong = { ok: false, error: { code: 'CONTEXT_TOO_LONG', detail: 'Prompt tokens exceed context window size' } };
+
+test('a part that does not fit the window is cut in half and each half is summarized', async () => {
+  const send = fakePage({ LOCAL_GENERATE: (m) => (m.prompt.length > 3600 ? tooLong : { ok: true, text: `ok ${m.prompt.length}` }) });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  const answer = await engine.summarizeChunk(longText, { title: 'T', index: 2, total: 5 });
+  assert.equal(send.sent.length, 3, 'one refusal, then two halves');
+  assert.equal(answer.split('\n\n').length, 2, 'the two half summaries are joined');
+  assert.equal(engine.halvedParts, 1);
+  assert.match(send.sent[1].prompt, /part 2 of 5/);
+});
+
+test('a page that was a single part is split into parts and merged when it does not fit', async () => {
+  const send = fakePage({
+    LOCAL_GENERATE: (m) => (m.prompt.length > 3600 ? tooLong : { ok: true, text: /consecutive parts/.test(m.prompt) ? 'merged' : 'half summary' }),
+  });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  assert.equal(await engine.summarizeChunk(longText, { title: 'T', index: 1, total: 1 }), 'merged');
+  assert.equal(send.sent.length, 4, 'one refusal, two halves, one merge');
+  assert.match(send.sent[1].prompt, /part 1 of 2/);
+  assert.match(send.sent[2].prompt, /part 2 of 2/);
+});
+
+test('when even the pieces do not fit, the error is CONTEXT_TOO_LONG and the cutting stops', async () => {
+  const send = fakePage({ LOCAL_GENERATE: tooLong });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  assert.equal(await code(engine.summarizeChunk(longText, { title: 'T', index: 1, total: 3 })), 'CONTEXT_TOO_LONG');
+  assert.ok(send.sent.length <= 1 + 2 + 4 + 8, `stops after a few levels, made ${send.sent.length} requests`);
+});
+
+test('a different error is not retried by cutting the part', async () => {
+  const send = fakePage({ LOCAL_GENERATE: { ok: false, error: { code: 'TIMEOUT', detail: 'x' } } });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  assert.equal(await code(engine.summarizeChunk(longText, { total: 2, index: 1 })), 'TIMEOUT');
+  assert.equal(send.sent.length, 1);
+});
+
+test('the answer timeout is long enough for a slow chip', () => {
+  assert.ok(DEFAULTS.generateTimeoutMs >= 600000);
+});
+
 // ---- the offscreen manager ----------------------------------------------------------------------
 
 function fakeChrome({ contexts = [] } = {}) {

@@ -9,6 +9,8 @@ import { ERROR_CODES } from './errors.js';
  */
 export function classifyEngineError(err, stage) {
   const text = String(err?.message ?? err ?? '').toLowerCase();
+  // WebLLM: "Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096"
+  if (/prompt tokens exceed|context window size/.test(text)) return ERROR_CODES.CONTEXT_TOO_LONG;
   if (/shader-f16|f16/.test(text) && /(support|feature|require)/.test(text)) return ERROR_CODES.NO_SHADER_F16;
   if (/webgpu|gpu adapter|navigator\.gpu/.test(text) && /(not\s+|un)(supported|available)|no (gpu )?adapter|unavailable/.test(text)) {
     return ERROR_CODES.NO_WEBGPU;

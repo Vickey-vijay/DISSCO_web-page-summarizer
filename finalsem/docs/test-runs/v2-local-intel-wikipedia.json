@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-24T11:49:50.424Z",
+  "mode": "intel-wikipedia",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel-wikipedia",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-24T11:39:28.431Z",
+      "modelLineBefore": "Model: SmolLM2 360M. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 616.4,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 1,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 2.3,
+          "text": "Loading the model into the graphics card: 33%"
+        },
+        {
+          "s": 2.7,
+          "text": "Loading the model into the graphics card: 65%"
+        },
+        {
+          "s": 3.1,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 4.4,
+          "text": "Summarizing part 1 of 7..."
+        },
+        {
+          "s": 75,
+          "text": "Summarizing part 2 of 7..."
+        },
+        {
+          "s": 143.4,
+          "text": "Summarizing part 3 of 7..."
+        },
+        {
+          "s": 209.3,
+          "text": "Summarizing part 4 of 7..."
+        },
+        {
+          "s": 284.4,
+          "text": "Summarizing part 5 of 7..."
+        },
+        {
+          "s": 363.6,
+          "text": "Summarizing part 6 of 7..."
+        },
+        {
+          "s": 485.1,
+          "text": "Summarizing part 7 of 7..."
+        },
+        {
+          "s": 553.7,
+          "text": "Combining 7 summaries..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 8,
+        "chunks": 7,
+        "decodeTps": 4.076154206776332,
+        "elapsedMs": 615985,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 3466,
+        "mergeLevels": 1,
+        "model": "SmolLM2 360M",
+        "modelSwitchReason": "integrated-graphics",
+        "textChars": 36752
+      },
+      "summary": "Summary:\n1. The page provides a brief history and significance of lighthouses.\n2. It includes a list of 14,700 lighthouses and navigation lights around the world, with links to more information.\n3. It includes 54 diagrams and 651 photographs to provide visual aids.\n\nSummary:\n1. The page provides a brief history and significance of lighthouses.\n2. It includes a list of 14,700 lighthouses and navigation lights around the world, with links to more information.\n3. It includes 54 diagrams and 651 photographs to provide visual aids."
+    }
+  ]
+}

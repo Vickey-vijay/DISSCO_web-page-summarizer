@@ -141,6 +141,7 @@ progress:not([value]) {
 a { color: var(--accent); }
 
 /* Version 2 additions */
+.error .detail { margin: 6px 0 0; color: var(--muted); font: 11px/1.4 var(--mono); word-break: break-word; }
 .result .notice { margin-bottom: 14px; }
 .edition { font: 11px var(--mono); color: var(--muted); }
 .modelline { margin: 10px 0 0; font-size: 13px; color: var(--ink); }

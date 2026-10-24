@@ -88,6 +88,7 @@ async function runJob(tabId, jobId, signal) {
         gpu: engine.status?.gpu ?? null,
         loadMs: engine.loadInfo?.loadMs ?? null,
         decodeTps: engine.lastStats?.decodeTps ?? null,
+        halvedParts: engine.halvedParts,
       },
       error: null,
     });
@@ -184,7 +185,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     manager.emitProgress(message);
     return false;
   }
-  // KEEPALIVE from the offscreen page needs no answer: receiving it is what keeps this worker alive.
+  if (message?.type === 'KEEPALIVE') {
+    // The offscreen page sends this every 10 s while it works. Receiving it keeps this worker alive,
+    // and it also proves the running jobs are alive: one answer can take minutes on a slow chip,
+    // and the popup treats a job with no update for 5 minutes as dead.
+    for (const [tabId, running] of controllers) void writeJob(tabId, running.jobId, {});
+    return false;
+  }
   return false;
 });
 

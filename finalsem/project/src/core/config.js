@@ -22,7 +22,7 @@ export const DEFAULTS = Object.freeze({
   maxTokensFinal: 320,
   temperature: 0.2,
   // One generation that takes longer than this is stopped and reported.
-  generateTimeoutMs: 180000,
+  generateTimeoutMs: 600000,
   // The offscreen page holds the model in graphics memory; it is closed after this much idle time.
   idleCloseMs: 5 * 60 * 1000,
   // 'real' runs the model. 'mock' is a test seam: a fake engine with fake download progress.

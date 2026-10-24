@@ -8,7 +8,12 @@
 import { AppError, ERROR_CODES, fromWire } from '../core/errors.js';
 import { MODELS } from '../core/config.js';
 import { chooseModel } from '../core/gpu-check.js';
+import { chunkText } from '../core/chunker.js';
 import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, stripPageMarkers } from '../core/prompts.js';
+
+// A part that does not fit the model's window is cut in half and tried again, at most this deep.
+const MAX_HALVING_DEPTH = 3;
+const MIN_HALVING_CHARS = 600;
 
 // A failed load with the primary model is retried once with the smaller one.
 const RETRY_WITH_FALLBACK = new Set([ERROR_CODES.GPU_MEMORY, ERROR_CODES.MODEL_LOAD_FAILED]);
@@ -51,6 +56,7 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
     loadInfo: null,
     lastStats: null,
     modelSwitchReason: null,
+    halvedParts: 0, // how many parts had to be cut in half because they did not fit the window
 
     /**
      * Asks the offscreen page about the graphics card and the model. On integrated graphics the
@@ -88,10 +94,34 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
       return { status: engine.status, loaded: engine.loadInfo };
     },
 
-    async summarizeChunk(text, { title = '', index = 1, total = 1 } = {}) {
-      const prompt =
-        total === 1 ? buildSinglePrompt({ title, text }) : buildChunkPrompt({ title, text, index, total });
-      return generate(prompt, total === 1 ? settings.maxTokensFinal : settings.maxTokensPart);
+    async summarizeChunk(text, { title = '', index = 1, total = 1, signal } = {}) {
+      const once = (t, i, n) => {
+        const prompt = n === 1 ? buildSinglePrompt({ title, text: t }) : buildChunkPrompt({ title, text: t, index: i, total: n });
+        return generate(prompt, n === 1 ? settings.maxTokensFinal : settings.maxTokensPart);
+      };
+
+      // Dense pages (tables, numbers, references) use more tokens per character than the 6000
+      // character limit assumes. When WebLLM says the prompt does not fit the window, the part is
+      // cut in half at a paragraph or sentence break and each half is summarized on its own.
+      const attempt = async (t, i, n, depth) => {
+        try {
+          return await once(t, i, n);
+        } catch (err) {
+          const tooLong = err instanceof AppError && err.code === ERROR_CODES.CONTEXT_TOO_LONG;
+          if (!tooLong || depth >= MAX_HALVING_DEPTH || t.length < MIN_HALVING_CHARS) throw err;
+          const halves = chunkText(t, Math.ceil(t.length / 2) + 100);
+          if (halves.length < 2) throw err;
+          engine.halvedParts += 1;
+          const pieces = [];
+          for (const half of halves) {
+            if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
+            // A page that was one part is now several: its pieces are summarized as parts and merged below.
+            pieces.push(await attempt(half, n === 1 ? pieces.length + 1 : i, n === 1 ? halves.length : n, depth + 1));
+          }
+          return n === 1 ? engine.mergeSummaries(pieces, { title }) : pieces.join('\n\n');
+        }
+      };
+      return attempt(text, index, total, 0);
     },
 
     async mergeSummaries(parts, { title = '' } = {}) {

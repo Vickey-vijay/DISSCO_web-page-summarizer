@@ -37,7 +37,7 @@
 <rect x="40" y="455.0400000000001" width="350" height="46.72" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
 <text x="48" y="485.12000000000006" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" font-family="Consolas, 'Courier New', monospace" data-fit="334">TIMEOUT</text>
 <rect x="410" y="455.0400000000001" width="370" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
-<text x="426" y="484.12000000000006" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">No answer within 3 minutes</text>
+<text x="426" y="484.12000000000006" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="338">No answer within 10 minutes</text>
 <rect x="800" y="455.0400000000001" width="760" height="46.72" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="816" y="484.12000000000006" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="728">The model took too long to answer. Try again, or use a shorter page.</text>
 <rect x="40" y="505.7600000000001" width="350" height="46.72" rx="4" ry="4" fill="#F6E7E1" stroke="#B4391F" stroke-width="2.2"/>
