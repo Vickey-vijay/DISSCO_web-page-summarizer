@@ -22,7 +22,7 @@ Table: Limits for the local model, from `src/core/config.js`
 | `maxTokensPart` | 300 | Longest answer for one part |
 | `maxTokensFinal` | 320 | Longest answer for a one-part page, or for a merge |
 | `temperature` | 0.2 | Low randomness: the model usually picks its most likely next word |
-| `generateTimeoutMs` | 180000 | One answer is stopped after three minutes |
+| `generateTimeoutMs` | 600000 | One answer is stopped after ten minutes |
 | `idleCloseMs` | 300000 | The hidden page is closed after five minutes without work |
 
 Every value sits in one file. Four of them (`chunkChars`, `maxChunks`, `generateTimeoutMs` and `idleCloseMs`) can also be overwritten in extension storage. The README lists them as test settings.
@@ -146,11 +146,44 @@ The seven-part Wikipedia run made eight model calls: seven parts and one merge. 
 
 ![Pretend model: the popup while part 2 of 4 is being summarized, with the bar at one of four parts](../screenshots/ui-05-summarizing-parts.png)
 
-The offscreen manager also keeps the hidden page open while work is in progress. It counts the messages still waiting for an answer, and the five-minute idle countdown starts only when the last one finishes. Before this change, a quick status check could start the countdown while a load was still running.
+The offscreen manager also keeps the hidden page open while work is in progress. It counts the messages still waiting for an answer, and the five-minute idle countdown starts only when the last one finishes. Before this change, a quick status check could start the countdown while a load was still running. Every ten seconds while it works, the hidden page also sends a keep-alive message, and the worker uses it to refresh the record of every running job, so a long answer is not shown as dead.
 
-The code does not check whether an answer stopped because it hit `max_tokens`, so a cut-off answer would be shown as it is. The saved answers all end at a full sentence, but this is not tested. When an answer takes longer than 180 seconds, `offscreen.js` calls WebLLM's `interruptGenerate`, reports `TIMEOUT`, and throws away the parts already finished. The longest answer in the repository took about 76 seconds (the Intel short article), and no real run has reached the limit: [to be measured]. No automated test covers this path, because the pretend model has no timeout.
+The code does not check whether an answer stopped because it hit `max_tokens`, so a cut-off answer would be shown as it is. The saved answers all end at a full sentence, but this is not tested. When an answer takes longer than ten minutes, `offscreen.js` calls WebLLM's `interruptGenerate`, reports `TIMEOUT`, and throws away the parts already finished. The limit was 180 seconds until 24 October. The longest single answer in the repository took about 127 seconds (part 2 of the Wikipedia article on the Intel chip, in the run that later timed out at the old limit). No real run has reached the ten-minute limit: [to be measured]. No automated test covers this path, because the pretend model has no timeout.
 
-**What this means in plain words.** The model writes each part on its own, one answer at a time. Each answer has a length cap and a three-minute stop, and the hidden page stays open while it works.
+**What this means in plain words.** The model writes each part on its own, one answer at a time. Each answer has a length cap and a ten-minute stop, and the hidden page stays open while it works.
+
+## When a part does not fit the window
+
+Dense text (tables, numbers, references) uses more tokens per character than the 6,000-character limit assumes. When WebLLM refuses a prompt because it does not fit the 4,096-token window, the engine does not give up. `summarizeChunk` cuts the part in half at a paragraph or sentence break, using `chunkText`, and summarizes each half. The code is in `src/engines/local.js`:
+
+`src/engines/local.js`
+
+```js
+      const attempt = async (t, i, n, depth) => {
+        try {
+          return await once(t, i, n);
+        } catch (err) {
+          const tooLong = err instanceof AppError && err.code === ERROR_CODES.CONTEXT_TOO_LONG;
+          if (!tooLong || depth >= MAX_HALVING_DEPTH || t.length < MIN_HALVING_CHARS) throw err;
+          const halves = chunkText(t, Math.ceil(t.length / 2) + 100);
+          if (halves.length < 2) throw err;
+          engine.halvedParts += 1;
+          const pieces = [];
+          for (const half of halves) {
+            if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
+            // A page that was one part is now several: its pieces are summarized as parts and merged below.
+            pieces.push(await attempt(half, n === 1 ? pieces.length + 1 : i, n === 1 ? halves.length : n, depth + 1));
+          }
+          return n === 1 ? engine.mergeSummaries(pieces, { title }) : pieces.join('\n\n');
+        }
+      };
+```
+
+The halving stops after three levels (`MAX_HALVING_DEPTH` is 3), so one part can become up to eight pieces. Text under 600 characters (`MIN_HALVING_CHARS`) is not cut, and the error is passed on. A page that was a single part becomes two part answers and one merge request, as in the code above. A part inside a longer page is replaced by its pieces' answers, joined in order. Each cut adds one to `stats.halvedParts`, so a part cut twice counts twice. The stats line shows the pipeline's own request count, which covers one request per part and the merge. The extra requests made inside the engine are not in that count.
+
+No real run has needed the halving. The new-code Intel Wikipedia run recorded `halvedParts: 0`. The behaviour is covered by four unit tests and by scenario V25, which uses the pretend-model mode `longprompt`.
+
+**What this means in plain words.** A part the model cannot read in one piece is split in half and read in two. The reader sees the same kind of result, and the stats line does not show the extra work.
 
 ## From the answer to the screen
 
@@ -234,6 +267,16 @@ The clean run did not save its summary text. The summary shown in `v2-nvidia-wik
 
 **What this means in plain words.** Seven parts cost about a minute on the NVIDIA card. The time per part varies, and the long summary breaks the length rule.
 
+## Worked example 3: a long page on a slow chip
+
+The same seven-part Wikipedia article was run on the Intel chip, where the extension uses SmolLM2 and writes about 4 tokens a second. Three runs are saved. The first, with the 180-second limit and no halving, failed with `TIMEOUT` after 615.6 seconds: part 1 took 76 seconds, part 2 took 127 seconds, and part 6 had not answered 180 seconds after it started. A second try of the same code finished in 704.5 seconds, with part 6 at 121 seconds. Answer times on this chip vary a lot, which is why the limit is now ten minutes.
+
+The repeat with the new code (`v2-local-intel-wikipedia.md`) finished in 616.4 seconds. Its parts took 70.6, 68.4, 65.9, 75.1, 79.2, 121.5 and 68.6 seconds, and the merge took about 62.7 seconds. The timeline begins with the check and the load, then part 1 at 4.4 seconds and the merge at 553.7 seconds. The page text changes from day to day, so a part that overflows one day may fit the next. No part overflowed on that day.
+
+The summary of the old-code second try (`v2-local-intel-wikipedia-second-try-old-code.json`) contains invented facts: a 1901 gas light with a made-up substrate, a lighthouse dated 1611 that is named three times, and a 1939 Act. They are reported here as slips, not as facts. The summary of the new-code run (`v2-local-intel-wikipedia.json`) is shorter. It has three generic points: a history and significance point, a point giving a count of 14,700 lighthouses and navigation lights, and a point giving 54 diagrams and 651 photographs. Those counts were not checked against the page, and the article copy is not in the repository, so they cannot be confirmed.
+
+**What this means in plain words.** A long page on this chip takes about ten to twelve minutes. The summaries of this article are unreliable: the old code invented facts, and the new code gives generic points with counts nobody has checked.
+
 ## How good the summaries are
 
 Some points are right. In the clean offline run on the short article, the first six points match the article: the weak lamp, the aim of the light, the 1822 Fresnel lens, the thin glass rings, the lighter lens and the clockwork motor. The model keeps the facts and numbers of a short passage.
@@ -256,7 +299,7 @@ Several problems were found in review and fixed in the code. The DEVLOG rows dat
 
 ## Limitations
 
-These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
+These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. No real run has reached the ten-minute limit, and the halving has not run on a real page. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
 
 ### Questions this chapter answers
 
@@ -267,7 +310,7 @@ According to the code comment, small models follow short, plain instructions bes
 Two labels mark the page text, and the first line tells the model that the text is material, not instructions. The extension also removes the labels from answers. Neither step stops the model from following an instruction hidden in a page, and the merge prompt has neither label.
 
 **What happens to a page that is too long?**
-The page is cut into parts of up to 6,000 characters. If it needs more than 12 parts, the extension refuses it before any model is loaded, with a message that asks for a shorter page.
+The page is cut into parts of up to 6,000 characters. If it needs more than 12 parts, the extension refuses it before any model is loaded, with a message that asks for a shorter page. A part the model still cannot read is cut in half, up to three times.
 
 **Why does a merged summary sometimes repeat the prompt's own words?**
 The merge prompt contains the line "These are summaries of consecutive parts" and "Part 1:" labels. A small model can copy these words into its answer, and the answer is not stripped of them. This is not fixed.

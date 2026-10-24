@@ -916,14 +916,14 @@ registerFigure('V14_reuse_v1_v2', () => {
     ['ui/options.js', 'Version 1 key page script'],
   ];
   const CHANGED = [
-    ['background/service-worker.js', '85 · local engine, no Gemini'],
+    ['background/service-worker.js', '92 · local engine, no Gemini'],
     ['core/config.js', '83 · local models, no key'],
-    ['core/errors.js', '56 · model error codes'],
+    ['core/errors.js', '58 · model error codes'],
     ['core/pipeline.js', '6 · model prepared first'],
     ['core/prompts.js', '61 · shorter prompts'],
-    ['ui/popup.js', '172 · model line, no key box'],
-    ['ui/popup.html', '16 · model line, no key box'],
-    ['ui/ui.css', '38 · model line styles'],
+    ['ui/popup.js', '181 · model line, no key box'],
+    ['ui/popup.html', '17 · model line, no key box'],
+    ['ui/ui.css', '39 · model line styles'],
   ];
   const NEW = [
     ['background/offscreen-manager.js', 'hidden page, opened and closed'],

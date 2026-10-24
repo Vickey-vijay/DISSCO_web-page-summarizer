@@ -79,7 +79,7 @@ This walkthrough is the same for first use and later use. The download and warm-
 4. **The page is read.** `extractFromTab` in `src/background/extract-tab.js` places Readability and the page reader into the tab. Chrome's own pages and local files are refused with RESTRICTED_PAGE.
 5. **The text is checked and cut.** `runPipeline` in `src/core/pipeline.js` refuses text under 200 characters (TOO_LITTLE_TEXT). `chunkText` cuts the text into parts of at most 6,000 characters. A page that needs more than 12 parts is refused (TOO_LONG). Both refusals happen before any model step, so no download starts.
 6. **The model is prepared.** The pipeline calls `engine.prepare()`. The steps are the ones under "First use", or the shorter ones under "Later use".
-7. **Each part is summarized.** For a page of one part, the engine writes a summary of at most 320 tokens. For a longer page, each part gets a short summary of at most 300 tokens, and the popup shows "Summarizing part 3 of 7...".
+7. **Each part is summarized.** For a page of one part, the engine writes a summary of at most 320 tokens. For a longer page, each part gets a short summary of at most 300 tokens, and the popup shows "Summarizing part 3 of 7...". If WebLLM refuses a part because it does not fit the 4,096-token window, the part is cut in half at a paragraph or sentence break and each half is summarized, up to three levels deep. A page that was one part then becomes two parts and one merge request.
 8. **The parts are merged.** If there was more than one part, the summaries are joined with one more model call, the merge step, which writes at most 320 tokens. The popup shows "Combining 7 summaries...".
 9. **The job is marked done.** The service worker writes the summary, the title and the stats into the job record. The stats are the number of parts and requests, the model's name, the graphics card's vendor, the load time and the decode speed.
 10. **The popup shows the result.** `popup.js` redraws when the record changes. It formats the summary with `summary-format.js`, which builds the text with `textContent`, so the model's words are shown as text and never run as HTML. If the smaller model wrote the summary after the main one failed, a notice appears above the summary (described below). The line under the summary reads, for example, "7 parts · 8 requests · 101.2 s · Llama 3.2 1B".
@@ -99,7 +99,7 @@ Caption: pretend model, not the real one. The popup shows a summary with three n
 
 The model takes seconds to load, so it should not be lost when the service worker sleeps. Three rules do this.
 
-- **Keepalive.** While the offscreen page is working, it sends `KEEPALIVE` to the service worker every 10 seconds (`beginWork` in `offscreen.js`). The interval stops when the work ends.
+- **Keepalive.** While the offscreen page is working, it sends `KEEPALIVE` to the service worker every 10 seconds (`beginWork` in `offscreen.js`). The interval stops when the work ends. Each message also refreshes the update time of every running job record (the `KEEPALIVE` listener in `service-worker.js`), so one long answer is not shown as dead.
 - **In-flight count.** The manager counts the messages that have been sent and not answered (`inFlight`). The page is never closed while that count is above zero, so a quick status check cannot cut off a running load.
 - **Idle close.** When the last message finishes, the manager starts a five-minute countdown (`idleCloseMs`, 300,000 ms in `config.js`). If no work arrives in that time, the page closes and the model leaves the card's memory. The stored files stay in IndexedDB, so the next use loads the model again without a download.
 
@@ -130,6 +130,7 @@ Only three runs were done on a quiet laptop, and they are the basis for the timi
 | Wikipedia Lighthouse, stored | NVIDIA RTX 3050 | Llama 3.2 1B | 74.1 | 7 parts, 8 requests | 34 |
 | Short article, first use | Intel built-in | SmolLM2 360M | 199.2 | 1 part, 1 request | 4 |
 | Long article, stored | Intel built-in | SmolLM2 360M | 149.1 | 2 parts, 3 requests | 5 |
+| Wikipedia Lighthouse, current code | Intel built-in | SmolLM2 360M | 616.4 | 7 parts, 8 requests | 4 |
 
 The Lighthouse article is cut into seven parts of at most 6,000 characters. Its parts start at 3.2, 7.8, 17.0, 22.5, 30.1, 38.1 and 54.7 seconds, the merge starts at 60.2 seconds, and the total is 74.1 seconds.
 
@@ -139,11 +140,11 @@ Reading the figure: the article of 36,752 characters becomes seven parts, each a
 
 ## When something fails
 
-Every failure becomes a code, defined in `src/core/errors.js`, with a plain message for the popup. The technical detail goes to the console. Some failures stop before any model step (too little text, too long, restricted page). Others happen inside the model step. Figure V11 lists each code with its message, and chapter 03 gives the messages as the popup shows them.
+Every failure becomes a code, defined in `src/core/errors.js`, with a plain message for the popup. The technical detail goes to the console. For the two vague messages, SERVICE_ERROR and MODEL_LOAD_FAILED, the popup also shows a "Technical detail" line with the first 240 characters of the detail, so the message is not a dead end. Some failures stop before any model step (too little text, too long, restricted page). Others happen inside the model step. Figure V11 lists each code with its message, and chapter 03 gives the messages as the popup shows them.
 
 ![Error codes with what causes them and the exact message, coloured by what the extension does next](../figures/V11_error_flow.png)
 
-Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown to the user.
+Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown to the user. The figure predates two changes of 24 October: it has no CONTEXT_TOO_LONG row, and its TIMEOUT row says 3 minutes, while the limit is now 10 minutes.
 
 If Chrome stops the service worker in the middle of a job, the next worker start marks the old record as INTERRUPTED (`sweepOrphans`). A job counts as dead after five minutes without an update, in both the service worker and the popup. If the tab moves to another page, the old job is aborted and its later writes are dropped.
 
@@ -160,7 +161,19 @@ A code review found the faults below. Each one is fixed in the code, and the DEV
 Caption: pretend model, not the real one. The main model is set to run out of memory, so the small one answers. The popup shows the notice, the model line "Model: SmolLM2 360M. Downloaded, runs on this computer.", and the stats line. The 2.3 s is the fake's timing. The popup shows the notice only after a memory or load failure, not for the built-in graphics case, which has its own note.
 
 - **Idle close during a message.** The page could be closed while a load was still running. It is now closed only when no message is in flight.
-- **Stale limit.** A job was marked dead after three minutes, the same as the 180-second answer limit, so a slow answer could look interrupted while still running. The dead limit is now five minutes in the service worker and the popup. The answer timeout (`generateTimeoutMs`, 180 s) is unchanged.
+- **Stale limit.** A job was marked dead after three minutes, the same as the 180-second answer limit, so a slow answer could look interrupted while still running. The dead-job limit is now five minutes in the service worker and the popup. The answer limit was changed on 24 October (see the next section).
+
+## What changed after the real-Chrome failure (24 October 2026)
+
+The project owner ran the extension in the real Chrome on the developer's laptop, which has the Intel chip, so SmolLM2 was in use. On the Wikipedia "Lighthouse" page the popup said "Something went wrong inside the extension. Try again." with no reason. A hidden run of the same case failed with TIMEOUT: part 6 of 7 had not answered 180 seconds after it started. The DEVLOG row dated 2026-10-24 tells the story. The changes were these.
+
+- **Answer limit 10 minutes.** `generateTimeoutMs` is now 600,000 ms in `config.js`. On the Intel chip the parts of that article took 76 s, 127 s, and then more than 180 s. The TIMEOUT message is unchanged.
+- **Halving.** WebLLM refuses a prompt that does not fit its 4,096-token window with the text "Prompt tokens exceed context window size". That text is now mapped to a new code, CONTEXT_TOO_LONG (15 codes in all). `summarizeChunk` in `local.js` cuts the part in half and summarizes each half, up to three levels deep and never for text under 600 characters. `stats.halvedParts` counts the cut parts. In the saved real run with the current code no part overflowed, so halving did not trigger there. It is covered by four unit tests and browser scenario V25.
+- **Heartbeat.** KEEPALIVE now also refreshes the update time of every running job. A single answer longer than five minutes therefore does not show as interrupted.
+- **Technical detail.** For SERVICE_ERROR and MODEL_LOAD_FAILED the popup shows the first 240 characters of the technical detail, so the vague message says something. Scenario V27 checks it.
+- **Real-run script.** `scripts/local-run.mjs` now deletes the profile's Service Worker and Code Cache folders before launching. A persistent profile had kept an old service-worker script, so the new `halvedParts` stat was missing from one real run.
+
+Timings on the Intel chip for the Lighthouse article, with the model stored, were these. The first try with the old code failed at 615.6 s. A second try with the same old code, after the stale script was cleared, finished in 704.5 s. The run with the current code finished in 616.4 s, with part times of about 66 to 121 seconds. Answer times on this chip vary a lot. The old-code second try, which finished in 704.5 s, produced a summary with invented facts. Those facts are not repeated here and must not be quoted as facts. The summary of the current run is three short, generic points. Its counts (14,700 lighthouses, 54 diagrams and 651 photographs) were not checked against the page, so it is not a reliable summary either.
 
 ## What still holds (limits, not fixed)
 
@@ -169,6 +182,8 @@ Caption: pretend model, not the real one. The main model is set to run out of me
 - The model line is not refreshed while a download or warm-up is running.
 - Built-in graphics detection recognises Intel only.
 - The warm-up was about 30 s on first use and 0.5 s in the stored offline run, and the cause is not measured.
+- The TIMEOUT path has no automated scenario, because the pretend model has no timeout.
+- A long page on the Intel chip takes 10 to 12 minutes, and its summaries are not reliable. The old-code run invented facts, and the current run's counts were not checked.
 
 ## What this means in plain words
 

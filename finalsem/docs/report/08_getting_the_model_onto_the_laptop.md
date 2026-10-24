@@ -105,7 +105,7 @@ Table: The two clean offline runs, before and after the label fix (same laptop, 
 | Before the label fix (`v2-local-nvidia-offline.md`) | "Downloading ... 0%" at 3.9 s, about 0.8 s | 6,890 | 8.1 to 8.6 s | 15.3 s | about 6.7 s | 40 and 42 tokens a second | 16.5 s |
 | After the label fix (`v2-local-nvidia-offline-after-label-fix.md`) | None | 11,621 | 13.1 to 13.5 s | 17.7 s | about 4.2 s | 65 and 45 tokens a second | 16 s |
 
-The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length.
+The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length. Real-model runs made before 24 October used a stale service worker script, because the persistent test profile kept an old copy of it. The test script now deletes that copy before each run, and the downloaded model is not touched. Every real run cited in this chapter was made before that change.
 
 The Intel first use (SmolLM2, clean run) took 199.2 seconds: a download from 0.9 to 81.2 seconds for about 204 MB, a warm-up of about 39.4 seconds, and writing at 4 to 5 tokens a second. The NVIDIA first use run while other programs were using the processor took 207 seconds, with a warm-up of about 56 seconds. That run is labelled as disturbed in the test-run folder.
 
@@ -173,7 +173,7 @@ Most failures in this part end with a message and leave the stored model alone. 
 - A stored check that throws counts as "not stored", so a stored model may be offered again.
 - A size estimate that fails, or takes more than 8 seconds, shows "about several hundred MB".
 - A download that stops gives `MODEL_DOWNLOAD_FAILED`. It is not retried with the small model, and nothing is saved (browser test V12). The message says that what was already downloaded is kept. No real network break has tested that claim.
-- A load or warm-up that is silent for more than 5 minutes is shown as interrupted, even if it is still working. The load has no timeout of its own. The stale limit was 3 minutes before the fix, which was the same length as the 180-second answer timeout. It is now 5 minutes (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2).
+- A job with no update for 5 minutes is shown as interrupted. While the page is busy, its KEEPALIVE message refreshes the running job records every 10 seconds, so a long load or warm-up is not shown as interrupted while the page still works. The load has no timeout of its own. The answer limit is 10 minutes, longer than the 5-minute dead-job limit, which is why the refresh was needed. The dead-job limit was 3 minutes before the fix, when it matched the old 180-second answer limit (DEVLOG, 2026-10-21 and 2026-10-24).
 
 **What this means in plain words.** Most failures show a clear message and leave the stored model alone. The one remaining gap is a very long silent wait, which the popup reports as an interruption.
 
@@ -183,7 +183,7 @@ Chapter 15 tells the stories behind this part: the model cache that refused to o
 
 ## How it was tested
 
-The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 70 tests, and the browser suite has 26. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
+The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 76 tests, and the browser suite has 29. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
 
 ## Limitations
 

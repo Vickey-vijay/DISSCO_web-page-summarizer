@@ -39,7 +39,7 @@ The client works in one folder, `finalsem\project`. The two batch files and `man
 
 ![Folder tree of finalsem with one-line notes](../figures/V13_repo_tree.png)
 
-Reading the figure: the tree lists the folders of `finalsem/`. Its `project` folder holds `manifest.json`, the two batch files, the `src` folder with the extension's parts (background, content, core, engines, lib, offscreen and ui), the `tests` folder, and the `scripts` folder for the computer check, the Chrome graphics setting and the real-model run. The `docs` folder holds the decision record, the figures, the screenshots and the test runs.
+Reading the figure: the tree lists the folders of `finalsem/`. Its `project` folder holds `manifest.json`, the two batch files, the `src` folder with the extension's parts (background, content, core, engines, lib, offscreen and ui), the `tests` folder, and the `scripts` folder for the computer check, the Chrome graphics setting and the real-model run. The `docs` folder holds the decision record, the figures, the screenshots and the test runs. The real-model script in `scripts` also deletes a browser profile's old service worker folders before each launch, which chapter 14 explains; the downloaded model is kept in IndexedDB and is not touched.
 
 ### What this means in plain words
 

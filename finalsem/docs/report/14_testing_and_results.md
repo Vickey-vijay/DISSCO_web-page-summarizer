@@ -10,12 +10,12 @@ Table: The four test layers
 
 | Layer | Files | Count | What it shows |
 |---|---|---|---|
-| Unit tests | `tests/unit` (six files) | 70 | Each piece of logic, with fakes. No browser, no network |
-| Browser tests | `tests/e2e` (smoke test, V01 to V24 and V18b) | 26 | The whole chain in hidden Chromium, with the pretend model |
+| Unit tests | `tests/unit` (six files) | 76 | Each piece of logic, with fakes. No browser, no network |
+| Browser tests | `tests/e2e` (smoke test, V01 to V27 and V18b) | 29 | The whole chain in hidden Chromium, with the pretend model |
 | Windows script checks | `tests/bat` | 15 (B1 to B10c) | `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key |
-| Real-model runs | `scripts/local-run.mjs` | Three modes | The real model's speed and output on the developer's laptop |
+| Real-model runs | `scripts/local-run.mjs` | Five plans | The real model's speed and output on the developer's laptop |
 
-The layers answer different questions. Only the real-model runs show how fast the real model is and how its answers read. The commands are `npm test`, `npm run test:e2e`, the Windows check script, and `node scripts/local-run.mjs` with a mode name.
+The layers answer different questions. Only the real-model runs show how fast the real model is and how its answers read. The commands are `npm test`, `npm run test:e2e`, the Windows check script, and `node scripts/local-run.mjs` with a plan name.
 
 ### What this means in plain words
 
@@ -30,15 +30,15 @@ Table: The six unit test files
 | `chunker.test.js` | 10 | Cutting text into parts. Identical to Version 1 |
 | `merger.test.js` | 8 | Joining part summaries, in levels when there are many. Identical to Version 1 |
 | `pipeline.test.js` | 7 | The job flow for short and long pages, and early refusals. Identical to Version 1 |
-| `local-engine.test.js` | 20 | The engine's calls to the fake offscreen page, retries, the idle close and countdown, and removal of copied markers |
-| `gpu-and-errors.test.js` | 11 | Graphics checks, model choice, progress labels, error codes, and the word "room" |
+| `local-engine.test.js` | 25 | The engine's calls to the fake offscreen page, retries, the cut-in-half retry, the idle close and countdown, and removal of copied markers |
+| `gpu-and-errors.test.js` | 12 | Graphics checks, model choice, progress labels, error codes (including the context-window code), and the word "room" |
 | `small.test.js` | 14 | Formatting, settings, plain error messages, prompts and URL checks |
 
 Two files are new in Version 2, one was changed, and three are identical to Version 1.
 
 ### What this means in plain words
 
-The 70 tests check each piece of logic with fake parts. They need no browser and no internet.
+The 76 tests check each piece of logic with fake parts. They need no browser and no internet.
 
 ## Browser tests and the pretend model
 
@@ -54,9 +54,9 @@ A worked example shows the level of detail. Scenario V01 checks that the downloa
   }
 ```
 
-The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026. All 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. The current suite has the same 26 scenarios, and all of them pass.
+The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026. All 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. The suite now has 29 scenarios. V25 to V27 were added on 24 October, and the three of them passed when run on their own that day. The change list reports all 29 passing in the current suite.
 
-Table: The 26 browser scenarios, what each checks, and the result
+Table: The 29 browser scenarios, what each checks, and the result
 
 | ID | What is checked | Result |
 |---|---|---|
@@ -86,8 +86,11 @@ Table: The 26 browser scenarios, what each checks, and the result
 | V22 | A tab closed mid-job leaves no record behind | Pass (fault found in run 1, fixed) |
 | V23 | The offscreen page closes after the idle time, and the next summary works | Pass |
 | V24 | A normal summary opens only the popup window | Pass |
+| V25 | A part that does not fit the model window is cut in half, and the page is still summarized | Pass (added 24 October) |
+| V26 | A long answer keeps the job alive: the record is refreshed while the model works | Pass (added 24 October) |
+| V27 | An unexpected failure shows the technical detail under the vague message | Pass (added 24 October) |
 
-Run 1 also found three faults in the test setup itself. Chapter 15 tells those stories with the two extension faults.
+Run 1 also found three faults in the test setup itself. Chapter 15 tells those stories with the extension faults.
 
 ### What this means in plain words
 
@@ -95,21 +98,27 @@ The browser tests press the real buttons, but on a fake model. They show that th
 
 ## Real-model runs
 
-The script `scripts/local-run.mjs` measures the real model in hidden Chromium. It has three modes. Each mode keeps its own browser profile folder, so the downloaded model is kept between runs.
+The script `scripts/local-run.mjs` measures the real model in hidden Chromium. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
 
-Table: The three real-model modes
+Table: The real-model plans
 
-| Mode | Flags and outside websites | Profile folder | Cases |
+| Plan | Flags and outside websites | Profile folder | Cases |
 |---|---|---|---|
 | `nvidia` | `--force_high_performance_gpu`; outside websites allowed | `.model-profile` | Short article, long article, Wikipedia "Lighthouse" (live) |
 | `nvidia-offline` | The same flag and a host rule that blocks outside addresses; cache only | `.model-profile`, the same as `nvidia` | Short article, long article |
 | `intel` | No flags; outside websites allowed | `.model-profile-intel` | Short article, long article |
+| `intel-wikipedia` | No flags; outside websites allowed | `.model-profile-intel` | Wikipedia "Lighthouse" (live) |
+| `intel-short` | No flags; outside websites allowed | `.model-profile-intel` | Short article |
 
-Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and three screenshots. It writes a JSON file and a Markdown table. The clean records are `v2-local-nvidia-cold-first-attempt.md`, `v2-local-nvidia-offline.md` (made before the label fix), `v2-local-nvidia-offline-after-label-fix.md` and `v2-local-intel.md`. The records made under load are `v2-local-nvidia.md`, `v2-local-nvidia-cold-second-attempt-with-load.md` and `v2-local-nvidia-offline-first-attempt-with-load.md`. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting.
+Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and three screenshots. It writes a JSON file and a Markdown table. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting.
+
+The clean records are `v2-local-nvidia-cold-first-attempt.md`, `v2-local-nvidia-offline.md` (made before the label fix), `v2-local-nvidia-offline-after-label-fix.md` and `v2-local-intel.md`. The records made under load are `v2-local-nvidia.md`, `v2-local-nvidia-cold-second-attempt-with-load.md` and `v2-local-nvidia-offline-first-attempt-with-load.md`. The three Intel Wikipedia records of 24 October are shown in the Intel table below.
+
+**A stale service worker.** A persistent browser profile keeps the extension's service worker script from its first use. On 24 October a real run lacked the new `halvedParts` statistic, which showed that the profile was running old code. The failing run was made with the code from before the changes. The second try also ran the old code, because the profile still held the old script. The run script now deletes the profile's `Service Worker` and `Code Cache` folders before each launch. The downloaded model is kept in IndexedDB, so it is not affected. Real-model runs made before 24 October ran the service-worker code as it was when each profile was first used. Changes made later to service-worker-side code, such as the marker removal, the idle close and the five-minute limit, were covered by unit and browser tests, but no real-model run exercised them until the Intel Wikipedia run.
 
 ### What this means in plain words
 
-Each real-model run leaves a timeline, the statistics and a screenshot, so every number can be traced back to a record.
+Each real-model run leaves a timeline, the statistics and a screenshot, so every number can be traced back to a record. A profile can keep old code, so a run is only as current as the folders it starts from.
 
 ## First use on the NVIDIA chip, clean run
 
@@ -184,31 +193,36 @@ The runs under load are slower in several steps. The records do not prove what c
 
 ## Intel chip
 
-The `intel` mode does not force the separate card. The extension chose the small model, SmolLM2 360M, by itself, because the chip is built into the processor. The clean run is in `v2-local-intel.md` and `v2-local-intel.json`. It was made before the fix that removes copied markers, and it has not been repeated since.
+The `intel` plan does not force the separate card. The extension chose the small model, SmolLM2 360M, by itself, because the chip is built into the processor. The clean short and long runs were made before the marker fix, and they have not been repeated on the short article. Three Wikipedia runs were added on 24 October, after a real Chrome run on the same article failed (chapter 15 tells that story). They are shown in the same table.
 
-Table: Clean run on the Intel chip, with the small model
+Table: Intel chip, clean short and long runs, and three runs on the Wikipedia article (7 parts)
 
-| Measure | Short article | Long article (2 parts) |
-|---|---|---|
-| Total time | 199.2 s | 149.1 s (popup 148.7 s) |
-| Download, about 204 MB | 0.9 to 81.2 s | Already stored |
-| Warm-up | 83.7 to 123.1 s (about 39 s) | Already stored |
-| Writing the answer | 123.1 to 199.0 s (about 76 s) | Parts start at 0.9 s and 65.7 s; merge from 122.6 s |
-| Writing speed | 4 tokens a second | 5 tokens a second |
+| Measure | Short article (clean) | Long article, 2 parts (clean) | Wikipedia, old code, failed | Wikipedia, old code, second try | Wikipedia, code as it is now |
+|---|---|---|---|---|---|
+| Record | `v2-local-intel.md` | `v2-local-intel.md` | `v2-local-intel-wikipedia-before-fix.md` | `v2-local-intel-wikipedia-second-try-old-code.md` | `v2-local-intel-wikipedia.md` |
+| Outcome | Summary | Summary | TIMEOUT | Summary | Summary |
+| Total time | 199.2 s | 149.1 s (popup 148.7 s) | 615.6 s | 704.5 s | 616.4 s |
+| Model at start | First use: download 0.9 to 81.2 s | Stored | Stored | Stored | Stored |
+| Warm-up | 83.7 to 123.1 s (about 39 s) | Stored | Started at 6.2 s | Started at 4 s | Started at 3.1 s |
+| Parts (seconds each) | Writing the answer 123.1 to 199.0 s (about 76 s) | Parts start at 0.9 s and 65.7 s; merge from 122.6 s | 76, 127, 66, 50 and 77 s. Part 6 started at 435.8 s and had not answered 180 s later | 75, 124, 73, 56, 90, 121 and 60 s; merge 100 s | 70.6, 68.4, 65.9, 75.1, 79.2, 121.5 and 68.6 s; merge about 62.7 s |
+| Writing speed | 4 tokens a second | 5 tokens a second | Not recorded | 4 tokens a second | 4.1 tokens a second |
+| Notes | Before the marker fix | Before the marker fix | Old code: 180 s answer limit, no halving | Same old code and profile, which still held the old service worker script | 10-minute answer limit, halving and heartbeat. No part overflowed the window (`halvedParts` is 0). The saved summary has no markers |
+
+The same old code timed out once and succeeded on the second try, after 704.5 s. Answer times on this chip vary a lot, which is why the answer limit was raised from 180 seconds to 10 minutes. On this chip, the 7-part Lighthouse summary takes about 10 to 12 minutes, which is 616.4 s with the code as it is now and 704.5 s with the old code. Whether a part overflows the model's window depends on the page text, which changes from day to day, and no part overflowed on the day of the new run. The halving step is therefore covered by unit tests and by scenario V25, not by a real run.
 
 ![Popup for the short article on the Intel chip, recorded before the marker fix](../screenshots/v2-intel-short-popup.png)
 
-Real-model screenshot, Intel chip, short article, first use, recorded before the marker fix. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the copied marker `<<<PAGE TEXT START>>>`, which the later fix removes from answers.
+Real-model screenshot, Intel chip, short article, first use, recorded before the marker fix. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the copied marker `<<<PAGE TEXT START>>>`, which the later code removes from answers.
 
 ### What this means in plain words
 
-On the built-in chip, a short summary takes a little over three minutes on first use, and writing the answer alone takes about 76 seconds. The smaller model works, but it is slow.
+On the built-in chip, a short summary takes a little over three minutes on first use, and writing the answer alone takes about 76 seconds. A long page takes 10 to 12 minutes. The smaller model works, but it is slow.
 
 ## What the saved summaries show
 
-The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more. Only the Intel short summary contains the copied markers. It ends with the end marker too.
+The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more, and the Intel Wikipedia runs add two more. Only the short Intel summary of the original set contains the copied markers.
 
-Five of the seven summaries that use bullets have more than six bullet lines, counting nested lines. They are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9, of which six are at the top level). The Wikipedia article is live, so its facts cannot be checked here.
+Five of the seven summaries that use bullets, across the original and after-fix runs, have more than six bullet lines, counting nested lines. They are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9, of which six are at the top level). The Wikipedia article is live, so its facts cannot be checked here.
 
 The clearest factual slip is in the under-load long article. The fixture says the Pharos lighthouse "was built in the third century BC", but the summary said "around 3000 BC". The same summary repeats the merge prompt's labels. Its opening lines, as saved, are:
 
@@ -226,11 +240,13 @@ The after-fix long summary shows a milder copy. Its first bullet repeats the "Pa
 
 Real-model screenshot, offline long article, clean run after the label fix. The first numbered point is "Page title provides a brief overview of the content within." The stats line reads 15.7 s, and the popup's summary box scrolls, so the list continues below the visible part.
 
-Each record is a single run. The table above shows what happened in those runs, not how often it happens.
+The two Intel Wikipedia summaries differ. The old-code second try contains invented facts, several dates and names, and the record's note points to one of them. That summary must not be quoted as fact. The new-code summary is three short generic points, a list of 14,700 lighthouses, 54 diagrams and 651 photographs, and the counts were not checked against the page. Its saved text repeats the three points once more.
+
+Each record is a single run. The tables above show what happened in those runs, not how often it happens.
 
 ### What this means in plain words
 
-The model follows the shape of the prompt, but it can copy the prompt's labels, give a wrong date, or add bullets that say nothing. The marker fix removed one kind of copying. A reader still has to check the facts against the page.
+The model follows the shape of the prompt, but it can copy the prompt's labels, give a wrong date, invent facts, or write generic points. The marker removal stopped one kind of copying. A reader still has to check the facts against the page.
 
 ## Speed
 
@@ -238,7 +254,7 @@ The speeds below are measured in tokens a second, which is the decode speed of e
 
 - Clean NVIDIA runs with the 1 billion parameter model: 34 to 53 tokens a second.
 - Offline after the label fix: 65 for the short article (one request) and 45 for the two-part article. These are single measurements.
-- Intel with SmolLM2 360M, clean run: 4 to 5 tokens a second.
+- Intel with SmolLM2 360M, clean run: 4 to 5 tokens a second. Intel Wikipedia runs with the same model: 4 to 4.1 tokens a second.
 - Intel with the 1 billion parameter model: about 2 tokens a second, from an earlier speed test recorded in the development log. No run file holds it.
 - NVIDIA with the 1 billion parameter model: about 63 tokens a second writing and about 600 reading the prompt, from an earlier speed test recorded in the development log. No run file holds these, and the log does not say which text was used.
 - Download sizes in the real runs, from the popup: about 695 MB for the main model and about 204 MB for SmolLM2. The pretend model's 664 MB and 300 MB are fixed numbers, not measurements.
@@ -251,7 +267,7 @@ Reading the figure: the NVIDIA bars come from the clean runs with the large mode
 
 ### What this means in plain words
 
-The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the smaller model, and even then a short summary takes minutes.
+The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the smaller model, and even then a short summary takes minutes and a long page takes about ten to twelve.
 
 ## What these tests do not show
 
@@ -261,11 +277,12 @@ From run 1, the browser tests do not show:
 - real download speed, graphics-card behaviour or shader warm-up, which only the real-model records cover;
 - the visible Chrome the client will use, because every test ran in hidden Chromium.
 
-From the README, these items are not yet verified:
+From the README and the change list, these items are not yet verified:
 
 - the client's laptop, whose details have not been received;
 - `setup.bat --gpu` against a real Chrome installation;
 - a manual click-through in the visible Chrome, using the V2 checklist;
+- a real answer timeout, because no automated test triggers the TIMEOUT path;
 - languages other than English, because the model is small and is meant for English text.
 
 The real-model records cover two fixture articles and one live Wikipedia page. No formal rating of summary quality exists in the repository, so this report does not call any summary good or poor.

@@ -28,7 +28,7 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **The trade-off.** The offscreen page is one more part to start, message and close. It keeps the model in graphics memory until the five-minute idle countdown ends.
 
-**Revised after review.** The page is never closed while a message is running. The manager counts messages in flight, and the countdown starts only when the last one finishes.
+**Revised after review.** The page is never closed while a message is running. The manager counts messages in flight, and the countdown starts only when the last one finishes. On 24 October the 10-second keepalive was also made to refresh the running job records, so one long answer is not shown as dead.
 
 **What you can say.** "The model runs in a hidden page because Chrome can stop the background worker when it is idle, and the page keeps the model ready. It is only closed when no work is running."
 
@@ -64,11 +64,13 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **Why.** The model's window is 4,096 tokens, so the part must leave room for the prompt and the answer. A short prompt suits a small model. A low temperature keeps the answer close to the text.
 
-**What else was considered.** Halving the part and trying again if the model reports a window error. The record lists this as part of the plan, and it was not built, because no run hit a window error and the 12-part limit refuses long pages first.
+**What else was considered.** Halving the part and trying again if the model reports a window error. The record listed this as part of the plan. It was not built at first, because no run had hit a window error. It was built on 24 October, after the real-Chrome failure (see below).
 
 **The trade-off.** The part size was chosen by reasoning and tested for the path, not tuned for quality. The repository does not show that 6,000 characters gives better summaries than another size.
 
 **Revised after review.** A small model sometimes copied the start marker into its answer, as the saved Intel summary shows. `stripPageMarkers` now removes the markers from every answer. The saved output and its screenshot were recorded before this fix, so they still show the marker. The repeated opening sentence in the 1B model's merged answer is not fixed. It is listed as a limit.
+
+**Revised on 24 October.** Halving is built. When WebLLM refuses a part with CONTEXT_TOO_LONG, the part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep and never for text under 600 characters. The real Wikipedia article showed why: dense text (tables, numbers, references) uses more tokens per character than the 6,000-character limit assumes. The saved real run with the current code did not trigger halving, because no part overflowed the window that day. Page text on Wikipedia changes, so a part that overflows one day may fit the next. The mechanism is covered by four unit tests and scenario V25.
 
 **What you can say.** "Each part is about 1,500 tokens, so the page and the answer fit the model's 4,096-token window. The page markers are removed from the answer, and pages longer than 12 parts are refused."
 
@@ -92,7 +94,7 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **What else was considered.** Refusing to run on integrated graphics. The record chose a note and a slower answer, because a slow answer is more useful than a refusal.
 
-**The trade-off.** Summaries on the Intel chip take minutes, not seconds. The saved runs took 199.2 s for a short article on first use and 149.1 s for a two-part article. The small model's summaries are weaker than the 1B model's, and no quality test was made.
+**The trade-off.** Summaries on the Intel chip take minutes, not seconds. The saved runs took 199.2 s for a short article on first use and 149.1 s for a two-part article. The small model's summaries are weaker than the 1B model's, and no quality test was made. The Wikipedia article took 616.4 s, about 10 minutes, with the current code, and the summaries from it are not reliable. That is why the answer limit went from 180 seconds to 10 minutes on 24 October, and why the Intel demo uses the short article.
 
 **What you can say.** "On the built-in graphics the extension switches to the small model by itself, because the big one was too slow there to be useful. It says so on screen."
 
@@ -142,7 +144,7 @@ Where a number appears, it comes from `DECISIONS.md`, from `DEVLOG.md`, from the
 
 **What else was considered.** Building the full extension first and testing later. The record does not say why it was rejected.
 
-**The trade-off.** The spike was a second piece of work. The answer to the question was given at medium confidence, and the record lists what would have changed it.
+**The trade-off.** The spike was a second piece of work. The answer to the question was given at medium confidence, and the record lists what would have changed it. The spike did not test a long, dense page on the slowest chip. The first real-Chrome run on that case, on 24 October, found the gap, and the halving advice that had been set aside as unlikely became the fix.
 
 **What you can say.** "The biggest risk was tested first with a throw-away extension, and it found the two problems that shaped the design."
 

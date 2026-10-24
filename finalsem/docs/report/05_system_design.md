@@ -10,7 +10,7 @@ Table: The layers of Version 2, what each owns, and what it talks to
 
 | Layer | Files | Owns | Talks to |
 |---|---|---|---|
-| Popup | `src/ui/popup.html`, `popup.js` | The button, model line, progress bar, notice and summary | Service worker, by message; reads the job record |
+| Popup | `src/ui/popup.html`, `popup.js` | The button, model line, progress bar, notice, technical-detail line and summary | Service worker, by message; reads the job record |
 | Service worker | `src/background/service-worker.js` | The job: id, phases, record, stop and cancel | Popup, offscreen manager, pipeline, Chrome tabs |
 | Offscreen manager | `src/background/offscreen-manager.js` | Opening and closing the hidden page, its idle timer, a count of messages in flight | Chrome's offscreen API, the offscreen page |
 | Offscreen page | `src/offscreen/offscreen.js` | The loaded model, the download, the warm-up, one answer at a time | Service worker, by message; the web worker |
@@ -52,7 +52,7 @@ function writeJob(tabId, jobId, patch) {
 }
 ```
 
-The popup sends one `START_SUMMARY` message and gets `{ok: true}` back at once. The job then runs in the service worker, so closing the popup changes nothing. Reopening it shows the same job (scenario V15), and a finished job is shown without a new run (scenario V16). A running job with no update for five minutes (`STALE_MS`, the same in the popup) is shown as interrupted; Version 1 used three minutes. The 180-second limit on one answer is unchanged. A new service worker marks a job left "running" as INTERRUPTED (scenario V20), and a closed tab has its job aborted (scenario V22).
+The popup sends one `START_SUMMARY` message and gets `{ok: true}` back at once. The job then runs in the service worker, so closing the popup changes nothing. Reopening it shows the same job (scenario V15), and a finished job is shown without a new run (scenario V16). The offscreen page's KEEPALIVE message, sent every 10 seconds while it works, also refreshes the update time of every running job (scenario V26), so one answer that runs past five minutes does not look dead. A running job with no update for five minutes (`STALE_MS`, the same in the popup) is shown as interrupted; Version 1 used three minutes. One answer may now take up to 10 minutes (`generateTimeoutMs`, previously 180 seconds). A new service worker marks a job left "running" as INTERRUPTED (scenario V20), and a closed tab has its job aborted (scenario V22).
 
 ![Job phases in order: extracting, checking, downloading, loading, warming up, summarizing, merging, done or error](../figures/V06_job_phases.png)
 
@@ -62,7 +62,7 @@ Reading the figure: The figure lists the phases the popup shows, in order. The D
 
 ## The offscreen page and the keepalive
 
-The model takes seconds to load, and a stopped service worker would lose it. The model therefore lives in an offscreen page, which has only the `chrome.runtime` API, so the service worker asks and the page answers by message. While work runs, the page sends `KEEPALIVE` every 10 seconds. The service worker's comment says receiving it keeps the worker awake. The design does not rely on that alone, because a stopped worker still leads to the INTERRUPTED path.
+The model takes seconds to load, and a stopped service worker would lose it. The model therefore lives in an offscreen page, which has only the `chrome.runtime` API, so the service worker asks and the page answers by message. While work runs, the page sends `KEEPALIVE` every 10 seconds. The service worker's comment says receiving it keeps the worker awake, and the same message refreshes the update time of each running job, so the popup does not treat a long answer as dead. The design does not rely on that alone, because a stopped worker still leads to the INTERRUPTED path.
 
 `finalsem/project/src/background/offscreen-manager.js`, lines 62 to 76
 
@@ -104,7 +104,7 @@ Reading the figure: The figure shows first use with the download (158.3 s), the 
 2. **Pressing the button (0 s).** The service worker writes the job record and replies at once.
 3. **Reading the page (0.1 s).** `extractFromTab` refuses browser pages Chrome does not allow, then injects Readability and the extractor.
 4. **Checking the card (under a second).** The pipeline calls `engine.prepare`.
-5. **Downloading (0.5 s to 158.8 s).** WebLLM runs in a web worker with its cache in IndexedDB. Progress arrives as `MODEL_PROGRESS` messages.
+5. **Downloading (0.5 s to 158.8 s).** WebLLM runs in a web worker with its cache in IndexedDB. Progress arrives as `MODEL_PROGRESS` messages, and the keepalive refreshes the running job's record every 10 seconds.
 6. **Loading into the card (158.8 s to 162.6 s).**
 7. **Warming up (162.6 s to 193.1 s).** One request of one token ("Say ok.") makes the card compile its programs.
 8. **Summarizing (193.1 s to 196.8 s).** One part and one request.
@@ -127,7 +127,7 @@ A later use has the same screens with the long steps removed. The reference is t
 2. **Pressing the button (0 s).** The page is read in 0.1 s, and the card is checked at 0.6 s.
 3. **Loading from the cache (1.9 s to 12.7 s).** The load took 11.6 s in this run, against 6.9 s in the earlier offline run, so the time varies.
 4. **Warming up (13.1 s to 13.5 s).** Under half a second, against about 30 s on first use. The reason is not measured.
-5. **Summarizing.** The short article took 17.7 s in all, and the two-part article 16 s.
+5. **Summarizing.** The short article took 17.7 s in all, and the two-part article 16 s. While each answer runs, the keepalive keeps the job record fresh.
 
 ![Real model, offline run after the label fix: warm-up on a stored model, with no Downloading line](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
 
@@ -163,17 +163,17 @@ The model cache sits in the client's Chrome profile, not in the project folder. 
 The comparison used `diff -rq` on `midsem/project/src` and `finalsem/project/src`, then a line-by-line diff of each changed file. Version 1's source folder holds 19 files and Version 2's holds 26.
 
 - **Unchanged, byte for byte (8 files):** `background/extract-tab.js`, `content/extract.js`, `core/chunker.js`, `core/merger.js`, `core/url.js`, `ui/summary-format.js`, `lib/readability.js` and `lib/READABILITY_LICENSE.md`.
-- **Changed (8 files), with diff lines (old and new together):** `background/service-worker.js` 85, `core/config.js` 83, `core/errors.js` 56, `core/pipeline.js` 6 (all added), `core/prompts.js` 61, `ui/popup.html` 16, `ui/popup.js` 172, `ui/ui.css` 38 (key-box and options rules removed, six lines added).
+- **Changed (8 files), with diff lines (old and new together):** `background/service-worker.js` 92, `core/config.js` 83, `core/errors.js` 58, `core/pipeline.js` 6 (all added), `core/prompts.js` 61, `ui/popup.html` 17, `ui/popup.js` 181, `ui/ui.css` 39 (key-box and options rules removed, seven lines added).
 - **Removed (3 files):** `engines/gemini.js`, `ui/options.html`, `ui/options.js`.
 - **New (10 files):** `background/offscreen-manager.js`, `core/engine-errors.js`, `core/gpu-check.js`, `engines/local.js`, `lib/web-llm.js`, `lib/WEBLLM_LICENSE`, and four files in `offscreen/`.
 
 The counts agree: 8 unchanged, 8 changed and 3 removed make the 19 Version 1 files, and 8 unchanged, 8 changed and 10 new make the 26 Version 2 files. The diff line counts show the size of each change, not how many edits were made.
 
-In the changed files, the largest changes are these. Service worker: the job logic is Version 1's, the Gemini engine is replaced by `makeEngine`, and the progress listener, the model-state message and the fallback save are added. Config: the part size goes from 8,000 to 6,000 characters and the part limit from 30 to 12. Errors: the five key, rate and network codes go, and the model codes come in.
+In the changed files, the largest changes are these. Service worker: the job logic is Version 1's, the Gemini engine is replaced by `makeEngine`, and the progress listener, the model-state message and the fallback save are added. On 24 October the keepalive message was also made to refresh running jobs. Config: the part size goes from 8,000 to 6,000 characters and the part limit from 30 to 12. Errors: the five key, rate and network codes go, the model codes come in, and CONTEXT_TOO_LONG was added on 24 October, making 15 codes. The files `local.js`, `engine-errors.js` and `mock-engine.js` also changed on 24 October. They are new in Version 2, so they sit outside the Version 1 comparison.
 
 ![Reuse from Version 1 to Version 2: unchanged, changed and new files](../figures/V14_reuse_v1_v2.png)
 
-Reading the figure: The figure sorts the files into the groups above. Its line counts do not match a fresh diff of the current code (for example, `ui/ui.css` shows 5 where the fresh diff gives 38), so this chapter uses the fresh counts. The groups match.
+Reading the figure: The figure sorts the files into the groups above. Its line counts are the changed lines of a diff against Version 1 (for example, `ui/ui.css` 39 and `ui/popup.js` 181). The groups match the lists above.
 
 **What this means in plain words.** Eight of the 19 Version 1 files carry over unchanged. They are the part of the product that reads and summarizes text, while the engine, the key and the messages differ.
 
@@ -193,7 +193,9 @@ The pipeline runs the whole job through one engine object. Its contract, in the 
 
 `prepare` in `local.js` checks the card and loads the model. If the load fails for lack of graphics memory or a start failure, it retries once with the small model and saves that choice, so later jobs also start with the small model.
 
-`finalsem/project/src/engines/local.js`, lines 70 to 89
+`summarizeChunk` in `local.js` handles a part that WebLLM refuses for length. The part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep and not for text under 600 characters. A page that was one part becomes two parts and one merge request, and the job counts the cut parts in `stats.halvedParts`.
+
+`finalsem/project/src/engines/local.js`, lines 76 to 95
 
 ```
     /** Checks the graphics card, downloads the model if needed, and loads it. Throws AppError. */
@@ -249,8 +251,10 @@ Table: How a failure reaches the reader (selected codes)
 | MODEL_DOWNLOAD_FAILED | `classifyEngineError`, when the message mentions the network | A message; nothing is saved, and a later press works | Scenario V12 |
 | TOO_LONG | `runPipeline`, above 12 parts | Refused before any download | Scenario V06 |
 | EMPTY_ANSWER | `generate` in `local.js` | A message saying no summary was returned | Scenario V13 |
-| TIMEOUT | Timer in the offscreen page, 180 s | A message | Unit test of the code only; no automated test runs the timer |
+| TIMEOUT | Timer in the offscreen page, 10 minutes | A message | Unit test of the code only; no automated test runs the timer |
 | INTERRUPTED | `sweepOrphans` after a worker restart, or no update for five minutes | A message, and the popup says so | Scenario V20 |
+| CONTEXT_TOO_LONG | `classifyEngineError` (WebLLM's window message); `summarizeChunk` cuts the part in half | Two halves are summarized and merged. The message appears only if halving also fails | Unit tests; scenario V25 |
+| SERVICE_ERROR, MODEL_LOAD_FAILED | Any unexpected error, or a load that will not start | The message, with "Technical detail:" and the first 240 characters of the detail under it | Scenario V27 |
 
 ![Pretend model screenshot: the result after the main model ran out of memory, with the notice that the smaller model wrote the summary](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
@@ -258,7 +262,7 @@ This is a pretend-model picture. The notice reads "The main model did not fit in
 
 ![How the errors flow from the code to the popup](../figures/V11_error_flow.png)
 
-Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. TIMEOUT is drawn as no answer within 3 minutes, which matches the 180-second limit.
+Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. The figure predates the 24 October changes: it has no CONTEXT_TOO_LONG row, and its TIMEOUT row says 3 minutes, while the answer limit is now 10 minutes.
 
 **What this means in plain words.** Each failure has one name in the code and one message on the screen. The gap is the timeout, which has a message but no automated test.
 

@@ -14,7 +14,7 @@ Table: The parts of the popup
 | Model line | Always | The model name, whether it is stored, and its size, or a blocking message |
 | Graphics note | Only on integrated graphics | The note about the built-in Intel chip |
 | Progress block | While a job runs | A label and a thin bar |
-| Error block | After a failure, or for an interrupted job | The plain message for the error code |
+| Error block | After a failure, or for an interrupted job | The plain message for the error code, and for two vague codes a technical detail line |
 | Result block | After a finished job | A notice when the small model wrote the summary, then the summary and a stats line |
 
 **What this means in plain words.** The reader sees one button and one line about the model. Below them appears whichever of progress, error or result applies now.
@@ -126,7 +126,9 @@ The vendor name is capitalized because WebGPU reports it in lower case. A browse
 
 ### Errors and the blocked state
 
-Errors appear in the error block below the progress area. For a computer without WebGPU or without 16-bit shader support, the message appears in the model line and the button is disabled. Each error has its own screenshot in the chapter on errors and fallbacks.
+Errors appear in the error block below the progress area. For a computer without WebGPU or without 16-bit shader support, the message appears in the model line and the button is disabled. Most errors have a screenshot in the chapter on errors and fallbacks.
+
+For the two vague codes, SERVICE_ERROR and MODEL_LOAD_FAILED, the error block adds a line under the message: "Technical detail:" followed by the first 240 characters of the error detail. The element is `#error-detail`, and the `.detail` rule in `ui.css` sets it as small grey monospace text. Before 24 October the popup showed only the message, so the owner's real Chrome run of the Wikipedia page gave no reason on screen. No screenshot of this line is in the repository, and the picture is described from the code. Scenario V27 forces the case with the pretend-model mode `crash`, which fails with the detail "mock: something unexpected happened", and checks that the line appears under the message.
 
 After a memory failure that switched to the small model, the model line names the model the extension now uses. The re-shot `ui-13` shows the case where that small model also ran out of memory. The model line reads "SmolLM2 360M. Not downloaded yet", the error block gives the memory message, and the button is enabled again. Before the fix, the line still named the main model after both had failed.
 
@@ -166,7 +168,7 @@ function writeJob(tabId, jobId, patch) {
 }
 ```
 
-The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Scenario V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for five minutes is shown as interrupted. Version 1 used three minutes, which suited short cloud calls, but a slow local answer needed more room. The answer timeout itself is still 180 seconds.
+The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Scenario V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for five minutes is shown as interrupted. Version 1 used three minutes, which suited short cloud calls, but a slow local answer needed more room. The answer timeout is now ten minutes, longer than this five-minute limit, so one answer can outlast it. The keep-alive message the hidden page sends every ten seconds while it works also refreshes the record of every running job, so a working job is not shown as interrupted.
 
 **What this means in plain words.** The summary belongs to the browser, not to the popup. Closing the popup does not stop it, and reopening the popup shows where it has got to.
 

@@ -1,6 +1,6 @@
 # V2 local model run: intel-wikipedia
 
-> Note: run with the new code (answer limit 10 minutes, halving of parts that do not fit the window, heartbeat). The saved summary contains an invented fact (a "1901" gas light named "Dalen light"): a 360M model makes such slips.
+> Note: run with the new code (answer limit 10 minutes, halving of parts that do not fit the window, heartbeat). The saved summary is three short, generic points; its counts (14,700 lighthouses, 54 diagrams, 651 photographs) were not checked against the page. The invented fact (a "1901" gas light named "Dalen light") is in the summary of [v2-local-intel-wikipedia-second-try-old-code.md](v2-local-intel-wikipedia-second-try-old-code.md).
 
 Hidden Chromium, V2 extension, real model. Flags: `none`. Outside websites allowed.
 

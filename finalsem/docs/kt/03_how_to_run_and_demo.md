@@ -24,6 +24,7 @@ The developer's laptop is an Acer Aspire Lite with an Intel i5-12450H processor,
 3. **Run setup.** Double-click `setup.bat`. It looks for Chrome, checks the version, runs `scripts\check-extension.ps1` and `scripts\check-computer.ps1`, and ends with "SETUP COMPLETE." and "Next step: double-click run.bat". If it says "SETUP FAILED.", the window says what is missing, and the details are in `setup.log`.
 4. **Run the launcher.** Double-click `run.bat`. It checks the setup record, copies the folder path to the clipboard, opens `chrome://extensions`, and prints four steps.
 5. **Load the extension.** Turn on Developer mode, click Load unpacked, press Ctrl+V to paste the path, and click Select Folder. Pin Page Summarizer from the puzzle-piece menu.
+5a. **Reload after any update.** When you pull new code, click the reload arrow on the Page Summarizer card on `chrome://extensions` before you test. Until you do, Chrome keeps running the code it loaded before, so the new behaviour does not appear.
 6. **Check the graphics card.** Open `chrome://gpu`. The line WebGPU should say "Hardware accelerated". If the computer has two chips, see the next section.
 7. **Make the first summary.** Open an article and click the icon. The popup says "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only)." and the button says "Download model and summarize". Press it. On the developer's laptop the first run took about 197 s. Later, the button says "Summarize this page".
 
@@ -61,7 +62,7 @@ Run this once in the order shown, with the model already downloaded and an artic
 | 7 | `chrome://version`, then press Summarize | "Chrome does not let extensions read its own pages, so the job stops before any model step. The code is RESTRICTED_PAGE." |
 | 8 | A page with only a sentence or two | "Under 200 characters of readable text, so the model is not called. The code is TOO_LITTLE_TEXT." |
 
-Three cautions. First, the popup for the Lighthouse article in the saved screenshot says 101.2 s, because that run was made while other programs were using the processor. If you show that screenshot, say so. Second, do not show the first download on stage unless you have time to wait. The download took 158.3 s on the developer's connection. Third, the 15.3 s offline figure was measured before a label fix. A repeat after the fix took 17.7 s, so say which run you quote.
+Four cautions. First, the popup for the Lighthouse article in the saved screenshot says 101.2 s, because that run was made while other programs were using the processor. If you show that screenshot, say so. Second, do not show the first download on stage unless you have time to wait. The download took 158.3 s on the developer's connection. Third, the 15.3 s offline figure was measured before a label fix. A repeat after the fix took 17.7 s, so say which run you quote. Fourth, do not demo the Wikipedia article on the Intel chip. With the current code it took 616.4 s, about 10 minutes, and its summaries are not reliable. Use the short article for that laptop.
 
 ![Screenshot, pretend model: the popup while the model is being prepared, with the grey button and the text "Warming up the model (first time can take about 30 seconds)..."](../screenshots/ui-04-warming.png)
 
@@ -96,16 +97,19 @@ Every message below comes from `src/core/errors.js`, from the popup, or from the
 | The graphics card ran out of memory. Close other heavy tabs or programs and try again. | GPU_MEMORY | The graphics card ran out of memory, and the smaller model also failed, or the smaller model was the one that failed | Close other tabs and try again. If the main model was the one that failed, the extension has already tried the smaller model once |
 | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | MODEL_DOWNLOAD_FAILED | The download failed | Reconnect and press the button again |
 | The model could not be started. Press the button to try again. | MODEL_LOAD_FAILED | The model did not load | Press again. If the main model was the one that failed, the extension had already tried the smaller model once |
-| The model took too long to answer. Try again, or use a shorter page. | TIMEOUT | No answer within 180 s (`generateTimeoutMs`) | Try again or use a shorter page |
+| The model took too long to answer. Try again, or use a shorter page. | TIMEOUT | No answer within 10 minutes (`generateTimeoutMs`, 600,000 ms) | Wait, or use a shorter page. On the Intel chip a long article can take that long |
 | The model returned no summary for this page. | EMPTY_ANSWER | The answer was empty | Press again, or try another page |
 | This page has too little readable text to summarize. | TOO_LITTLE_TEXT | Under 200 characters | Use a page with more text |
 | This page is too long for the local model on this computer. Try a shorter page. | TOO_LONG | More than 12 parts | Use a shorter page |
+| A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | CONTEXT_TOO_LONG | WebLLM refused a part that does not fit the 4,096-token window, and the halving steps did not fix it | Use a shorter page. Dense pages (tables, numbers, references) use more tokens per character |
 | Chrome does not allow extensions to read this page. | RESTRICTED_PAGE | Chrome's own page, a local file or the Web Store | Use a normal web page |
 | Could not read the text of this page. | EXTRACT_FAILED | The page reader could not run | Reload the page and try again |
-| Something went wrong inside the extension. Try again. | SERVICE_ERROR | An unexpected failure, such as the offscreen page not answering | Press again. Check the console for the detail |
+| Something went wrong inside the extension. Try again. | SERVICE_ERROR | An unexpected failure, such as the offscreen page not answering | Read the "Technical detail" line under the message. For more, use the console (below) |
 | The summary was interrupted. Press Summarize to try again. | INTERRUPTED | Chrome stopped the worker, or the job had no update for 5 minutes | Press Summarize again |
 | The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed. | (notice) | A finished summary was written by SmolLM2 after a memory or load failure | Explain it. This is shown above the summary, not as an error |
 | Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster. | (note) | The built-in chip was found and the smaller model is used | Explain it, and offer the separate card |
+
+When the popup shows a vague message (SERVICE_ERROR, or MODEL_LOAD_FAILED), the popup also shows a "Technical detail: ..." line with the first 240 characters of the cause. That is the first thing to read, and it is enough for a bug report. For more, open `chrome://extensions`, find Page Summarizer, click the "service worker" link, and read the Console tab. The line that starts with `[PageSummarizer] failed` gives the code and the full detail. In the 24 October real-Chrome failure the popup showed only the vague message. The detail was added to the popup after that, and so this line was not there then.
 
 The code CANCELLED is not shown to the user. It marks a job stopped because the page changed or the tab closed.
 
@@ -130,15 +134,17 @@ The test setup is the set of scripts and checks in the project. `setup.bat --dev
 
 | Command | What it does | What you should see |
 |---|---|---|
-| `npm test` | Runs the unit tests in Node. No browser, no network | 70 tests across six files, all passing |
-| `npm run test:e2e` | Runs the browser scenarios in hidden Chromium with the pretend model | 26 scenarios, all passing |
+| `npm test` | Runs the unit tests in Node. No browser, no network | 76 tests across six files, all passing |
+| `npm run test:e2e` | Runs the browser scenarios in hidden Chromium with the pretend model | 29 scenarios (smoke, V01 to V27, V18b), all passing |
 | `node scripts/local-run.mjs nvidia` | Real model on the NVIDIA card: a cold start, then repeats. Downloads about 660 MB once | Writes `docs/test-runs/v2-local-nvidia` files. Slow, so run it on purpose |
 | `node scripts/local-run.mjs nvidia-offline` | Real model with the outside websites blocked | Writes `v2-local-nvidia-offline` files |
 | `node scripts/local-run.mjs intel` | Real model on the built-in Intel chip | Writes `v2-local-intel` files. Slow |
+| `node scripts/local-run.mjs intel-wikipedia` | Real model on the Intel chip, the long Wikipedia article (7 parts) | Writes `v2-local-intel-wikipedia` files. Takes about 10 minutes |
+| `node scripts/local-run.mjs intel-short` | Real model on the Intel chip, the short article | Writes the short Intel run files |
 | `node scripts/secret-scan.mjs` | Checks the repository for the Version 1 key before a push | Exit code 1 if a key is found |
 | `powershell -File tests\bat\test-bat-scripts.ps1` | Checks the setup and launcher scripts | 15 checks (B1 to B10c), all passing |
 
-The browser scenarios run hidden. Set `HEADED=1` to watch them. Each scenario uses the pretend model, selected with `?mock=<mode>` on the offscreen page, so the tests do not need a graphics card.
+The browser scenarios run hidden. Set `HEADED=1` to watch them. Each scenario uses the pretend model, selected with `?mock=<mode>` on the offscreen page, so the tests do not need a graphics card. There are twelve modes: `ok`, `nowebgpu`, `nof16`, `intel`, `oom`, `oomall`, `downloadfail`, `empty`, `html`, `slow`, `longprompt` and `crash`.
 
 Do not run `scripts/local-run.mjs` in the days before the viva unless you want new numbers. It downloads the model and writes files into `docs/test-runs`.
 
@@ -161,6 +167,17 @@ The client's laptop has not been tested. Its graphics chip, memory and free disk
 - `setup.bat --gpu` against a real Chrome. It was tried only against a throw-away registry key.
 - A click-through in the visible, daily Chrome. Every browser scenario and every real-model run used hidden Chromium.
 - Languages other than English. The model is small and was meant for English text.
+
+## What changed on 24 October 2026
+
+After a failure in the real Chrome, the following changed. The run file above reflects them.
+
+- The answer limit is 10 minutes, not 180 seconds.
+- A part that WebLLM refuses for size is cut in half and summarized again, up to three levels deep. The error CONTEXT_TOO_LONG is shown only if that also fails.
+- Each KEEPALIVE refreshes the running job records, so a long answer is not shown as dead.
+- The popup shows a "Technical detail" line for SERVICE_ERROR and MODEL_LOAD_FAILED.
+- `scripts/local-run.mjs` clears the profile's old service-worker scripts before a real run.
+- The extension must be reloaded on `chrome://extensions` after new code is pulled (step 5a).
 
 ## What this means in plain words
 

@@ -1,5 +1,7 @@
 # Version 2 test run 1 (pretend model, hidden Chromium)
 
+> Later additions: after this run the suite grew to 29 browser scenarios (V25 cut part, V26 heartbeat, V27 technical detail; 24 October) and the unit tests to 76. The table below is the 26-scenario run of 21 October.
+
 Date: 2026-10-21. Command: `npm run test:e2e` in `finalsem/project`.
 
 The browser tests load the real extension into a hidden Chromium window and press the real Summarize button. The model is a **pretend model** (the offscreen page answers from `mock-engine.js` when `?mock=<mode>` is set), so these tests check the extension's own behaviour: messages, progress, storage, errors and the popup. They do not check how good a real model's summaries are. That is covered by the real-model runs in the other files in this folder.

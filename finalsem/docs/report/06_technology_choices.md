@@ -20,11 +20,11 @@ Table: The first choice, question by question, from decision D1
 | 1 | Library | WebLLM 0.2.86, pinned, one file; Transformers.js only as plan B | Followed. The spike worked |
 | 2 | Where it runs | Offscreen page with one module web worker; job stays in the service worker; keepalive; close after about five idle minutes | Followed. Keepalive every 10 s |
 | 3 | Which model | Llama 3.2 1B by default, SmolLM2 360M as fallback, chosen by computer | Followed, with one rule added after measuring (D3) |
-| 4 | Piece size and prompt | 6,000 characters a part; at most 300 tokens an answer; temperature 0.2; halve the part if the window is exceeded | Followed, except the halving step, which was **not built** |
+| 4 | Piece size and prompt | 6,000 characters a part; at most 300 tokens an answer; temperature 0.2; halve the part if the window is exceeded | Followed. The halving step was missing until 24 October, when it was built after a failure in the real Chrome |
 | 5 | Keep the cloud engine? | Local only; remove the key box | Followed |
 | 6 | Biggest risk | WebLLM without a bundler in an offscreen page on a weak chip; test first in a throw-away extension | Done as a spike, which found the storage problem (D2) |
 
-The advice named three conditions that would change it: a client laptop without WebGPU, a failed spike, and one part taking more than about 60 seconds. The first two did not happen. The third did, on the Intel chip, where the first part of the two-part article took about 65 s with SmolLM2. The response was narrower than the advice: SmolLM2 became the default on Intel graphics only (D3). The halving step was never built, because no real run hit a window error.
+The advice named three conditions that would change it: a client laptop without WebGPU, a failed spike, and one part taking more than about 60 seconds. The first two did not happen. The third did, on the Intel chip, where the first part of the two-part article took about 65 s with SmolLM2. The response was narrower than the advice: SmolLM2 became the default on Intel graphics only (D3). The halving step was left out at first, because no run had yet hit a window error. The first real-Chrome failure, on 24 October, was a dense page that did not fit the window, so the step was built then.
 
 **What this means in plain words.** Most of the advice was followed. One condition came true, and the answer was a rule for one kind of chip, not a change for every computer.
 
@@ -74,7 +74,8 @@ Table: The four models considered, with the graphics memory from DECISIONS.md
 - **Choice.** 6,000 characters a part, about 1,500 tokens, with part answers capped at 300 tokens, the final answer at 320, and temperature 0.2.
 - **Trade-off accepted.** Long pages need more requests, and pages over 12 parts are refused (`maxChunks`).
 - **Measured afterwards.** The clean NVIDIA runs took 15.9 s for the two-part article and 74.1 s for the seven-part article. No real run hit a window error.
-- **Not built.** The halve-and-retry step.
+- **Built on 24 October.** The halve-and-retry step was in the advice (D1, item 4) and had been left out. In the real Chrome, the project owner ran the Wikipedia article on the Intel chip and got "Something went wrong inside the extension. Try again." with no reason. WebLLM had refused a dense part with "Prompt tokens exceed context window size", and the code reported that as a generic service error. The fix recognises the message as CONTEXT_TOO_LONG. `summarizeChunk` then cuts the part in half at a paragraph or sentence break and summarizes each half, up to three levels deep and not for text under 600 characters. The job counts the cut parts in `stats.halvedParts`. The unit tests and scenario V25 pass. No part of the 24 October run needed cutting, so the effect on a real page is not yet measured.
+- **Answer limit.** The limit on one answer rose from 180 seconds to 10 minutes (`generateTimeoutMs`). In the failing run, one answer on the Intel chip ran past 180 s: parts 1 and 2 took 76 s and 127 s, and part 6 had not answered within 180 s.
 
 **What this means in plain words.** Each piece is small enough for the model to read at once, and very long pages are refused before the wait starts.
 
@@ -115,7 +116,7 @@ This record changed after measuring. The first version used the same model on ev
 - **Choice.** Switch to SmolLM2 360M, and show a note that a separate card is much faster.
 - **Why the others were rejected.** On Intel the 1B model wrote about 2 tokens a second, and the first answer took 36 s to prepare. The development log says the weak chip "is not an error", so it gets a note and a smaller model rather than a refusal.
 - **Trade-off accepted.** Answers are slow and come from the smaller model, whose quality was not compared. Detection covers Intel only, so an AMD or Apple built-in chip is not switched. This limit remains.
-- **Measured afterwards.** The Intel short article took 199.2 s on first use (81 s download, about 40 s warm-up, 76 s writing). The two-part article took 149.1 s with the model stored.
+- **Measured afterwards.** The Intel short article took 199.2 s on first use (81 s download, about 40 s warm-up, 76 s writing). The two-part article took 149.1 s with the model stored. The seven-part Wikipedia article took 616.4 s with the new code and 704.5 s on a second try with the old code. The first try, under the old 180-second limit, failed with TIMEOUT.
 
 ![Real model, Intel built-in graphics, recorded before the marker fix: the popup with the note that names the chip](../screenshots/v2-intel-short-popup.png)
 
@@ -147,7 +148,7 @@ Reading the figure: The figure shows Chrome on the Intel chip by default, and th
 - **Choice.** Both. Most browser scenarios use the pretend model selected with `?mock=<mode>`.
 - **Why the first option was rejected.** A real model cannot be made to fail on demand.
 - **Trade-off accepted.** The pretend model says nothing about summary quality or real memory limits. Its fixed numbers, such as 664 MB and 300 MB, are not measurements.
-- **Measured afterwards.** The current code has 70 unit tests, 26 browser scenarios and 15 batch-script checks, from the change notes. `run-1.md` records three full browser runs made before the later fixes.
+- **Measured afterwards.** The current code has 76 unit tests, 29 browser scenarios and 15 batch-script checks, from the change notes. `run-1.md` records three full browser runs made before the later fixes.
 
 **What this means in plain words.** Most tests are quick and repeatable, and a few real runs show that the model works on the developer's laptop.
 
@@ -171,7 +172,7 @@ Table: Problems found in review, and their status
 |---|---|---|
 | Unused key-box and options CSS | **Fixed.** Removed from `ui.css`; one rule added for the notice | Chapter 5, reuse |
 | Intel detection | **Still open.** Only an Intel built-in chip is switched; AMD or Apple built-in chips are not | This chapter, weak-chip record; FR9 |
-| TIMEOUT untested | **Still open.** No automated test runs the 180-second timer; the pretend model has no timeout | Chapter 5, failures; FR8 |
+| TIMEOUT untested | **Still open.** No automated test runs the 10-minute timer; the pretend model has no timeout | Chapter 5, failures; FR8 |
 | Copied page markers in answers | Fixed. `stripPageMarkers` with two unit tests. The Intel run and its screenshot predate the fix | Chapter 5, engine seam |
 | Silent fallback to the smaller model | Fixed. A notice shows on the result (scenario V10) | Chapter 5, failures |
 | Stale "Not downloaded yet" after both models fail | Fixed. The line refreshes once when a job ends; not during download or warm-up | Chapter 5, first use |
@@ -179,11 +180,16 @@ Table: Problems found in review, and their status
 | Offscreen page closed during a long answer | Fixed. Messages in flight are counted, with a unit test | Chapter 5, offscreen page |
 | "oom" matched inside words such as "room" | Fixed, with a unit test | Chapter 4, FR8 |
 | Stale limit of three minutes | Changed to five minutes; Version 1 kept three | Chapter 5, job record |
+| The real-Chrome failure with no reason (24 October) | **Fixed.** The popup shows a technical-detail line under SERVICE_ERROR and MODEL_LOAD_FAILED (scenario V27) | Chapter 5, failures |
+| A dense part refused by WebLLM and reported as a vague error | **Fixed.** CONTEXT_TOO_LONG is recognised, and the part is cut in half (scenario V25) | Chapter 5, engine seam; this chapter, piece-size record |
+| Answer limit of 180 s too short on the Intel chip | **Fixed.** Changed to 10 minutes; the TIMEOUT message is unchanged | Chapter 5, job record |
+| A long answer shown as dead (interrupted) | **Fixed.** The KEEPALIVE message refreshes running jobs (scenario V26) | Chapter 5, job record |
+| The test setup reused an old service-worker script | **Fixed.** `scripts/local-run.mjs` deletes the profile's Service Worker and Code Cache folders before a run; the downloaded model is kept | Test setup |
 | Undo command needed `-ChromePath` | Fixed. The README command works | This chapter, opt-in record |
 
 One loose end is not a code change: the download size is quoted as 664 MB in a DEVLOG row and as about 660 MB in a script comment, while the popup reports about 695 MB, which this report uses.
 
-These limits are still true of the code. `modelOverride` is never cleared, so the small model stays in use until the stored settings are cleared. Closing a tab during a download does not stop it, because `prepare()` ignores the abort signal. The merge answer can repeat the prompt's own wording, and small models make factual slips. The model line is not refreshed during the download or warm-up. A load-stage error containing "cache" counts as a download failure. The secret-scan script knows only the Version 1 Gemini key. The under-8-GB rule has not been seen on low-memory hardware. The dashboard fixture is used by no Version 2 browser scenario. The warm-up took about 30 s on first use and 0.4 to 0.5 s later, and the reason is not measured.
+These limits are still true of the code. `modelOverride` is never cleared, so the small model stays in use until the stored settings are cleared. Closing a tab during a download does not stop it, because `prepare()` ignores the abort signal. The merge answer can repeat the prompt's own wording, and small models make factual slips. The model line is not refreshed during the download or warm-up. A load-stage error containing "cache" counts as a download failure. The secret-scan script knows only the Version 1 Gemini key. The under-8-GB rule has not been seen on low-memory hardware. The dashboard fixture is used by no Version 2 browser scenario. The warm-up took about 30 s on first use and 0.4 to 0.5 s later, and the reason is not measured. On the Intel chip the seven-part Wikipedia article takes about 10 to 12 minutes (616.4 s with the new code, 704.5 s with the old). The summary of the old-code second try contains invented facts, which must not be quoted. The new-code summary is three short generic points (history and significance, a count of 14,700 lighthouses, and counts of 54 diagrams and 651 photographs), and those counts were not checked against the page.
 
 **What this means in plain words.** The fixes cover the defects a reader would see. The open items are the chip detection, the untested timeout and several limits of the small model and the test setup.
 
@@ -218,4 +224,4 @@ Cache Storage failed inside the offscreen page, and IndexedDB worked there. The 
 The PRD goal of no API key and no page text leaving the machine would be broken by a cloud engine. A laptop without WebGPU gets a clear refusal rather than a fallback.
 
 **Did another model check the first choice, and was its advice followed?**
-Yes. The question went to a stronger model in writing before building, with a stated confidence of medium. Most of the advice was followed, one condition came true on the Intel chip, and the halving step was not built.
+Yes. The question went to a stronger model in writing before building, with a stated confidence of medium. Most of the advice was followed, one condition came true on the Intel chip, and the halving step was built on 24 October, after a failure in the real Chrome.

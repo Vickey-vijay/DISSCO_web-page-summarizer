@@ -15,7 +15,8 @@ Table: Errors that come from the model, from `src/core/errors.js` and `src/offsc
 | `GPU_MEMORY` | Out of memory while loading, or during an answer | The graphics card ran out of memory. Close other heavy tabs or programs and try again. | While loading, retries once with the small model, and a finished summary carries a notice. During an answer, the job ends. | Close other tabs or programs, then press the button again. |
 | `MODEL_DOWNLOAD_FAILED` | The download stops (see the classifier below) | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | The job ends. Nothing is saved as a choice. | Check the connection and press again. |
 | `MODEL_LOAD_FAILED` | Loading fails for another reason | The model could not be started. Press the button to try again. | While loading the primary model, retries once with the small model. Otherwise the job ends. | Press again. |
-| `TIMEOUT` | One answer takes longer than 180 seconds | The model took too long to answer. Try again, or use a shorter page. | The answer is interrupted, and the job ends with its finished parts dropped. | Try again, or use a shorter page. |
+| `TIMEOUT` | One answer takes longer than 10 minutes (it was 180 seconds until 24 October 2026) | The model took too long to answer. Try again, or use a shorter page. | The answer is interrupted, and the job ends with its finished parts dropped. | Try again, or use a shorter page. |
+| `CONTEXT_TOO_LONG` | WebLLM refuses a prompt that does not fit the 4,096-token window. A dense part can use more tokens per character than the 6,000-character limit assumes. | A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | The part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep. The message appears only if the cutting fails too, or if the text is under 600 characters. | Try a shorter page. |
 | `EMPTY_ANSWER` | The model returns only spaces | The model returned no summary for this page. | The job ends. | Press again. |
 
 Table: Errors from the page and the job, from `src/core/errors.js`, `pipeline.js` and `extract-tab.js`
@@ -26,7 +27,7 @@ Table: Errors from the page and the job, from `src/core/errors.js`, `pipeline.js
 | `TOO_LONG` | More than 12 parts are needed | This page is too long for the local model on this computer. Try a shorter page. | Refused before any download. | Use a shorter page. |
 | `RESTRICTED_PAGE` | Chrome internal, extension, file, data or blob pages, and the Chrome Web Store | Chrome does not allow extensions to read this page. | Refused before any model step. | Use another page. |
 | `EXTRACT_FAILED` | Injecting the reader script fails for another reason, or the script returns nothing | Could not read the text of this page. | The job ends. | Press again. The popup offers no other step. |
-| `SERVICE_ERROR` | The hidden page cannot be reached, sends no answer or an unknown message, or an unexpected error occurs during an answer | Something went wrong inside the extension. Try again. | The job ends. | Try again. |
+| `SERVICE_ERROR` | The hidden page cannot be reached, sends no answer or an unknown message, or an unexpected error occurs during an answer | Something went wrong inside the extension. Try again. | The job ends, and the popup shows a "Technical detail" line under the message (the first 240 characters of the detail). | Try again. The detail line says what the extension knows. |
 | `INTERRUPTED` | Chrome stopped the service worker during a job, or a job has had no update for five minutes | The summary was interrupted. Press Summarize to try again. | The record is marked as an error when the worker next starts. An open popup shows the message after five minutes without an update. | Press Summarize. |
 | `CANCELLED` | The tab closed or moved to another page | Cancelled. | The job stops without writing an error. The message is never shown. | Nothing to do. |
 
@@ -44,7 +45,7 @@ Table: Messages the popup writes itself, which are not in `errors.js`
 
 ## How a thrown error becomes a code
 
-`describeError` turns any thrown value into the three fields the popup needs: the code, the message and the detail. An error that is already an `AppError` keeps its code. Any other error becomes `SERVICE_ERROR`, and an abort becomes `CANCELLED`. When a code crosses a message channel as `{code, detail}`, `fromWire` rebuilds it, and an unknown code becomes `SERVICE_ERROR`. This keeps the list of codes closed. The popup shows one of the fourteen messages in `errors.js`, or one of the few it writes itself (listed above).
+`describeError` turns any thrown value into the three fields the popup needs: the code, the message and the detail. An error that is already an `AppError` keeps its code. Any other error becomes `SERVICE_ERROR`, and an abort becomes `CANCELLED`. When a code crosses a message channel as `{code, detail}`, `fromWire` rebuilds it, and an unknown code becomes `SERVICE_ERROR`. This keeps the list of codes closed. The popup shows one of the fifteen messages in `errors.js`, or one of the few it writes itself (listed above).
 
 **What this means in plain words.** Whatever goes wrong, the popup only ever gets a known code, so it cannot show a raw error text by accident.
 
@@ -57,6 +58,8 @@ WebLLM throws plain errors with free text. The function `classifyEngineError` in
 ```js
 export function classifyEngineError(err, stage) {
   const text = String(err?.message ?? err ?? '').toLowerCase();
+  // WebLLM: "Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096"
+  if (/prompt tokens exceed|context window size/.test(text)) return ERROR_CODES.CONTEXT_TOO_LONG;
   if (/shader-f16|f16/.test(text) && /(support|feature|require)/.test(text)) return ERROR_CODES.NO_SHADER_F16;
   if (/webgpu|gpu adapter|navigator\.gpu/.test(text) && /(not\s+|un)(supported|available)|no (gpu )?adapter|unavailable/.test(text)) {
     return ERROR_CODES.NO_WEBGPU;
@@ -87,10 +90,13 @@ Table: Examples from the unit tests, and the code each one gives
 | something strange | load | MODEL_LOAD_FAILED |
 | something strange | generate | SERVICE_ERROR |
 | network exploded | generate | SERVICE_ERROR |
+| Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096 | generate | CONTEXT_TOO_LONG |
 
 The memory pattern now matches "oom" only as a whole word. Before the fix it matched the letters inside other words, so a message containing "room" would have been read as a memory error. A unit test covers the change.
 
 One weakness remains. At the loading step, any message containing "cache" counts as a download failure. The spike error recorded in the DEVLOG, "Failed to execute 'open' on 'CacheStorage': Unexpected internal error", contains "cache". Under the current rules it would show the download message, which is wrong for that cause. The real WebLLM error texts are known only from that one spike message. The other patterns were written from expected wording and checked with sample strings.
+
+The window message was the gap behind a vague error in the owner's real Chrome on 24 October. On the Intel chip, with the Wikipedia "Lighthouse" page, the popup said "Something went wrong inside the extension. Try again." with no reason. The DEVLOG attributes that message to the classifier, which did not know WebLLM's window message, so the error fell through to SERVICE_ERROR. The detail was not on screen at the time, so the exact text of that run is not in the repository. The window message now maps to CONTEXT_TOO_LONG.
 
 **What this means in plain words.** The engine's free-text errors are sorted into the codes by looking for key words. The memory word now has to stand alone, but the download pattern still reads any "cache" message as a download problem.
 
@@ -134,7 +140,7 @@ The browser tests show both sides. Scenario V10 makes the primary model run out 
 
 ## Timeouts, empty answers and what is lost
 
-Each answer has 180 seconds, a limit that is unchanged. The hidden page starts a race between the answer and a timer. When the timer wins, it calls `interruptGenerate` on the WebLLM engine and reports `TIMEOUT`:
+Each answer has ten minutes. Until 24 October 2026 the limit was 180 seconds, and a real Intel run on the Wikipedia page hit it. The hidden page starts a race between the answer and a timer. When the timer wins, it calls `interruptGenerate` on the WebLLM engine and reports `TIMEOUT`:
 
 `src/offscreen/offscreen.js`
 
@@ -151,7 +157,7 @@ The job then stops. The parts already finished are discarded, because a summary 
 
 An empty answer is a different case. The engine trims the text, and if nothing is left it reports `EMPTY_ANSWER`. The pretend model mode `empty` shows the message in scenario V13. Nothing is saved, and the reader can press again.
 
-**What this means in plain words.** A slow answer is stopped at three minutes, and the whole summary is dropped with it. An empty answer is reported as an empty answer, not as a success.
+**What this means in plain words.** A slow answer is stopped at ten minutes, and the whole summary is dropped with it. An empty answer is reported as an empty answer, not as a success.
 
 ## Interrupted and cancelled jobs
 
@@ -177,7 +183,7 @@ async function sweepOrphans() {
 }
 ```
 
-The popup has a second check. A job that has not been updated for five minutes is shown as interrupted, even if the record still says running. Before the fix, that limit was three minutes, the same length as the 180-second answer timeout, so a slow answer could appear interrupted while it was still running (DEVLOG, 21 October). The limit is now five minutes, so the answer timeout is reached well before the stale limit. While the hidden page is busy, it sends a keep-alive message to the worker every ten seconds, which is meant to keep the worker awake. Scenario V20 stops the workers on purpose and checks that the job becomes `INTERRUPTED`. The screenshot `ui-17-interrupted.png` shows the popup (pretend model).
+The popup has a second check. A job that has not been updated for five minutes is shown as interrupted, even if the record still says running. Before the fix, that limit was three minutes, the same length as the 180-second answer timeout, so a slow answer could appear interrupted while it was still running (DEVLOG, 21 October). The answer limit is now ten minutes, longer than this five-minute limit. So the keep-alive message that the hidden page sends to the worker every ten seconds while it works also refreshes the update time of every running job (DEVLOG, 24 October). A working job is not shown as dead, however long one answer takes. Scenario V20 stops the workers on purpose and checks that the job becomes `INTERRUPTED`. The screenshot `ui-17-interrupted.png` shows the popup (pretend model).
 
 ![Pretend model: the interrupted message, shown after the service worker was stopped mid-job](../screenshots/ui-17-interrupted.png)
 
@@ -221,22 +227,24 @@ A computer without WebGPU or without the 16-bit feature is blocked from the star
 
 ## Which errors were forced, and which were real
 
-Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 26 browser scenarios (the smoke run and V01 to V24, with V18b) all pass.
+Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 29 browser scenarios (the smoke run, V01 to V27 and V18b) all pass, with 76 unit tests.
 
 - `nowebgpu` gives `NO_WEBGPU` (scenario V07), and `nof16` gives `NO_SHADER_F16` (scenario V08).
 - `oom` gives `GPU_MEMORY` on the primary model only (scenario V10), and `oomall` gives it on every model (scenario V11).
 - `downloadfail` gives `MODEL_DOWNLOAD_FAILED` (scenario V12). `empty` gives `EMPTY_ANSWER` (scenario V13).
 - `html` shows hostile markup as an answer (scenario V14). The popup prints it as text, and the screenshot `ui-18-hostile-output-as-text.png` shows it (pretend model).
 - The service worker was stopped on purpose, which gives `INTERRUPTED` (scenario V20).
+- `longprompt` refuses a prompt over 3,500 characters the way WebLLM does, which gives `CONTEXT_TOO_LONG` and the halving (scenario V25).
+- `crash` fails with `SERVICE_ERROR` and the detail "mock: something unexpected happened" (scenario V27).
 - The page choices in the browser tests give `TOO_LITTLE_TEXT` (V04, V18b), `TOO_LONG` (V06) and `RESTRICTED_PAGE` (V05).
 
 ![Pretend model: markup in the model's answer is printed as text, so the image tag does not load and the bold tag is not rendered](../screenshots/ui-18-hostile-output-as-text.png)
 
-Five codes have no browser scenario that asserts them. `TIMEOUT`, `MODEL_LOAD_FAILED` and `SERVICE_ERROR` appear only in unit tests. `EXTRACT_FAILED` appears in no test. `CANCELLED` has a unit test for its conversion, and V21 and V22 exercise the path without asserting the code.
+Four codes have no browser scenario that asserts them. `TIMEOUT` and `MODEL_LOAD_FAILED` appear only in unit tests. `EXTRACT_FAILED` appears in no test. `CONTEXT_TOO_LONG` is forced by scenario V25 and `SERVICE_ERROR` by scenario V27. `CANCELLED` has a unit test for its conversion, and V21 and V22 exercise the path without asserting the code.
 
-Only one real error is recorded in the repository. The DEVLOG entry of 21 October 2026 records that Cache Storage failed inside the hidden page with `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error`. The fix was to store the model in IndexedDB, not a fallback. The real-model runs in `finalsem/docs/test-runs/` all ended with a summary. The slow Intel runs are slow, not failed. The DEVLOG also records that an offline test blocked the extension's own page. That was a fault in the test setup, not an error code.
+Three real failures are recorded in the repository. The first is the spike of 21 October 2026, where the DEVLOG records that Cache Storage failed inside the hidden page with `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error`. The fix was to store the model in IndexedDB, not a fallback. The real-model runs in `finalsem/docs/test-runs/` all ended with a summary except one. The second is the Intel Wikipedia run, `v2-local-intel-wikipedia-before-fix.md`, which ended in TIMEOUT after 615.6 seconds at the old 180-second limit. The third is the vague message in the owner's real Chrome on 24 October, described above. The slow Intel runs are slow, not failed. The DEVLOG also records that an offline test blocked the extension's own page. That was a fault in the test setup, not an error code.
 
-**What this means in plain words.** Most errors were produced on purpose, so the handling has been checked. Only one real failure was seen, and the real runs have not produced any of the error messages.
+**What this means in plain words.** Most errors were produced on purpose, so the handling has been checked. The real runs produced three failures: a spike error, a timeout on a long page, and a vague message in the owner's Chrome.
 
 ## What is kept after each outcome
 
@@ -255,23 +263,23 @@ The model files live in IndexedDB, which is why a later job needs no download. T
 
 ![Errors and their routes: which codes stop the job, which retry with the small model, and which only ask the reader to press again](../figures/V11_error_flow.png)
 
-Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. Its footer says the detail goes only to the console, but the code also keeps it in the job record, and the GPU_MEMORY row shows only the loading case.
+Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. It was drawn before CONTEXT_TOO_LONG existed, so that code is not in it. Its footer says the detail goes only to the console, but the code also keeps it in the job record, and the GPU_MEMORY row shows only the loading case.
 
 **What this means in plain words.** A failure leaves the model files and the job record in a known state. Only a memory failure or a failed load while loading changes what the extension remembers.
 
 ### Questions this chapter answers
 
 **What does the reader see when something fails?**
-One short message, from a fixed list of fourteen codes. Sometimes the message sits in the model line, and sometimes in the error block below the progress area. The technical detail is kept in the console and in the job record, and the reader does not see it.
+One short message, from a fixed list of fifteen codes. Sometimes the message sits in the model line, and sometimes in the error block below the progress area. The technical detail is kept in the console and in the job record, and the reader does not see it.
 
 **Why does a memory error sometimes switch the model?**
 When the big model fails to load with a memory error, the extension tries the small one once and saves that choice. A notice then tells the reader that the small model wrote the summary. A memory error during an answer does not switch the model, and the saved choice is never cleared by the extension.
 
 **What happens if the model answers too slowly?**
-After 180 seconds the answer is interrupted, the job ends with a timeout message, and the parts already finished are dropped. The reader can press again. No automated test covers this path, and whether the stopped answer ends completely is not tested.
+After ten minutes the answer is interrupted, the job ends with a timeout message, and the parts already finished are dropped. The reader can press again. No automated test covers this path, and whether the stopped answer ends completely is not tested.
 
 **What happens if the reader closes the tab during a summary?**
 The job is stopped at the next part boundary, and its record is removed. A download that has already started keeps running, and the model is kept when it finishes. The reader sees nothing about the cancelled job.
 
 **Can the extension tell every error apart?**
-Not yet. The memory pattern now needs a whole word, but any "cache" message at loading reads as a download failure. Only one real engine error is recorded, so most of the patterns have not been checked against real messages.
+Not yet. The memory pattern now needs a whole word, but any "cache" message at loading reads as a download failure. Only two real engine errors are recorded, the spike's Cache Storage error and the window message seen on the Intel chip. Most of the patterns have not been checked against real messages.

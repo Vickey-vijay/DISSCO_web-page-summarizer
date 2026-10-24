@@ -90,7 +90,7 @@ Table: What the reader sees for each outcome
 | Check fails for another reason | SERVICE_ERROR | `Something went wrong inside the extension. Try again.` | Enabled |
 | Answer not yet received | none | `Checking this computer...` | No change |
 
-If the size cannot be read, the first row says "about several hundred MB". The built-in note reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.` Only the two blocking codes disable the button, because the code comment says other failures may be temporary. After every job ends, success or error, the popup asks for the model state once more, so the model line follows the saved choice.
+If the size cannot be read, the first row says "about several hundred MB". The built-in note reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.` Only the two blocking codes disable the button, because the code comment says other failures may be temporary. For `SERVICE_ERROR` and `MODEL_LOAD_FAILED` the popup also shows a line that starts "Technical detail:" with the first 240 characters of the error. After every job ends, success or error, the popup asks for the model state once more, so the model line follows the saved choice.
 
 **What this means in plain words.** Two messages stop the button. Every other failure leaves it open, and the model line is brought up to date when a job ends.
 
@@ -147,6 +147,8 @@ On the default run the summary started at 123.1 seconds and ended at 199.2 secon
 
 Chrome picked the built-in chip by default, even when the code asked for the high-performance card. The flag changed the choice (DEVLOG, 2026-10-21; chapter 15 tells this). The opt-in setting `setup.bat --gpu` moves Chrome to the separate card (DECISIONS D4). It prints a plain message if the Windows change fails, and setup carries on. In one speed test the 1B model wrote about 2 tokens a second on the built-in chip (DEVLOG only, no run file). In the saved clean runs the separate card wrote 34 to 53 tokens a second, and each value is the last request of its job.
 
+The Intel chip also ran the 7-part Wikipedia article (36,752 characters). With the new code, which has a 10-minute answer limit and cuts a part that does not fit the window in half, the summary took 616.4 seconds, writing at 4.1 tokens a second. The old code timed out on the first try, after 615.6 seconds: part 6 of 7 had not answered 180 seconds after it started. The same old code finished the second try in 704.5 seconds. Answer times on this chip vary a lot, which is why the limit was raised (DEVLOG, 2026-10-24).
+
 **What this means in plain words.** On this laptop the browser decides which chip runs the model. The same article took about 76 seconds on the built-in chip and about 3.7 seconds on the separate card, once the download was done.
 
 ## Figures
@@ -195,7 +197,7 @@ The developer log tells the stories behind this part (chapter 15). The main ones
 
 ## How it was tested
 
-The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engine.test.js` cover the check, the choice and the retry. The browser tests in `tests/e2e/pipeline.test.js` use the pretend model: V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 70 tests and the browser suite 26. The real card was checked only on the developer laptop.
+The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engine.test.js` cover the check, the choice and the retry. The browser tests in `tests/e2e/pipeline.test.js` use the pretend model: V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 76 tests and the browser suite 29. Scenario V25 covers the halving of long parts, and V27 the technical detail line. The real card was checked only on the developer laptop.
 
 **What this means in plain words.** The rules are checked by unit tests and by the pretend model. The real card was checked on one laptop only.
 
@@ -205,6 +207,8 @@ The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engi
 - The memory rule works only below 8 GB, because the browser caps the value. No run on a 4 GB machine is recorded, so the threshold is not measured [to be measured].
 - The small model's answers are weaker. The merge step can repeat the prompt's own preamble, and small models make factual slips. Chapter 10 covers how good the summaries are.
 - No code path clears `modelOverride`, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
+- Halving is built. A part that does not fit the model's window is cut in half and summarized again, up to three levels deep and for parts of at least 600 characters. The real Wikipedia run did not need it, so the halving is covered by unit tests and by scenario V25 only.
+- A long page on the Intel chip is slow. The 7-part Wikipedia article took about 10 to 12 minutes with SmolLM2 (616.4 seconds with the new code). The summary of the old-code second try contains invented facts, which are not quoted here. The new-code run's summary has three short generic points, and its counts were not checked against the page. Chapter 10 covers summary quality. Wikipedia text changes from day to day, so a part that overflows one day may fit the next.
 - The client's laptop has not been tested (DECISIONS D1, last paragraph).
 
 ## Questions this chapter answers

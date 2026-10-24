@@ -95,7 +95,7 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 **Testing**
 
-- Unit tests: 70 pass. Browser tests: 26 scenarios with a pretend model pass. Windows script checks: 15 (`finalsem/docs/test-runs/run-1.md`).
+- Unit tests: 76 pass. Browser tests: 29 scenarios with a pretend model pass. Windows script checks: 15 (`finalsem/docs/test-runs/run-1.md`).
 - Real-model runs on the NVIDIA card and on the built-in Intel chip are recorded in `finalsem/docs/test-runs/`. Two faults in the extension were found by the browser tests and fixed.
 - A code-reading review after the first real-model runs led to further fixes. Copied page markers are removed from answers, a stored model is no longer labelled as downloading, the offscreen page is not closed while a message is running, and a job counts as dead after five minutes without an update.
 
@@ -103,7 +103,7 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 - The client's laptop has not been checked. Its operating system, memory and graphics card are still unknown.
 - The optional `setup.bat --gpu` switch has not been tried in a real Chrome installation.
-- A manual check in the visible Chrome window is still to be done. Every run so far used a hidden Chromium browser.
+- A full manual check in the visible Chrome window is still to be done. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 - No side-by-side comparison of summary quality between Version 1 and Version 2 is recorded in the repository.
 
 **Evaluation:**
@@ -230,19 +230,19 @@ Table: Project objectives and the state of Version 2
 - The graphics card check, with the messages for missing WebGPU and missing 16-bit math.
 - The switch to the smaller model on a weak built-in chip, with a one-line note in the popup.
 - A fallback to the smaller model after a memory failure, remembered for later, with a notice in the popup when the smaller model wrote the summary.
+- Halving a part that the model's window cannot take at once, and a plain refusal when a half is still too long.
 - The offscreen page that holds the model and its messages, and the job that runs in the background.
 - Setup and run scripts for Windows (`setup.bat`, `run.bat`), a computer check (`scripts/check-computer.ps1`) and an opt-in script that asks Windows to run Chrome on the separate graphics card.
-- Tests: 70 unit tests, 26 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
+- Tests: 76 unit tests, 29 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
 
 ### What is not built or not verified
 
 - Other models beyond the two in `src/core/config.js`.
-- The step that halves the part size and tries again when a model reports that its window is too small. The design allowed for it. No run needed it, and the part limit refuses very long pages first, so it was not built (`DECISIONS.md`, D1, item 4).
 - A summary-quality comparison between Version 1 and Version 2.
 - Clearing the saved switch to the smaller model. Once it is saved, it stays until the stored settings are cleared. Closing a tab during the download does not stop the download either.
 - Languages other than English. The model is small and is meant for English text.
 - Chrome's built-in Summarizer API. It was studied as background only.
-- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a manual click-through in the visible Chrome window. All runs so far used a hidden Chromium browser.
+- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in the visible Chrome window. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 
 ## Test machines
 
@@ -322,7 +322,7 @@ Speed is also counted in tokens. A speed of 40 tokens a second means the model w
 
 A desk can hold only so many pages at a time. The context window is the desk of a language model. Everything in one request must fit on it: the instructions, the page text and the answer.
 
-The Llama 3.2 1B model has a window of 4,096 tokens. This figure is recorded in `finalsem/docs/DECISIONS.md` (decision D1). The project's requests stay well inside it. A part of about 1,500 tokens, the instruction text of about 520 characters (about 130 tokens by the same rule), and an answer of at most 300 tokens for a part, or 320 for the final summary, add up to about 2,000 tokens.
+The Llama 3.2 1B model has a window of 4,096 tokens. This figure is recorded in `finalsem/docs/DECISIONS.md` (decision D1). The requests normally stay well inside it. A part that still does not fit is cut in half and summarized as its two halves (chapters 10 and 12). A part of about 1,500 tokens, the instruction text of about 520 characters (about 130 tokens by the same rule), and an answer of at most 300 tokens for a part, or 320 for the final summary, add up to about 2,000 tokens.
 
 The window does not explain why the part size is 6,000 characters. The configuration file gives the reason: a small local model reads less at once than a cloud model, so the parts are smaller than the 8,000 characters that Version 1 used (`src/core/config.js`). The window is the upper limit, and the part size is the choice made below that limit.
 
@@ -417,6 +417,8 @@ Reading the screenshot: a real-model capture from the clean Intel run, taken bef
 The run recorded as 207 s was done while other programs were using the processor. Its timing is not used in this report as a clean figure. Its summary text is used only as an example of a quality fault.
 
 The reversed fact is the most serious of these mistakes, because a reader could believe it. The copied markers are the easiest to see, and the code now removes them. The popup has no way to check a summary against the page after the model writes it, and the project does not check summaries against the source. The tests use a pretend model that returns fixed text, so they cannot find these faults. The real-model runs are the only place where they appear.
+
+A longer real example comes from the Intel chip. The seven-part Wikipedia article, 36,752 characters, took 616.4 seconds with SmolLM2 360M and the current code (`v2-local-intel-wikipedia.md`). Its saved summary is three short points in general terms, and two of them give counts (14,700 lighthouses, 54 diagrams and 651 photographs) that this report has not checked against the page. An earlier try with the older code wrote a longer summary (`v2-local-intel-wikipedia-second-try-old-code.json`). It contains a sentence that the change record marks as invented: a "1901" gas light, the "Dalén light", with "Agamassan (Aga)" as its substrate. This report treats that sentence as a slip of a small model and does not quote it as fact. The summaries of this article on the Intel chip are weak, and a reader should not rely on them.
 
 The prompts are written to reduce these faults, and their structure has four parts. The page text comes first and one short instruction comes after it, because the code comment says small models follow short, plain instructions best. The page text sits between two markers, and a safety line tells the model that the text is material to summarize and not instructions to follow. The part summaries are asked for in 3 to 5 short sentences with no bullets, so the merge step has less to read. The merge prompt asks for "page order, without repeating yourself".
 
@@ -577,7 +579,7 @@ self.onmessage = (message) => handler.onmessage(message);
 
 The offscreen page exists because of the service worker. Chrome stops an extension's service worker when it is idle, and a stopped worker would lose the loaded model, which takes seconds to load. The offscreen page is a hidden page that stays alive. It has only the `chrome.runtime` messaging API, so it cannot read the storage or the tabs, and it works purely by messages from the service worker (chapter 9).
 
-Two timing rules govern the page. While it is busy, it sends a keepalive message every 10 seconds. It closes after five minutes without work to free the card's memory. It is never closed while a message is still running: only the last message to finish starts the five-minute countdown. The code comment estimates that closing frees about a gigabyte of graphics memory, which was not measured. A job that receives no update for five minutes counts as dead, and the 180-second answer timeout is a separate limit.
+Two timing rules govern the page. While it is busy, it sends a keepalive message every 10 seconds, which keeps the service worker awake and also refreshes the job record. It closes after five minutes without work to free the card's memory. It is never closed while a message is still running: only the last message to finish starts the five-minute countdown. The code comment estimates that closing frees about a gigabyte of graphics memory, which was not measured. A job that receives no update for five minutes counts as dead. The answer limit is ten minutes (`generateTimeoutMs` in `src/core/config.js`), a separate rule, so a long answer on a slow chip is not taken for a dead job.
 
 ![What runs where on the client laptop: the popup, service worker, offscreen page, web worker, Chrome GPU, graphics card, the disk and the first download](../figures/V12_deployment.png)
 
@@ -647,6 +649,8 @@ The developer laptop has two graphics chips. The Intel chip is built into the pr
 
 The saved runs use different models on each chip, so they are not a like-for-like comparison. On the built-in chip the extension picks SmolLM2 360M, and the clean run wrote at 4 to 5 tokens a second (`v2-local-intel.md`). On the NVIDIA card the clean runs wrote at 34 to 53 tokens a second with Llama 3.2 1B. Chapter 7 sets out the comparison.
 
+The seven-part Wikipedia article shows the difference in time. With the current code the built-in chip took 616.4 seconds, a little over ten minutes, with SmolLM2 writing at 4.1 tokens a second (`v2-local-intel-wikipedia.md`). An earlier try with the older code took 704.5 seconds, so the same chip varies from one try to the next. The NVIDIA card took 74.1 seconds for the same article in a clean run, with the model already downloaded (`v2-local-nvidia-cold-first-attempt.md`). A single run on the Intel chip is therefore not a fixed figure, and its summary of this article is weak (chapter 2).
+
 The extension detects the built-in chip by vendor and architecture. The Intel chip here reports the architecture `gen-12lp`, and the rule matches the "gen" part (`src/offscreen/offscreen.js`). The popup then shows a note that answers can be slow.
 
 ![Pretend model: the popup with the note for built-in graphics](../screenshots/ui-09-intel-note.png)
@@ -700,8 +704,9 @@ Table: Functional requirements for Version 2
 | FR5 | Enter a key once in an options page (Version 1 only). | Not built. No key box, Options page, key storage or key styles | None; checked by reading | Dropped on purpose |
 | FR6 | Download the model on first use with a progress bar, and keep it cached. | `src/engines/local.js` (`prepare`); `src/offscreen/offscreen.js` (`load`, IndexedDB cache); `src/core/gpu-check.js` (`mapInitProgress`, with the stored-model flag) | Scenarios V01, V12; smoke; unit: GPU and errors (stored and not-stored labels). Real first use: 196.8 s | Met, on one laptop |
 | FR7 | After caching, summarize with no network. | `src/offscreen/offscreen.js` asks for the file list only when the model is not stored. The summary path makes no request | Clean offline runs with outside websites blocked: 15.3 s and 16.5 s before the label fix; 17.7 s and 16 s after it. Not in the browser tests | Met on the developer's laptop |
-| FR8 | Failures give a clear message. | `src/core/errors.js` (`USER_MESSAGES`); `src/core/engine-errors.js` (`classifyEngineError`, `oom` matched as a whole word); `src/ui/popup.js` | Scenarios V04, V05, V06, V07, V08, V10 to V13, V20; unit: GPU and errors (11) | Met for the listed codes. TIMEOUT has no automated test |
+| FR8 | Failures give a clear message. | `src/core/errors.js` (`USER_MESSAGES`); `src/core/engine-errors.js` (`classifyEngineError`, `oom` matched as a whole word); `src/ui/popup.js` | Scenarios V04, V05, V06, V07, V08, V10 to V13, V20, V27; unit: GPU and errors (11), which includes CONTEXT_TOO_LONG | Met for the listed codes (15 codes now). The popup adds a technical-detail line for SERVICE_ERROR and MODEL_LOAD_FAILED (V27). TIMEOUT has no automated test |
 | FR9 | Check the computer first. Show a clear message if the model cannot run. Use a smaller model when memory is short. (From the risk table in `prd.md`.) | `src/core/gpu-check.js` (`evaluateGpu`, `chooseModel`); `src/engines/local.js` (`checkStatus`, one retry in `prepare`); `src/ui/popup.js` (`#result-notice`) | Scenarios V07 to V10 (V10 checks the notice); unit: local engine; real run on the Intel chip | Met. The fallback stays in force until stored settings are cleared. The under-8-GB rule has not been seen on low-memory hardware |
+| FR10 | Long pages on slow chips: the page is still summarized, each answer has up to 10 minutes, a part the model cannot read at once is cut in half, and a long answer does not make the job look dead. | `src/engines/local.js` (`summarizeChunk`: halving, up to three levels, not below 600 characters); `src/core/engine-errors.js` (CONTEXT_TOO_LONG); `src/core/config.js` (`generateTimeoutMs` 600000); `src/background/service-worker.js` (the KEEPALIVE message refreshes running jobs) | Scenarios V25 (cut part) and V26 (heartbeat); unit: local engine (halving), GPU and errors (CONTEXT_TOO_LONG). Real run on the Intel chip: the Wikipedia article in 616.4 s with the new code | Met in tests. One real run finished in 616.4 s, and no part needed cutting that day. The first try, under the old 180-second limit, failed with TIMEOUT |
 
 The popup's messages for a missing WebGPU and a missing 16-bit feature are drawn in the two pictures below. Both are pretend-model screenshots, so they show the messages, not measured behaviour.
 
@@ -720,7 +725,7 @@ Table: Non-functional requirements for Version 2
 | ID | Requirement | How it is checked, and the evidence | Status |
 |---|---|---|---|
 | NF1 | Page text never leaves the computer. | Code reading: the summary path only sends messages inside the extension. The one `fetch` outside the library reads the model's file list. No network capture was recorded | Partly |
-| NF2 | A speed a reader can wait for. The PRD gives no number. | Clean NVIDIA runs: first use 196.8 s; seven parts 74.1 s; a stored model 15.3 s (short) and 16.5 s (two parts) before the label fix, and 17.7 s and 16 s after it. Clean Intel runs: first use 199.2 s; two parts 149.1 s. On Intel, part 1 of the two-part article took about 65 s | Partly |
+| NF2 | A speed a reader can wait for. The PRD gives no number. | Clean NVIDIA runs: first use 196.8 s; seven parts 74.1 s; a stored model 15.3 s (short) and 16.5 s (two parts) before the label fix, and 17.7 s and 16 s after it. Clean Intel runs: first use 199.2 s; two parts 149.1 s. On Intel, part 1 of the two-part article took about 65 s. The seven-part Wikipedia article took 616.4 s with the new code, and 704.5 s on a second try with the old code | Partly |
 | NF3 | Disk space fits a normal laptop. | Not checked by the extension. `scripts/check-computer.ps1` prints the free space on drive C. The popup reports the download as about 695 MB. The README asks for about 3 GB free | Not verified on the client's laptop |
 | NF4 | The model fits in graphics memory. | `src/core/config.js` holds 879 MB (1B model) and 376 MB (SmolLM2), taken from WebLLM's list. No free-memory check exists. A failed load is retried once with the small model. A real out-of-memory was never produced; the failure paths are tested with the pretend model (scenarios V10, V11) | Partly |
 | NF5 | Works offline after the first download. | The model is stored in IndexedDB. The summary path makes no request. Clean offline runs with outside websites blocked | Met on the developer's laptop |
@@ -728,7 +733,7 @@ Table: Non-functional requirements for Version 2
 | NF7 | No key. | No key box, key storage or key styles remain in the Version 2 code. No test asserts it | Met by reading |
 | NF8 | Chrome desktop, Manifest V3, loaded unpacked. | `manifest.json` (`manifest_version` 3). `run.bat` shows the load steps, because branded Chrome no longer accepts the load flag (DEVLOG, 20 October). 15 batch-script checks (B1 to B10c). `set-chrome-gpu.ps1 -Remove` works without a Chrome path. A manual load in the installed Chrome is still needed | Partly |
 | NF9 | Works on the client's laptop. | FR9 chooses the model from the reported card and memory. The client's details have been requested and have not come back | Not verified |
-| NF10 | Summaries good enough for a busy reader (abstract goal 6). | No formal quality check. Copied page markers are now removed from answers. The saved Intel summary and its screenshot were recorded before that fix and still show the marker. The Llama summary of the short article calls the thick single lens "the original Fresnel lighthouse", which the page does not say | Not verified |
+| NF10 | Summaries good enough for a busy reader (abstract goal 6). | No formal quality check. Copied page markers are now removed from answers. The saved Intel summary and its screenshot were recorded before that fix and still show the marker. The Llama summary of the short article calls the thick single lens "the original Fresnel lighthouse", which the page does not say. The Intel Wikipedia summaries have not been checked against the page, and the summary of the old-code second try contains invented facts | Not verified |
 
 **What this means in plain words.** The privacy and offline claims rest on reading the code and on offline runs, with no network capture behind them. The speed numbers come from one laptop. Quality has not been measured, and the saved samples show faults, one of which has since been fixed in the code.
 
@@ -757,10 +762,10 @@ Table: Requirements that differ from Version 1
 - **The client's laptop has not been tested** (README, "Not yet verified"). Its graphics chip, memory and free disk space have been requested and have not come back.
 - **Both measured chips are on one laptop**: an Intel built-in chip and an NVIDIA RTX 3050 with 6 GB, Chrome 155 and 15.7 GB of memory (DECISIONS.md, D1).
 - **`setup.bat --gpu`** was tried only against a throw-away registry key, not a real Chrome.
-- **The visible Chrome** has had no manual click-through. The browser scenarios ran hidden.
+- **The real Chrome** showed a failure on 24 October. The project owner's run of the Wikipedia article on the Intel chip ended with "Something went wrong inside the extension. Try again." and no reason. The cause and the changes are in chapter 6. No full manual click-through is recorded, and the browser scenarios ran hidden.
 - **Summary quality** has not been compared.
-- **Real-model runs.** Six exist. Four are clean: the first NVIDIA run, the NVIDIA offline run before the label fix, the Intel run, and the NVIDIA offline run after the label fix. Two were done while other programs were using the processor and are kept as records.
-- **Test counts.** The current code has 70 unit tests, 26 browser scenarios and 15 batch-script checks. These counts come from the change notes; `run-1.md` records three full browser runs made before the later fixes.
+- **Real-model runs.** Nine run files exist. Six were made before 24 October, and three Intel Wikipedia runs were added that day (one failed with TIMEOUT under the old code, one finished under the old code, and one under the new code). Of the six older runs, four are clean: the first NVIDIA run, the NVIDIA offline run before the label fix, the Intel run, and the NVIDIA offline run after the label fix. Two were done while other programs were using the processor and are kept as records.
+- **Test counts.** The current code has 76 unit tests, 29 browser scenarios and 15 batch-script checks. The unit and scenario counts match the test files; the batch count comes from the change notes. `run-1.md` records three full browser runs made before the later fixes.
 
 **What this means in plain words.** Every claim about the client's own laptop, the visible browser and summary quality is still open. The results so far come from one developer's machine.
 
@@ -776,7 +781,7 @@ The code gives page text no route off the machine, and the only network request 
 On the developer's laptop, yes. Clean runs with outside websites blocked gave summaries in 15.3 s and 16.5 s before the label fix, and 17.7 s and 16 s after it. The client's laptop has not been tested.
 
 **How fast is it?**
-On the NVIDIA chip the first use took about 197 s, most of it the download. A short article took 15.3 s to 17.7 s once the model was stored. The PRD sets no target, so the speed requirement is only partly met.
+On the NVIDIA chip the first use took about 197 s, most of it the download. A short article took 15.3 s to 17.7 s once the model was stored. On the Intel chip the seven-part Wikipedia article took 616.4 s with the new code. The PRD sets no target, so the speed requirement is only partly met.
 
 **Which requirements are still open?**
 The client's laptop, disk and memory on a second computer, the visible Chrome check, the setup script against a real Chrome, and summary quality. None of these has a result in the repository yet, so each stays marked as not verified or partly verified above.
@@ -796,7 +801,7 @@ Table: The layers of Version 2, what each owns, and what it talks to
 
 | Layer | Files | Owns | Talks to |
 |---|---|---|---|
-| Popup | `src/ui/popup.html`, `popup.js` | The button, model line, progress bar, notice and summary | Service worker, by message; reads the job record |
+| Popup | `src/ui/popup.html`, `popup.js` | The button, model line, progress bar, notice, technical-detail line and summary | Service worker, by message; reads the job record |
 | Service worker | `src/background/service-worker.js` | The job: id, phases, record, stop and cancel | Popup, offscreen manager, pipeline, Chrome tabs |
 | Offscreen manager | `src/background/offscreen-manager.js` | Opening and closing the hidden page, its idle timer, a count of messages in flight | Chrome's offscreen API, the offscreen page |
 | Offscreen page | `src/offscreen/offscreen.js` | The loaded model, the download, the warm-up, one answer at a time | Service worker, by message; the web worker |
@@ -838,7 +843,7 @@ function writeJob(tabId, jobId, patch) {
 }
 ```
 
-The popup sends one `START_SUMMARY` message and gets `{ok: true}` back at once. The job then runs in the service worker, so closing the popup changes nothing. Reopening it shows the same job (scenario V15), and a finished job is shown without a new run (scenario V16). A running job with no update for five minutes (`STALE_MS`, the same in the popup) is shown as interrupted; Version 1 used three minutes. The 180-second limit on one answer is unchanged. A new service worker marks a job left "running" as INTERRUPTED (scenario V20), and a closed tab has its job aborted (scenario V22).
+The popup sends one `START_SUMMARY` message and gets `{ok: true}` back at once. The job then runs in the service worker, so closing the popup changes nothing. Reopening it shows the same job (scenario V15), and a finished job is shown without a new run (scenario V16). The offscreen page's KEEPALIVE message, sent every 10 seconds while it works, also refreshes the update time of every running job (scenario V26), so one answer that runs past five minutes does not look dead. A running job with no update for five minutes (`STALE_MS`, the same in the popup) is shown as interrupted; Version 1 used three minutes. One answer may now take up to 10 minutes (`generateTimeoutMs`, previously 180 seconds). A new service worker marks a job left "running" as INTERRUPTED (scenario V20), and a closed tab has its job aborted (scenario V22).
 
 ![Job phases in order: extracting, checking, downloading, loading, warming up, summarizing, merging, done or error](../figures/V06_job_phases.png)
 
@@ -848,7 +853,7 @@ Reading the figure: The figure lists the phases the popup shows, in order. The D
 
 ## The offscreen page and the keepalive
 
-The model takes seconds to load, and a stopped service worker would lose it. The model therefore lives in an offscreen page, which has only the `chrome.runtime` API, so the service worker asks and the page answers by message. While work runs, the page sends `KEEPALIVE` every 10 seconds. The service worker's comment says receiving it keeps the worker awake. The design does not rely on that alone, because a stopped worker still leads to the INTERRUPTED path.
+The model takes seconds to load, and a stopped service worker would lose it. The model therefore lives in an offscreen page, which has only the `chrome.runtime` API, so the service worker asks and the page answers by message. While work runs, the page sends `KEEPALIVE` every 10 seconds. The service worker's comment says receiving it keeps the worker awake, and the same message refreshes the update time of each running job, so the popup does not treat a long answer as dead. The design does not rely on that alone, because a stopped worker still leads to the INTERRUPTED path.
 
 `finalsem/project/src/background/offscreen-manager.js`, lines 62 to 76
 
@@ -890,7 +895,7 @@ Reading the figure: The figure shows first use with the download (158.3 s), the 
 2. **Pressing the button (0 s).** The service worker writes the job record and replies at once.
 3. **Reading the page (0.1 s).** `extractFromTab` refuses browser pages Chrome does not allow, then injects Readability and the extractor.
 4. **Checking the card (under a second).** The pipeline calls `engine.prepare`.
-5. **Downloading (0.5 s to 158.8 s).** WebLLM runs in a web worker with its cache in IndexedDB. Progress arrives as `MODEL_PROGRESS` messages.
+5. **Downloading (0.5 s to 158.8 s).** WebLLM runs in a web worker with its cache in IndexedDB. Progress arrives as `MODEL_PROGRESS` messages, and the keepalive refreshes the running job's record every 10 seconds.
 6. **Loading into the card (158.8 s to 162.6 s).**
 7. **Warming up (162.6 s to 193.1 s).** One request of one token ("Say ok.") makes the card compile its programs.
 8. **Summarizing (193.1 s to 196.8 s).** One part and one request.
@@ -913,7 +918,7 @@ A later use has the same screens with the long steps removed. The reference is t
 2. **Pressing the button (0 s).** The page is read in 0.1 s, and the card is checked at 0.6 s.
 3. **Loading from the cache (1.9 s to 12.7 s).** The load took 11.6 s in this run, against 6.9 s in the earlier offline run, so the time varies.
 4. **Warming up (13.1 s to 13.5 s).** Under half a second, against about 30 s on first use. The reason is not measured.
-5. **Summarizing.** The short article took 17.7 s in all, and the two-part article 16 s.
+5. **Summarizing.** The short article took 17.7 s in all, and the two-part article 16 s. While each answer runs, the keepalive keeps the job record fresh.
 
 ![Real model, offline run after the label fix: warm-up on a stored model, with no Downloading line](../screenshots/v2-nvidia-offline-short-warming-after-label-fix.png)
 
@@ -949,17 +954,17 @@ The model cache sits in the client's Chrome profile, not in the project folder. 
 The comparison used `diff -rq` on `midsem/project/src` and `finalsem/project/src`, then a line-by-line diff of each changed file. Version 1's source folder holds 19 files and Version 2's holds 26.
 
 - **Unchanged, byte for byte (8 files):** `background/extract-tab.js`, `content/extract.js`, `core/chunker.js`, `core/merger.js`, `core/url.js`, `ui/summary-format.js`, `lib/readability.js` and `lib/READABILITY_LICENSE.md`.
-- **Changed (8 files), with diff lines (old and new together):** `background/service-worker.js` 85, `core/config.js` 83, `core/errors.js` 56, `core/pipeline.js` 6 (all added), `core/prompts.js` 61, `ui/popup.html` 16, `ui/popup.js` 172, `ui/ui.css` 38 (key-box and options rules removed, six lines added).
+- **Changed (8 files), with diff lines (old and new together):** `background/service-worker.js` 92, `core/config.js` 83, `core/errors.js` 58, `core/pipeline.js` 6 (all added), `core/prompts.js` 61, `ui/popup.html` 17, `ui/popup.js` 181, `ui/ui.css` 39 (key-box and options rules removed, seven lines added).
 - **Removed (3 files):** `engines/gemini.js`, `ui/options.html`, `ui/options.js`.
 - **New (10 files):** `background/offscreen-manager.js`, `core/engine-errors.js`, `core/gpu-check.js`, `engines/local.js`, `lib/web-llm.js`, `lib/WEBLLM_LICENSE`, and four files in `offscreen/`.
 
 The counts agree: 8 unchanged, 8 changed and 3 removed make the 19 Version 1 files, and 8 unchanged, 8 changed and 10 new make the 26 Version 2 files. The diff line counts show the size of each change, not how many edits were made.
 
-In the changed files, the largest changes are these. Service worker: the job logic is Version 1's, the Gemini engine is replaced by `makeEngine`, and the progress listener, the model-state message and the fallback save are added. Config: the part size goes from 8,000 to 6,000 characters and the part limit from 30 to 12. Errors: the five key, rate and network codes go, and the model codes come in.
+In the changed files, the largest changes are these. Service worker: the job logic is Version 1's, the Gemini engine is replaced by `makeEngine`, and the progress listener, the model-state message and the fallback save are added. On 24 October the keepalive message was also made to refresh running jobs. Config: the part size goes from 8,000 to 6,000 characters and the part limit from 30 to 12. Errors: the five key, rate and network codes go, the model codes come in, and CONTEXT_TOO_LONG was added on 24 October, making 15 codes. The files `local.js`, `engine-errors.js` and `mock-engine.js` also changed on 24 October. They are new in Version 2, so they sit outside the Version 1 comparison.
 
 ![Reuse from Version 1 to Version 2: unchanged, changed and new files](../figures/V14_reuse_v1_v2.png)
 
-Reading the figure: The figure sorts the files into the groups above. Its line counts do not match a fresh diff of the current code (for example, `ui/ui.css` shows 5 where the fresh diff gives 38), so this chapter uses the fresh counts. The groups match.
+Reading the figure: The figure sorts the files into the groups above. Its line counts are the changed lines of a diff against Version 1 (for example, `ui/ui.css` 39 and `ui/popup.js` 181). The groups match the lists above.
 
 **What this means in plain words.** Eight of the 19 Version 1 files carry over unchanged. They are the part of the product that reads and summarizes text, while the engine, the key and the messages differ.
 
@@ -979,7 +984,9 @@ The pipeline runs the whole job through one engine object. Its contract, in the 
 
 `prepare` in `local.js` checks the card and loads the model. If the load fails for lack of graphics memory or a start failure, it retries once with the small model and saves that choice, so later jobs also start with the small model.
 
-`finalsem/project/src/engines/local.js`, lines 70 to 89
+`summarizeChunk` in `local.js` handles a part that WebLLM refuses for length. The part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep and not for text under 600 characters. A page that was one part becomes two parts and one merge request, and the job counts the cut parts in `stats.halvedParts`.
+
+`finalsem/project/src/engines/local.js`, lines 76 to 95
 
 ```
     /** Checks the graphics card, downloads the model if needed, and loads it. Throws AppError. */
@@ -1035,8 +1042,10 @@ Table: How a failure reaches the reader (selected codes)
 | MODEL_DOWNLOAD_FAILED | `classifyEngineError`, when the message mentions the network | A message; nothing is saved, and a later press works | Scenario V12 |
 | TOO_LONG | `runPipeline`, above 12 parts | Refused before any download | Scenario V06 |
 | EMPTY_ANSWER | `generate` in `local.js` | A message saying no summary was returned | Scenario V13 |
-| TIMEOUT | Timer in the offscreen page, 180 s | A message | Unit test of the code only; no automated test runs the timer |
+| TIMEOUT | Timer in the offscreen page, 10 minutes | A message | Unit test of the code only; no automated test runs the timer |
 | INTERRUPTED | `sweepOrphans` after a worker restart, or no update for five minutes | A message, and the popup says so | Scenario V20 |
+| CONTEXT_TOO_LONG | `classifyEngineError` (WebLLM's window message); `summarizeChunk` cuts the part in half | Two halves are summarized and merged. The message appears only if halving also fails | Unit tests; scenario V25 |
+| SERVICE_ERROR, MODEL_LOAD_FAILED | Any unexpected error, or a load that will not start | The message, with "Technical detail:" and the first 240 characters of the detail under it | Scenario V27 |
 
 ![Pretend model screenshot: the result after the main model ran out of memory, with the notice that the smaller model wrote the summary](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
@@ -1044,7 +1053,7 @@ This is a pretend-model picture. The notice reads "The main model did not fit in
 
 ![How the errors flow from the code to the popup](../figures/V11_error_flow.png)
 
-Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. TIMEOUT is drawn as no answer within 3 minutes, which matches the 180-second limit.
+Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. The figure predates the 24 October changes: it has no CONTEXT_TOO_LONG row, and its TIMEOUT row says 3 minutes, while the answer limit is now 10 minutes.
 
 **What this means in plain words.** Each failure has one name in the code and one message on the screen. The gap is the timeout, which has a message but no automated test.
 
@@ -1090,11 +1099,11 @@ Table: The first choice, question by question, from decision D1
 | 1 | Library | WebLLM 0.2.86, pinned, one file; Transformers.js only as plan B | Followed. The spike worked |
 | 2 | Where it runs | Offscreen page with one module web worker; job stays in the service worker; keepalive; close after about five idle minutes | Followed. Keepalive every 10 s |
 | 3 | Which model | Llama 3.2 1B by default, SmolLM2 360M as fallback, chosen by computer | Followed, with one rule added after measuring (D3) |
-| 4 | Piece size and prompt | 6,000 characters a part; at most 300 tokens an answer; temperature 0.2; halve the part if the window is exceeded | Followed, except the halving step, which was **not built** |
+| 4 | Piece size and prompt | 6,000 characters a part; at most 300 tokens an answer; temperature 0.2; halve the part if the window is exceeded | Followed. The halving step was missing until 24 October, when it was built after a failure in the real Chrome |
 | 5 | Keep the cloud engine? | Local only; remove the key box | Followed |
 | 6 | Biggest risk | WebLLM without a bundler in an offscreen page on a weak chip; test first in a throw-away extension | Done as a spike, which found the storage problem (D2) |
 
-The advice named three conditions that would change it: a client laptop without WebGPU, a failed spike, and one part taking more than about 60 seconds. The first two did not happen. The third did, on the Intel chip, where the first part of the two-part article took about 65 s with SmolLM2. The response was narrower than the advice: SmolLM2 became the default on Intel graphics only (D3). The halving step was never built, because no real run hit a window error.
+The advice named three conditions that would change it: a client laptop without WebGPU, a failed spike, and one part taking more than about 60 seconds. The first two did not happen. The third did, on the Intel chip, where the first part of the two-part article took about 65 s with SmolLM2. The response was narrower than the advice: SmolLM2 became the default on Intel graphics only (D3). The halving step was left out at first, because no run had yet hit a window error. The first real-Chrome failure, on 24 October, was a dense page that did not fit the window, so the step was built then.
 
 **What this means in plain words.** Most of the advice was followed. One condition came true, and the answer was a rule for one kind of chip, not a change for every computer.
 
@@ -1144,7 +1153,8 @@ Table: The four models considered, with the graphics memory from DECISIONS.md
 - **Choice.** 6,000 characters a part, about 1,500 tokens, with part answers capped at 300 tokens, the final answer at 320, and temperature 0.2.
 - **Trade-off accepted.** Long pages need more requests, and pages over 12 parts are refused (`maxChunks`).
 - **Measured afterwards.** The clean NVIDIA runs took 15.9 s for the two-part article and 74.1 s for the seven-part article. No real run hit a window error.
-- **Not built.** The halve-and-retry step.
+- **Built on 24 October.** The halve-and-retry step was in the advice (D1, item 4) and had been left out. In the real Chrome, the project owner ran the Wikipedia article on the Intel chip and got "Something went wrong inside the extension. Try again." with no reason. WebLLM had refused a dense part with "Prompt tokens exceed context window size", and the code reported that as a generic service error. The fix recognises the message as CONTEXT_TOO_LONG. `summarizeChunk` then cuts the part in half at a paragraph or sentence break and summarizes each half, up to three levels deep and not for text under 600 characters. The job counts the cut parts in `stats.halvedParts`. The unit tests and scenario V25 pass. No part of the 24 October run needed cutting, so the effect on a real page is not yet measured.
+- **Answer limit.** The limit on one answer rose from 180 seconds to 10 minutes (`generateTimeoutMs`). In the failing run, one answer on the Intel chip ran past 180 s: parts 1 and 2 took 76 s and 127 s, and part 6 had not answered within 180 s.
 
 **What this means in plain words.** Each piece is small enough for the model to read at once, and very long pages are refused before the wait starts.
 
@@ -1185,7 +1195,7 @@ This record changed after measuring. The first version used the same model on ev
 - **Choice.** Switch to SmolLM2 360M, and show a note that a separate card is much faster.
 - **Why the others were rejected.** On Intel the 1B model wrote about 2 tokens a second, and the first answer took 36 s to prepare. The development log says the weak chip "is not an error", so it gets a note and a smaller model rather than a refusal.
 - **Trade-off accepted.** Answers are slow and come from the smaller model, whose quality was not compared. Detection covers Intel only, so an AMD or Apple built-in chip is not switched. This limit remains.
-- **Measured afterwards.** The Intel short article took 199.2 s on first use (81 s download, about 40 s warm-up, 76 s writing). The two-part article took 149.1 s with the model stored.
+- **Measured afterwards.** The Intel short article took 199.2 s on first use (81 s download, about 40 s warm-up, 76 s writing). The two-part article took 149.1 s with the model stored. The seven-part Wikipedia article took 616.4 s with the new code and 704.5 s on a second try with the old code. The first try, under the old 180-second limit, failed with TIMEOUT.
 
 ![Real model, Intel built-in graphics, recorded before the marker fix: the popup with the note that names the chip](../screenshots/v2-intel-short-popup.png)
 
@@ -1217,7 +1227,7 @@ Reading the figure: The figure shows Chrome on the Intel chip by default, and th
 - **Choice.** Both. Most browser scenarios use the pretend model selected with `?mock=<mode>`.
 - **Why the first option was rejected.** A real model cannot be made to fail on demand.
 - **Trade-off accepted.** The pretend model says nothing about summary quality or real memory limits. Its fixed numbers, such as 664 MB and 300 MB, are not measurements.
-- **Measured afterwards.** The current code has 70 unit tests, 26 browser scenarios and 15 batch-script checks, from the change notes. `run-1.md` records three full browser runs made before the later fixes.
+- **Measured afterwards.** The current code has 76 unit tests, 29 browser scenarios and 15 batch-script checks, from the change notes. `run-1.md` records three full browser runs made before the later fixes.
 
 **What this means in plain words.** Most tests are quick and repeatable, and a few real runs show that the model works on the developer's laptop.
 
@@ -1241,7 +1251,7 @@ Table: Problems found in review, and their status
 |---|---|---|
 | Unused key-box and options CSS | **Fixed.** Removed from `ui.css`; one rule added for the notice | Chapter 5, reuse |
 | Intel detection | **Still open.** Only an Intel built-in chip is switched; AMD or Apple built-in chips are not | This chapter, weak-chip record; FR9 |
-| TIMEOUT untested | **Still open.** No automated test runs the 180-second timer; the pretend model has no timeout | Chapter 5, failures; FR8 |
+| TIMEOUT untested | **Still open.** No automated test runs the 10-minute timer; the pretend model has no timeout | Chapter 5, failures; FR8 |
 | Copied page markers in answers | Fixed. `stripPageMarkers` with two unit tests. The Intel run and its screenshot predate the fix | Chapter 5, engine seam |
 | Silent fallback to the smaller model | Fixed. A notice shows on the result (scenario V10) | Chapter 5, failures |
 | Stale "Not downloaded yet" after both models fail | Fixed. The line refreshes once when a job ends; not during download or warm-up | Chapter 5, first use |
@@ -1249,11 +1259,16 @@ Table: Problems found in review, and their status
 | Offscreen page closed during a long answer | Fixed. Messages in flight are counted, with a unit test | Chapter 5, offscreen page |
 | "oom" matched inside words such as "room" | Fixed, with a unit test | Chapter 4, FR8 |
 | Stale limit of three minutes | Changed to five minutes; Version 1 kept three | Chapter 5, job record |
+| The real-Chrome failure with no reason (24 October) | **Fixed.** The popup shows a technical-detail line under SERVICE_ERROR and MODEL_LOAD_FAILED (scenario V27) | Chapter 5, failures |
+| A dense part refused by WebLLM and reported as a vague error | **Fixed.** CONTEXT_TOO_LONG is recognised, and the part is cut in half (scenario V25) | Chapter 5, engine seam; this chapter, piece-size record |
+| Answer limit of 180 s too short on the Intel chip | **Fixed.** Changed to 10 minutes; the TIMEOUT message is unchanged | Chapter 5, job record |
+| A long answer shown as dead (interrupted) | **Fixed.** The KEEPALIVE message refreshes running jobs (scenario V26) | Chapter 5, job record |
+| The test setup reused an old service-worker script | **Fixed.** `scripts/local-run.mjs` deletes the profile's Service Worker and Code Cache folders before a run; the downloaded model is kept | Test setup |
 | Undo command needed `-ChromePath` | Fixed. The README command works | This chapter, opt-in record |
 
 One loose end is not a code change: the download size is quoted as 664 MB in a DEVLOG row and as about 660 MB in a script comment, while the popup reports about 695 MB, which this report uses.
 
-These limits are still true of the code. `modelOverride` is never cleared, so the small model stays in use until the stored settings are cleared. Closing a tab during a download does not stop it, because `prepare()` ignores the abort signal. The merge answer can repeat the prompt's own wording, and small models make factual slips. The model line is not refreshed during the download or warm-up. A load-stage error containing "cache" counts as a download failure. The secret-scan script knows only the Version 1 Gemini key. The under-8-GB rule has not been seen on low-memory hardware. The dashboard fixture is used by no Version 2 browser scenario. The warm-up took about 30 s on first use and 0.4 to 0.5 s later, and the reason is not measured.
+These limits are still true of the code. `modelOverride` is never cleared, so the small model stays in use until the stored settings are cleared. Closing a tab during a download does not stop it, because `prepare()` ignores the abort signal. The merge answer can repeat the prompt's own wording, and small models make factual slips. The model line is not refreshed during the download or warm-up. A load-stage error containing "cache" counts as a download failure. The secret-scan script knows only the Version 1 Gemini key. The under-8-GB rule has not been seen on low-memory hardware. The dashboard fixture is used by no Version 2 browser scenario. The warm-up took about 30 s on first use and 0.4 to 0.5 s later, and the reason is not measured. On the Intel chip the seven-part Wikipedia article takes about 10 to 12 minutes (616.4 s with the new code, 704.5 s with the old). The summary of the old-code second try contains invented facts, which must not be quoted. The new-code summary is three short generic points (history and significance, a count of 14,700 lighthouses, and counts of 54 diagrams and 651 photographs), and those counts were not checked against the page.
 
 **What this means in plain words.** The fixes cover the defects a reader would see. The open items are the chip detection, the untested timeout and several limits of the small model and the test setup.
 
@@ -1288,7 +1303,7 @@ Cache Storage failed inside the offscreen page, and IndexedDB worked there. The 
 The PRD goal of no API key and no page text leaving the machine would be broken by a cloud engine. A laptop without WebGPU gets a clear refusal rather than a fallback.
 
 **Did another model check the first choice, and was its advice followed?**
-Yes. The question went to a stronger model in writing before building, with a stated confidence of medium. Most of the advice was followed, one condition came true on the Intel chip, and the halving step was not built.
+Yes. The question went to a stronger model in writing before building, with a stated confidence of medium. Most of the advice was followed, one condition came true on the Intel chip, and the halving step was built on 24 October, after a failure in the real Chrome.
 
 
 <div style="page-break-after: always"></div>
@@ -1385,7 +1400,7 @@ Table: What the reader sees for each outcome
 | Check fails for another reason | SERVICE_ERROR | `Something went wrong inside the extension. Try again.` | Enabled |
 | Answer not yet received | none | `Checking this computer...` | No change |
 
-If the size cannot be read, the first row says "about several hundred MB". The built-in note reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.` Only the two blocking codes disable the button, because the code comment says other failures may be temporary. After every job ends, success or error, the popup asks for the model state once more, so the model line follows the saved choice.
+If the size cannot be read, the first row says "about several hundred MB". The built-in note reads: `Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.` Only the two blocking codes disable the button, because the code comment says other failures may be temporary. For `SERVICE_ERROR` and `MODEL_LOAD_FAILED` the popup also shows a line that starts "Technical detail:" with the first 240 characters of the error. After every job ends, success or error, the popup asks for the model state once more, so the model line follows the saved choice.
 
 **What this means in plain words.** Two messages stop the button. Every other failure leaves it open, and the model line is brought up to date when a job ends.
 
@@ -1442,6 +1457,8 @@ On the default run the summary started at 123.1 seconds and ended at 199.2 secon
 
 Chrome picked the built-in chip by default, even when the code asked for the high-performance card. The flag changed the choice (DEVLOG, 2026-10-21; chapter 15 tells this). The opt-in setting `setup.bat --gpu` moves Chrome to the separate card (DECISIONS D4). It prints a plain message if the Windows change fails, and setup carries on. In one speed test the 1B model wrote about 2 tokens a second on the built-in chip (DEVLOG only, no run file). In the saved clean runs the separate card wrote 34 to 53 tokens a second, and each value is the last request of its job.
 
+The Intel chip also ran the 7-part Wikipedia article (36,752 characters). With the new code, which has a 10-minute answer limit and cuts a part that does not fit the window in half, the summary took 616.4 seconds, writing at 4.1 tokens a second. The old code timed out on the first try, after 615.6 seconds: part 6 of 7 had not answered 180 seconds after it started. The same old code finished the second try in 704.5 seconds. Answer times on this chip vary a lot, which is why the limit was raised (DEVLOG, 2026-10-24).
+
 **What this means in plain words.** On this laptop the browser decides which chip runs the model. The same article took about 76 seconds on the built-in chip and about 3.7 seconds on the separate card, once the download was done.
 
 ## Figures
@@ -1490,7 +1507,7 @@ The developer log tells the stories behind this part (chapter 15). The main ones
 
 ## How it was tested
 
-The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engine.test.js` cover the check, the choice and the retry. The browser tests in `tests/e2e/pipeline.test.js` use the pretend model: V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 70 tests and the browser suite 26. The real card was checked only on the developer laptop.
+The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engine.test.js` cover the check, the choice and the retry. The browser tests in `tests/e2e/pipeline.test.js` use the pretend model: V07 covers no WebGPU, V08 no 16-bit math, V09 built-in graphics, V10 an out-of-memory primary model (and checks the notice), V11 two out-of-memory models, and V12 a failed download. The unit suite has 76 tests and the browser suite 29. Scenario V25 covers the halving of long parts, and V27 the technical detail line. The real card was checked only on the developer laptop.
 
 **What this means in plain words.** The rules are checked by unit tests and by the pretend model. The real card was checked on one laptop only.
 
@@ -1500,6 +1517,8 @@ The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engi
 - The memory rule works only below 8 GB, because the browser caps the value. No run on a 4 GB machine is recorded, so the threshold is not measured [to be measured].
 - The small model's answers are weaker. The merge step can repeat the prompt's own preamble, and small models make factual slips. Chapter 10 covers how good the summaries are.
 - No code path clears `modelOverride`, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
+- Halving is built. A part that does not fit the model's window is cut in half and summarized again, up to three levels deep and for parts of at least 600 characters. The real Wikipedia run did not need it, so the halving is covered by unit tests and by scenario V25 only.
+- A long page on the Intel chip is slow. The 7-part Wikipedia article took about 10 to 12 minutes with SmolLM2 (616.4 seconds with the new code). The summary of the old-code second try contains invented facts, which are not quoted here. The new-code run's summary has three short generic points, and its counts were not checked against the page. Chapter 10 covers summary quality. Wikipedia text changes from day to day, so a part that overflows one day may fit the next.
 - The client's laptop has not been tested (DECISIONS D1, last paragraph).
 
 ## Questions this chapter answers
@@ -1626,7 +1645,7 @@ Table: The two clean offline runs, before and after the label fix (same laptop, 
 | Before the label fix (`v2-local-nvidia-offline.md`) | "Downloading ... 0%" at 3.9 s, about 0.8 s | 6,890 | 8.1 to 8.6 s | 15.3 s | about 6.7 s | 40 and 42 tokens a second | 16.5 s |
 | After the label fix (`v2-local-nvidia-offline-after-label-fix.md`) | None | 11,621 | 13.1 to 13.5 s | 17.7 s | about 4.2 s | 65 and 45 tokens a second | 16 s |
 
-The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length.
+The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length. Real-model runs made before 24 October used a stale service worker script, because the persistent test profile kept an old copy of it. The test script now deletes that copy before each run, and the downloaded model is not touched. Every real run cited in this chapter was made before that change.
 
 The Intel first use (SmolLM2, clean run) took 199.2 seconds: a download from 0.9 to 81.2 seconds for about 204 MB, a warm-up of about 39.4 seconds, and writing at 4 to 5 tokens a second. The NVIDIA first use run while other programs were using the processor took 207 seconds, with a warm-up of about 56 seconds. That run is labelled as disturbed in the test-run folder.
 
@@ -1694,7 +1713,7 @@ Most failures in this part end with a message and leave the stored model alone. 
 - A stored check that throws counts as "not stored", so a stored model may be offered again.
 - A size estimate that fails, or takes more than 8 seconds, shows "about several hundred MB".
 - A download that stops gives `MODEL_DOWNLOAD_FAILED`. It is not retried with the small model, and nothing is saved (browser test V12). The message says that what was already downloaded is kept. No real network break has tested that claim.
-- A load or warm-up that is silent for more than 5 minutes is shown as interrupted, even if it is still working. The load has no timeout of its own. The stale limit was 3 minutes before the fix, which was the same length as the 180-second answer timeout. It is now 5 minutes (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2).
+- A job with no update for 5 minutes is shown as interrupted. While the page is busy, its KEEPALIVE message refreshes the running job records every 10 seconds, so a long load or warm-up is not shown as interrupted while the page still works. The load has no timeout of its own. The answer limit is 10 minutes, longer than the 5-minute dead-job limit, which is why the refresh was needed. The dead-job limit was 3 minutes before the fix, when it matched the old 180-second answer limit (DEVLOG, 2026-10-21 and 2026-10-24).
 
 **What this means in plain words.** Most failures show a clear message and leave the stored model alone. The one remaining gap is a very long silent wait, which the popup reports as an interruption.
 
@@ -1704,7 +1723,7 @@ Chapter 15 tells the stories behind this part: the model cache that refused to o
 
 ## How it was tested
 
-The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 70 tests, and the browser suite has 26. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
+The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 76 tests, and the browser suite has 29. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
 
 ## Limitations
 
@@ -1798,7 +1817,7 @@ Table: The five message types between the service worker and the offscreen page
 | `LOCAL_LOAD` | Service worker to page | `modelId` | `loadMs`, or `alreadyLoaded`, or an error | Once per job, after the check |
 | `LOCAL_GENERATE` | Service worker to page | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `text` and `stats`, or an error | Once per part, and once per merge step |
 | `MODEL_PROGRESS` | Page to service worker | `phase`, `percent`, `text` | None | During a download or load |
-| `KEEPALIVE` | Page to service worker | None | None | Every 10 seconds while the page is busy |
+| `KEEPALIVE` | Page to service worker | None | None | Every 10 seconds while the page is busy; the service worker also refreshes the running job records |
 
 Figure: the message protocol between the two pages.
 
@@ -1908,11 +1927,16 @@ function endWork() {
 
 `src/background/service-worker.js`
 ```js
-  // KEEPALIVE from the offscreen page needs no answer: receiving it is what keeps this worker alive.
-  return false;
+  if (message?.type === 'KEEPALIVE') {
+    // The offscreen page sends this every 10 s while it works. Receiving it keeps this worker alive,
+    // and it also proves the running jobs are alive: one answer can take minutes on a slow chip,
+    // and the popup treats a job with no update for 5 minutes as dead.
+    for (const [tabId, running] of controllers) void writeJob(tabId, running.jobId, {});
+    return false;
+  }
 ```
 
-The timer runs while at least one request is in progress. The service worker does nothing with the message beyond receiving it, and the code comment says that receiving it is what keeps the worker awake. Chrome's general rule for idle workers is background knowledge, and the project does not measure it. The 10-second interval is the project's own choice.
+The timer runs while at least one request is in progress. Each KEEPALIVE does two things in the service worker. Receiving it keeps the worker awake, and it refreshes the `updatedAt` time of every running job record. A single answer can take minutes on a slow chip, and the popup treats a job with no update for 5 minutes as dead, so without that refresh a long answer would look interrupted while it was still running. Chrome's general rule for idle workers is background knowledge, and the project does not measure it. The 10-second interval is the project's own choice.
 
 **What this means in plain words.** While the page is busy, it contacts the service worker every 10 seconds, so Chrome does not put the worker to sleep in the middle of a job.
 
@@ -2027,7 +2051,7 @@ Browser tests cannot depend on a real graphics card or a 695 MB download. The pr
   }
 ```
 
-The table lists each mode and the browser test that uses it. The modes are defined in the header of `mock-engine.js`.
+There are twelve modes. The table lists each mode and the browser test that uses it. The modes are defined in the header of `mock-engine.js`.
 
 Table: The pretend model modes and the browser tests that use them
 
@@ -2043,6 +2067,8 @@ Table: The pretend model modes and the browser tests that use them
 | `empty` | The model answers with no text | V13 |
 | `html` | The model answers with HTML-looking text, which the popup must show as plain text | V14 |
 | `slow` | Each answer takes at least 1.5 seconds | Not used by the browser test file |
+| `longprompt` | Returns the window-size error for a part, to test the halving | V25 |
+| `crash` | Fails in the way that shows the technical detail line | V27 |
 
 The fake download runs eight steps of 120 milliseconds, reporting each step as progress. The pretend model records that a model is stored in the page's `localStorage`, under one key per model. It does not use IndexedDB, so it says nothing about the real cache. The pretend model also never sends the "Loading the model into the graphics card" message at the point where the screenshot `ui-03` is taken. That picture was made by writing the job record by hand into session storage, and its caption says so.
 
@@ -2059,7 +2085,7 @@ Table: Design decisions for the offscreen page and the messages
 | Where the model runs | Service worker; popup; offscreen page | Offscreen page (DECISIONS D1, item 2) | The service worker stops when idle, and the popup closes when the reader clicks away | The page reaches the rest of the extension only by messages |
 | Where the job lives | In the page; in the service worker | Service worker, with the job record in session storage | The job must survive a closed popup and be readable by the popup | Every progress update is a message and a storage write |
 | Generation order | Parallel; queued | Queued, one at a time | The card does one job at a time (manager comment) | A second tab waits for the first tab's current part |
-| Keepalive | None; every 10 seconds | Every 10 seconds while busy | A load can take minutes, and the worker must not stop in the middle | Messages are sent for as long as the job runs |
+| Keepalive | None; every 10 seconds | Every 10 seconds while busy, and each one refreshes the running job records | A load can take minutes, and the worker must not stop in the middle | Messages are sent for as long as the job runs |
 | Idle close | Never close; close after each job; close after 5 minutes idle, and never while a message runs | Close after 5 minutes idle, with the in-flight rule | Frees the card's memory, and a reload from the browser takes seconds | A reader who returns after five minutes waits for the load again |
 | Pretend model | A separate test build; an address parameter | Address parameter | One code path for the real and pretend engines | The test seam ships with the extension |
 
@@ -2075,18 +2101,18 @@ Table: Failures in the messaging path
 | The page gives no answer | `call()` throws `SERVICE_ERROR`, "the offscreen page did not answer" | The same message |
 | The page receives an unknown message type | The page answers `SERVICE_ERROR`, "unknown message" | The same message |
 | A handler throws, for example `requestAdapter()` | The `catch` sends `SERVICE_ERROR` with the error text | The same message, with the detail kept for the console |
-| A generation hangs | After `generateTimeoutMs` (180 seconds) the page calls `interruptGenerate` and reports `TIMEOUT` | "The model took too long to answer. Try again, or use a shorter page." |
+| A generation hangs | After `generateTimeoutMs` (10 minutes) the page calls `interruptGenerate` and reports `TIMEOUT` | "The model took too long to answer. Try again, or use a shorter page." |
 | The page closed between two jobs | The next request calls `ensure()` and creates the page again, and the model reloads from IndexedDB | No message, only a slower start |
 | A quick message finishes while a load is still running | The countdown does not start, and `close()` refuses to run while a message is in progress | No effect on the load (unit test only) |
 | The service worker stops during a job | `sweepOrphans` marks the job `INTERRUPTED` when the worker starts again (browser test V20) | "The summary was interrupted. Press Summarize to try again." |
-| A job is silent for more than 5 minutes | The popup and the service worker treat it as dead | "The summary was interrupted." |
+| A job with no update for 5 minutes, because the page has stopped sending KEEPALIVE | The popup and the service worker treat it as dead | "The summary was interrupted." |
 | Two requests create the page at once | The shared `creating` promise lets both wait for one creation | No visible effect |
 
-The stale limit is 5 minutes in the service worker and the popup. It was 3 minutes before the fix. At 3 minutes it was the same length as the 180-second generation timeout, so a slow answer could look interrupted while still running. The timeout now fires first (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2). A load with no progress writes for 5 minutes is still shown as interrupted, because the load has no timeout of its own.
+The stale limit is 5 minutes in the service worker and the popup. It was 3 minutes before the fix, when it matched the old 180-second answer limit. The answer limit is now 10 minutes, so a single answer longer than 5 minutes is kept alive by the KEEPALIVE refresh (DEVLOG, 2026-10-21 and 2026-10-24). A load has no timeout of its own, and the same refresh covers it while the page is busy.
 
 None of the browser tests named in this chapter runs two tabs at once, so the queued case is covered only by the unit test.
 
-**What this means in plain words.** Every message failure ends as a short, generic message, and the technical detail goes to the console. The page now stays open while a message is in progress, so a quick request cannot cut off a running load.
+**What this means in plain words.** Every message failure ends as a short, generic message. For `SERVICE_ERROR` and `MODEL_LOAD_FAILED` the popup also shows the first 240 characters of the technical detail, in a line that starts "Technical detail:". The page now stays open while a message is in progress, so a quick request cannot cut off a running load.
 
 ## What went wrong while building it
 
@@ -2104,7 +2130,7 @@ The unit tests in `tests/unit/local-engine.test.js` cover the manager. They chec
 
 The browser tests in `tests/e2e/pipeline.test.js` cover the same path with the real extension. V15 closes the popup in the middle of a job and reopens it. V20 stops the service worker in the middle of a job. V22 closes the tab during a job. V23 closes the page after the idle time, with `idleCloseMs` set to 400 ms, and then checks that the next summary still works. V24 checks that nothing opens except the popup window: no tab and no options page.
 
-The whole suite has 70 unit tests and 26 browser tests, all passing, and 15 Windows script checks (B1 to B10c).
+The whole suite has 76 unit tests and 29 browser tests, all passing, and 15 Windows script checks (B1 to B10c). Scenario V26 checks that KEEPALIVE keeps a 16-second pretend answer from showing as interrupted, and V27 checks the technical detail line.
 
 **What this means in plain words.** The unit tests check the manager's rules, and the browser tests check the same rules through the whole extension. The in-flight rule has only the unit test.
 
@@ -2113,7 +2139,7 @@ The whole suite has 70 unit tests and 26 browser tests, all passing, and 15 Wind
 - The in-flight rule is checked at unit level only. No browser test closes the page during a load.
 - The keepalive interval is the project's own choice. It is not measured against Chrome's actual idle limit on the test laptop.
 - The one-at-a-time rule applies to generation only, and it is enforced in the service worker. A caller that bypassed the manager could overlap.
-- A load with no progress writes for 5 minutes is still shown as interrupted, and the load has no timeout of its own.
+- The load has no timeout of its own. Its job record is refreshed only while the page sends KEEPALIVE, so a stopped page still shows as interrupted after 5 minutes.
 - The test seam ships with the extension.
 - The reason for the `*.hf.co` host permission is not written down in the repository.
 
@@ -2126,7 +2152,7 @@ Chrome can stop a service worker that is idle, and the page's header comment say
 The graphics card does one job at a time, and the manager puts every `LOCAL_GENERATE` on one promise chain, so the parts of two jobs take turns. A unit test checks the order with three requests. Loading has its own guard inside the page.
 
 **What keeps the page alive during a long download, and when does it close?**
-The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it. The page closes five minutes after the last request has finished, and never while a request is still running. The model stays in IndexedDB, so the next use reloads it.
+The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it and refreshes the running job records. The page closes five minutes after the last request has finished, and never while a request is still running. The model stays in IndexedDB, so the next use reloads it.
 
 **What happens if the page disappears during a job?**
 The next message fails, and the call reports `SERVICE_ERROR`. The job then shows the generic message, and the reader can press the button again. A later job creates the page and loads the model from IndexedDB.
@@ -2161,7 +2187,7 @@ Table: Limits for the local model, from `src/core/config.js`
 | `maxTokensPart` | 300 | Longest answer for one part |
 | `maxTokensFinal` | 320 | Longest answer for a one-part page, or for a merge |
 | `temperature` | 0.2 | Low randomness: the model usually picks its most likely next word |
-| `generateTimeoutMs` | 180000 | One answer is stopped after three minutes |
+| `generateTimeoutMs` | 600000 | One answer is stopped after ten minutes |
 | `idleCloseMs` | 300000 | The hidden page is closed after five minutes without work |
 
 Every value sits in one file. Four of them (`chunkChars`, `maxChunks`, `generateTimeoutMs` and `idleCloseMs`) can also be overwritten in extension storage. The README lists them as test settings.
@@ -2285,11 +2311,44 @@ The seven-part Wikipedia run made eight model calls: seven parts and one merge. 
 
 ![Pretend model: the popup while part 2 of 4 is being summarized, with the bar at one of four parts](../screenshots/ui-05-summarizing-parts.png)
 
-The offscreen manager also keeps the hidden page open while work is in progress. It counts the messages still waiting for an answer, and the five-minute idle countdown starts only when the last one finishes. Before this change, a quick status check could start the countdown while a load was still running.
+The offscreen manager also keeps the hidden page open while work is in progress. It counts the messages still waiting for an answer, and the five-minute idle countdown starts only when the last one finishes. Before this change, a quick status check could start the countdown while a load was still running. Every ten seconds while it works, the hidden page also sends a keep-alive message, and the worker uses it to refresh the record of every running job, so a long answer is not shown as dead.
 
-The code does not check whether an answer stopped because it hit `max_tokens`, so a cut-off answer would be shown as it is. The saved answers all end at a full sentence, but this is not tested. When an answer takes longer than 180 seconds, `offscreen.js` calls WebLLM's `interruptGenerate`, reports `TIMEOUT`, and throws away the parts already finished. The longest answer in the repository took about 76 seconds (the Intel short article), and no real run has reached the limit: [to be measured]. No automated test covers this path, because the pretend model has no timeout.
+The code does not check whether an answer stopped because it hit `max_tokens`, so a cut-off answer would be shown as it is. The saved answers all end at a full sentence, but this is not tested. When an answer takes longer than ten minutes, `offscreen.js` calls WebLLM's `interruptGenerate`, reports `TIMEOUT`, and throws away the parts already finished. The limit was 180 seconds until 24 October. The longest single answer in the repository took about 127 seconds (part 2 of the Wikipedia article on the Intel chip, in the run that later timed out at the old limit). No real run has reached the ten-minute limit: [to be measured]. No automated test covers this path, because the pretend model has no timeout.
 
-**What this means in plain words.** The model writes each part on its own, one answer at a time. Each answer has a length cap and a three-minute stop, and the hidden page stays open while it works.
+**What this means in plain words.** The model writes each part on its own, one answer at a time. Each answer has a length cap and a ten-minute stop, and the hidden page stays open while it works.
+
+## When a part does not fit the window
+
+Dense text (tables, numbers, references) uses more tokens per character than the 6,000-character limit assumes. When WebLLM refuses a prompt because it does not fit the 4,096-token window, the engine does not give up. `summarizeChunk` cuts the part in half at a paragraph or sentence break, using `chunkText`, and summarizes each half. The code is in `src/engines/local.js`:
+
+`src/engines/local.js`
+
+```js
+      const attempt = async (t, i, n, depth) => {
+        try {
+          return await once(t, i, n);
+        } catch (err) {
+          const tooLong = err instanceof AppError && err.code === ERROR_CODES.CONTEXT_TOO_LONG;
+          if (!tooLong || depth >= MAX_HALVING_DEPTH || t.length < MIN_HALVING_CHARS) throw err;
+          const halves = chunkText(t, Math.ceil(t.length / 2) + 100);
+          if (halves.length < 2) throw err;
+          engine.halvedParts += 1;
+          const pieces = [];
+          for (const half of halves) {
+            if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
+            // A page that was one part is now several: its pieces are summarized as parts and merged below.
+            pieces.push(await attempt(half, n === 1 ? pieces.length + 1 : i, n === 1 ? halves.length : n, depth + 1));
+          }
+          return n === 1 ? engine.mergeSummaries(pieces, { title }) : pieces.join('\n\n');
+        }
+      };
+```
+
+The halving stops after three levels (`MAX_HALVING_DEPTH` is 3), so one part can become up to eight pieces. Text under 600 characters (`MIN_HALVING_CHARS`) is not cut, and the error is passed on. A page that was a single part becomes two part answers and one merge request, as in the code above. A part inside a longer page is replaced by its pieces' answers, joined in order. Each cut adds one to `stats.halvedParts`, so a part cut twice counts twice. The stats line shows the pipeline's own request count, which covers one request per part and the merge. The extra requests made inside the engine are not in that count.
+
+No real run has needed the halving. The new-code Intel Wikipedia run recorded `halvedParts: 0`. The behaviour is covered by four unit tests and by scenario V25, which uses the pretend-model mode `longprompt`.
+
+**What this means in plain words.** A part the model cannot read in one piece is split in half and read in two. The reader sees the same kind of result, and the stats line does not show the extra work.
 
 ## From the answer to the screen
 
@@ -2373,6 +2432,16 @@ The clean run did not save its summary text. The summary shown in `v2-nvidia-wik
 
 **What this means in plain words.** Seven parts cost about a minute on the NVIDIA card. The time per part varies, and the long summary breaks the length rule.
 
+## Worked example 3: a long page on a slow chip
+
+The same seven-part Wikipedia article was run on the Intel chip, where the extension uses SmolLM2 and writes about 4 tokens a second. Three runs are saved. The first, with the 180-second limit and no halving, failed with `TIMEOUT` after 615.6 seconds: part 1 took 76 seconds, part 2 took 127 seconds, and part 6 had not answered 180 seconds after it started. A second try of the same code finished in 704.5 seconds, with part 6 at 121 seconds. Answer times on this chip vary a lot, which is why the limit is now ten minutes.
+
+The repeat with the new code (`v2-local-intel-wikipedia.md`) finished in 616.4 seconds. Its parts took 70.6, 68.4, 65.9, 75.1, 79.2, 121.5 and 68.6 seconds, and the merge took about 62.7 seconds. The timeline begins with the check and the load, then part 1 at 4.4 seconds and the merge at 553.7 seconds. The page text changes from day to day, so a part that overflows one day may fit the next. No part overflowed on that day.
+
+The summary of the old-code second try (`v2-local-intel-wikipedia-second-try-old-code.json`) contains invented facts: a 1901 gas light with a made-up substrate, a lighthouse dated 1611 that is named three times, and a 1939 Act. They are reported here as slips, not as facts. The summary of the new-code run (`v2-local-intel-wikipedia.json`) is shorter. It has three generic points: a history and significance point, a point giving a count of 14,700 lighthouses and navigation lights, and a point giving 54 diagrams and 651 photographs. Those counts were not checked against the page, and the article copy is not in the repository, so they cannot be confirmed.
+
+**What this means in plain words.** A long page on this chip takes about ten to twelve minutes. The summaries of this article are unreliable: the old code invented facts, and the new code gives generic points with counts nobody has checked.
+
 ## How good the summaries are
 
 Some points are right. In the clean offline run on the short article, the first six points match the article: the weak lamp, the aim of the light, the 1822 Fresnel lens, the thin glass rings, the lighter lens and the clockwork motor. The model keeps the facts and numbers of a short passage.
@@ -2395,7 +2464,7 @@ Several problems were found in review and fixed in the code. The DEVLOG rows dat
 
 ## Limitations
 
-These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
+These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. No real run has reached the ten-minute limit, and the halving has not run on a real page. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
 
 ### Questions this chapter answers
 
@@ -2406,7 +2475,7 @@ According to the code comment, small models follow short, plain instructions bes
 Two labels mark the page text, and the first line tells the model that the text is material, not instructions. The extension also removes the labels from answers. Neither step stops the model from following an instruction hidden in a page, and the merge prompt has neither label.
 
 **What happens to a page that is too long?**
-The page is cut into parts of up to 6,000 characters. If it needs more than 12 parts, the extension refuses it before any model is loaded, with a message that asks for a shorter page.
+The page is cut into parts of up to 6,000 characters. If it needs more than 12 parts, the extension refuses it before any model is loaded, with a message that asks for a shorter page. A part the model still cannot read is cut in half, up to three times.
 
 **Why does a merged summary sometimes repeat the prompt's own words?**
 The merge prompt contains the line "These are summaries of consecutive parts" and "Part 1:" labels. A small model can copy these words into its answer, and the answer is not stripped of them. This is not fixed.
@@ -2433,7 +2502,7 @@ Table: The parts of the popup
 | Model line | Always | The model name, whether it is stored, and its size, or a blocking message |
 | Graphics note | Only on integrated graphics | The note about the built-in Intel chip |
 | Progress block | While a job runs | A label and a thin bar |
-| Error block | After a failure, or for an interrupted job | The plain message for the error code |
+| Error block | After a failure, or for an interrupted job | The plain message for the error code, and for two vague codes a technical detail line |
 | Result block | After a finished job | A notice when the small model wrote the summary, then the summary and a stats line |
 
 **What this means in plain words.** The reader sees one button and one line about the model. Below them appears whichever of progress, error or result applies now.
@@ -2545,7 +2614,9 @@ The vendor name is capitalized because WebGPU reports it in lower case. A browse
 
 ### Errors and the blocked state
 
-Errors appear in the error block below the progress area. For a computer without WebGPU or without 16-bit shader support, the message appears in the model line and the button is disabled. Each error has its own screenshot in the chapter on errors and fallbacks.
+Errors appear in the error block below the progress area. For a computer without WebGPU or without 16-bit shader support, the message appears in the model line and the button is disabled. Most errors have a screenshot in the chapter on errors and fallbacks.
+
+For the two vague codes, SERVICE_ERROR and MODEL_LOAD_FAILED, the error block adds a line under the message: "Technical detail:" followed by the first 240 characters of the error detail. The element is `#error-detail`, and the `.detail` rule in `ui.css` sets it as small grey monospace text. Before 24 October the popup showed only the message, so the owner's real Chrome run of the Wikipedia page gave no reason on screen. No screenshot of this line is in the repository, and the picture is described from the code. Scenario V27 forces the case with the pretend-model mode `crash`, which fails with the detail "mock: something unexpected happened", and checks that the line appears under the message.
 
 After a memory failure that switched to the small model, the model line names the model the extension now uses. The re-shot `ui-13` shows the case where that small model also ran out of memory. The model line reads "SmolLM2 360M. Not downloaded yet", the error block gives the memory message, and the button is enabled again. Before the fix, the line still named the main model after both had failed.
 
@@ -2585,7 +2656,7 @@ function writeJob(tabId, jobId, patch) {
 }
 ```
 
-The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Scenario V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for five minutes is shown as interrupted. Version 1 used three minutes, which suited short cloud calls, but a slow local answer needed more room. The answer timeout itself is still 180 seconds.
+The popup also redraws every five seconds. Without that, a job whose worker had died would keep looking busy, because a dead worker writes nothing. The Version 1 DEVLOG records that fault. Scenario V15 checks that a reopened popup shows the same job and then the summary. A job that has not been updated for five minutes is shown as interrupted. Version 1 used three minutes, which suited short cloud calls, but a slow local answer needed more room. The answer timeout is now ten minutes, longer than this five-minute limit, so one answer can outlast it. The keep-alive message the hidden page sends every ten seconds while it works also refreshes the record of every running job, so a working job is not shown as interrupted.
 
 **What this means in plain words.** The summary belongs to the browser, not to the popup. Closing the popup does not stop it, and reopening the popup shows where it has got to.
 
@@ -2670,7 +2741,8 @@ Table: Errors that come from the model, from `src/core/errors.js` and `src/offsc
 | `GPU_MEMORY` | Out of memory while loading, or during an answer | The graphics card ran out of memory. Close other heavy tabs or programs and try again. | While loading, retries once with the small model, and a finished summary carries a notice. During an answer, the job ends. | Close other tabs or programs, then press the button again. |
 | `MODEL_DOWNLOAD_FAILED` | The download stops (see the classifier below) | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | The job ends. Nothing is saved as a choice. | Check the connection and press again. |
 | `MODEL_LOAD_FAILED` | Loading fails for another reason | The model could not be started. Press the button to try again. | While loading the primary model, retries once with the small model. Otherwise the job ends. | Press again. |
-| `TIMEOUT` | One answer takes longer than 180 seconds | The model took too long to answer. Try again, or use a shorter page. | The answer is interrupted, and the job ends with its finished parts dropped. | Try again, or use a shorter page. |
+| `TIMEOUT` | One answer takes longer than 10 minutes (it was 180 seconds until 24 October 2026) | The model took too long to answer. Try again, or use a shorter page. | The answer is interrupted, and the job ends with its finished parts dropped. | Try again, or use a shorter page. |
+| `CONTEXT_TOO_LONG` | WebLLM refuses a prompt that does not fit the 4,096-token window. A dense part can use more tokens per character than the 6,000-character limit assumes. | A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | The part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep. The message appears only if the cutting fails too, or if the text is under 600 characters. | Try a shorter page. |
 | `EMPTY_ANSWER` | The model returns only spaces | The model returned no summary for this page. | The job ends. | Press again. |
 
 Table: Errors from the page and the job, from `src/core/errors.js`, `pipeline.js` and `extract-tab.js`
@@ -2681,7 +2753,7 @@ Table: Errors from the page and the job, from `src/core/errors.js`, `pipeline.js
 | `TOO_LONG` | More than 12 parts are needed | This page is too long for the local model on this computer. Try a shorter page. | Refused before any download. | Use a shorter page. |
 | `RESTRICTED_PAGE` | Chrome internal, extension, file, data or blob pages, and the Chrome Web Store | Chrome does not allow extensions to read this page. | Refused before any model step. | Use another page. |
 | `EXTRACT_FAILED` | Injecting the reader script fails for another reason, or the script returns nothing | Could not read the text of this page. | The job ends. | Press again. The popup offers no other step. |
-| `SERVICE_ERROR` | The hidden page cannot be reached, sends no answer or an unknown message, or an unexpected error occurs during an answer | Something went wrong inside the extension. Try again. | The job ends. | Try again. |
+| `SERVICE_ERROR` | The hidden page cannot be reached, sends no answer or an unknown message, or an unexpected error occurs during an answer | Something went wrong inside the extension. Try again. | The job ends, and the popup shows a "Technical detail" line under the message (the first 240 characters of the detail). | Try again. The detail line says what the extension knows. |
 | `INTERRUPTED` | Chrome stopped the service worker during a job, or a job has had no update for five minutes | The summary was interrupted. Press Summarize to try again. | The record is marked as an error when the worker next starts. An open popup shows the message after five minutes without an update. | Press Summarize. |
 | `CANCELLED` | The tab closed or moved to another page | Cancelled. | The job stops without writing an error. The message is never shown. | Nothing to do. |
 
@@ -2699,7 +2771,7 @@ Table: Messages the popup writes itself, which are not in `errors.js`
 
 ## How a thrown error becomes a code
 
-`describeError` turns any thrown value into the three fields the popup needs: the code, the message and the detail. An error that is already an `AppError` keeps its code. Any other error becomes `SERVICE_ERROR`, and an abort becomes `CANCELLED`. When a code crosses a message channel as `{code, detail}`, `fromWire` rebuilds it, and an unknown code becomes `SERVICE_ERROR`. This keeps the list of codes closed. The popup shows one of the fourteen messages in `errors.js`, or one of the few it writes itself (listed above).
+`describeError` turns any thrown value into the three fields the popup needs: the code, the message and the detail. An error that is already an `AppError` keeps its code. Any other error becomes `SERVICE_ERROR`, and an abort becomes `CANCELLED`. When a code crosses a message channel as `{code, detail}`, `fromWire` rebuilds it, and an unknown code becomes `SERVICE_ERROR`. This keeps the list of codes closed. The popup shows one of the fifteen messages in `errors.js`, or one of the few it writes itself (listed above).
 
 **What this means in plain words.** Whatever goes wrong, the popup only ever gets a known code, so it cannot show a raw error text by accident.
 
@@ -2712,6 +2784,8 @@ WebLLM throws plain errors with free text. The function `classifyEngineError` in
 ```js
 export function classifyEngineError(err, stage) {
   const text = String(err?.message ?? err ?? '').toLowerCase();
+  // WebLLM: "Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096"
+  if (/prompt tokens exceed|context window size/.test(text)) return ERROR_CODES.CONTEXT_TOO_LONG;
   if (/shader-f16|f16/.test(text) && /(support|feature|require)/.test(text)) return ERROR_CODES.NO_SHADER_F16;
   if (/webgpu|gpu adapter|navigator\.gpu/.test(text) && /(not\s+|un)(supported|available)|no (gpu )?adapter|unavailable/.test(text)) {
     return ERROR_CODES.NO_WEBGPU;
@@ -2742,10 +2816,13 @@ Table: Examples from the unit tests, and the code each one gives
 | something strange | load | MODEL_LOAD_FAILED |
 | something strange | generate | SERVICE_ERROR |
 | network exploded | generate | SERVICE_ERROR |
+| Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096 | generate | CONTEXT_TOO_LONG |
 
 The memory pattern now matches "oom" only as a whole word. Before the fix it matched the letters inside other words, so a message containing "room" would have been read as a memory error. A unit test covers the change.
 
 One weakness remains. At the loading step, any message containing "cache" counts as a download failure. The spike error recorded in the DEVLOG, "Failed to execute 'open' on 'CacheStorage': Unexpected internal error", contains "cache". Under the current rules it would show the download message, which is wrong for that cause. The real WebLLM error texts are known only from that one spike message. The other patterns were written from expected wording and checked with sample strings.
+
+The window message was the gap behind a vague error in the owner's real Chrome on 24 October. On the Intel chip, with the Wikipedia "Lighthouse" page, the popup said "Something went wrong inside the extension. Try again." with no reason. The DEVLOG attributes that message to the classifier, which did not know WebLLM's window message, so the error fell through to SERVICE_ERROR. The detail was not on screen at the time, so the exact text of that run is not in the repository. The window message now maps to CONTEXT_TOO_LONG.
 
 **What this means in plain words.** The engine's free-text errors are sorted into the codes by looking for key words. The memory word now has to stand alone, but the download pattern still reads any "cache" message as a download problem.
 
@@ -2789,7 +2866,7 @@ The browser tests show both sides. Scenario V10 makes the primary model run out 
 
 ## Timeouts, empty answers and what is lost
 
-Each answer has 180 seconds, a limit that is unchanged. The hidden page starts a race between the answer and a timer. When the timer wins, it calls `interruptGenerate` on the WebLLM engine and reports `TIMEOUT`:
+Each answer has ten minutes. Until 24 October 2026 the limit was 180 seconds, and a real Intel run on the Wikipedia page hit it. The hidden page starts a race between the answer and a timer. When the timer wins, it calls `interruptGenerate` on the WebLLM engine and reports `TIMEOUT`:
 
 `src/offscreen/offscreen.js`
 
@@ -2806,7 +2883,7 @@ The job then stops. The parts already finished are discarded, because a summary 
 
 An empty answer is a different case. The engine trims the text, and if nothing is left it reports `EMPTY_ANSWER`. The pretend model mode `empty` shows the message in scenario V13. Nothing is saved, and the reader can press again.
 
-**What this means in plain words.** A slow answer is stopped at three minutes, and the whole summary is dropped with it. An empty answer is reported as an empty answer, not as a success.
+**What this means in plain words.** A slow answer is stopped at ten minutes, and the whole summary is dropped with it. An empty answer is reported as an empty answer, not as a success.
 
 ## Interrupted and cancelled jobs
 
@@ -2832,7 +2909,7 @@ async function sweepOrphans() {
 }
 ```
 
-The popup has a second check. A job that has not been updated for five minutes is shown as interrupted, even if the record still says running. Before the fix, that limit was three minutes, the same length as the 180-second answer timeout, so a slow answer could appear interrupted while it was still running (DEVLOG, 21 October). The limit is now five minutes, so the answer timeout is reached well before the stale limit. While the hidden page is busy, it sends a keep-alive message to the worker every ten seconds, which is meant to keep the worker awake. Scenario V20 stops the workers on purpose and checks that the job becomes `INTERRUPTED`. The screenshot `ui-17-interrupted.png` shows the popup (pretend model).
+The popup has a second check. A job that has not been updated for five minutes is shown as interrupted, even if the record still says running. Before the fix, that limit was three minutes, the same length as the 180-second answer timeout, so a slow answer could appear interrupted while it was still running (DEVLOG, 21 October). The answer limit is now ten minutes, longer than this five-minute limit. So the keep-alive message that the hidden page sends to the worker every ten seconds while it works also refreshes the update time of every running job (DEVLOG, 24 October). A working job is not shown as dead, however long one answer takes. Scenario V20 stops the workers on purpose and checks that the job becomes `INTERRUPTED`. The screenshot `ui-17-interrupted.png` shows the popup (pretend model).
 
 ![Pretend model: the interrupted message, shown after the service worker was stopped mid-job](../screenshots/ui-17-interrupted.png)
 
@@ -2876,22 +2953,24 @@ A computer without WebGPU or without the 16-bit feature is blocked from the star
 
 ## Which errors were forced, and which were real
 
-Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 26 browser scenarios (the smoke run and V01 to V24, with V18b) all pass.
+Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 29 browser scenarios (the smoke run, V01 to V27 and V18b) all pass, with 76 unit tests.
 
 - `nowebgpu` gives `NO_WEBGPU` (scenario V07), and `nof16` gives `NO_SHADER_F16` (scenario V08).
 - `oom` gives `GPU_MEMORY` on the primary model only (scenario V10), and `oomall` gives it on every model (scenario V11).
 - `downloadfail` gives `MODEL_DOWNLOAD_FAILED` (scenario V12). `empty` gives `EMPTY_ANSWER` (scenario V13).
 - `html` shows hostile markup as an answer (scenario V14). The popup prints it as text, and the screenshot `ui-18-hostile-output-as-text.png` shows it (pretend model).
 - The service worker was stopped on purpose, which gives `INTERRUPTED` (scenario V20).
+- `longprompt` refuses a prompt over 3,500 characters the way WebLLM does, which gives `CONTEXT_TOO_LONG` and the halving (scenario V25).
+- `crash` fails with `SERVICE_ERROR` and the detail "mock: something unexpected happened" (scenario V27).
 - The page choices in the browser tests give `TOO_LITTLE_TEXT` (V04, V18b), `TOO_LONG` (V06) and `RESTRICTED_PAGE` (V05).
 
 ![Pretend model: markup in the model's answer is printed as text, so the image tag does not load and the bold tag is not rendered](../screenshots/ui-18-hostile-output-as-text.png)
 
-Five codes have no browser scenario that asserts them. `TIMEOUT`, `MODEL_LOAD_FAILED` and `SERVICE_ERROR` appear only in unit tests. `EXTRACT_FAILED` appears in no test. `CANCELLED` has a unit test for its conversion, and V21 and V22 exercise the path without asserting the code.
+Four codes have no browser scenario that asserts them. `TIMEOUT` and `MODEL_LOAD_FAILED` appear only in unit tests. `EXTRACT_FAILED` appears in no test. `CONTEXT_TOO_LONG` is forced by scenario V25 and `SERVICE_ERROR` by scenario V27. `CANCELLED` has a unit test for its conversion, and V21 and V22 exercise the path without asserting the code.
 
-Only one real error is recorded in the repository. The DEVLOG entry of 21 October 2026 records that Cache Storage failed inside the hidden page with `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error`. The fix was to store the model in IndexedDB, not a fallback. The real-model runs in `finalsem/docs/test-runs/` all ended with a summary. The slow Intel runs are slow, not failed. The DEVLOG also records that an offline test blocked the extension's own page. That was a fault in the test setup, not an error code.
+Three real failures are recorded in the repository. The first is the spike of 21 October 2026, where the DEVLOG records that Cache Storage failed inside the hidden page with `UnknownError: Failed to execute 'open' on 'CacheStorage': Unexpected internal error`. The fix was to store the model in IndexedDB, not a fallback. The real-model runs in `finalsem/docs/test-runs/` all ended with a summary except one. The second is the Intel Wikipedia run, `v2-local-intel-wikipedia-before-fix.md`, which ended in TIMEOUT after 615.6 seconds at the old 180-second limit. The third is the vague message in the owner's real Chrome on 24 October, described above. The slow Intel runs are slow, not failed. The DEVLOG also records that an offline test blocked the extension's own page. That was a fault in the test setup, not an error code.
 
-**What this means in plain words.** Most errors were produced on purpose, so the handling has been checked. Only one real failure was seen, and the real runs have not produced any of the error messages.
+**What this means in plain words.** Most errors were produced on purpose, so the handling has been checked. The real runs produced three failures: a spike error, a timeout on a long page, and a vague message in the owner's Chrome.
 
 ## What is kept after each outcome
 
@@ -2910,26 +2989,26 @@ The model files live in IndexedDB, which is why a later job needs no download. T
 
 ![Errors and their routes: which codes stop the job, which retry with the small model, and which only ask the reader to press again](../figures/V11_error_flow.png)
 
-Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. Its footer says the detail goes only to the console, but the code also keeps it in the job record, and the GPU_MEMORY row shows only the loading case.
+Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. It was drawn before CONTEXT_TOO_LONG existed, so that code is not in it. Its footer says the detail goes only to the console, but the code also keeps it in the job record, and the GPU_MEMORY row shows only the loading case.
 
 **What this means in plain words.** A failure leaves the model files and the job record in a known state. Only a memory failure or a failed load while loading changes what the extension remembers.
 
 ### Questions this chapter answers
 
 **What does the reader see when something fails?**
-One short message, from a fixed list of fourteen codes. Sometimes the message sits in the model line, and sometimes in the error block below the progress area. The technical detail is kept in the console and in the job record, and the reader does not see it.
+One short message, from a fixed list of fifteen codes. Sometimes the message sits in the model line, and sometimes in the error block below the progress area. The technical detail is kept in the console and in the job record, and the reader does not see it.
 
 **Why does a memory error sometimes switch the model?**
 When the big model fails to load with a memory error, the extension tries the small one once and saves that choice. A notice then tells the reader that the small model wrote the summary. A memory error during an answer does not switch the model, and the saved choice is never cleared by the extension.
 
 **What happens if the model answers too slowly?**
-After 180 seconds the answer is interrupted, the job ends with a timeout message, and the parts already finished are dropped. The reader can press again. No automated test covers this path, and whether the stopped answer ends completely is not tested.
+After ten minutes the answer is interrupted, the job ends with a timeout message, and the parts already finished are dropped. The reader can press again. No automated test covers this path, and whether the stopped answer ends completely is not tested.
 
 **What happens if the reader closes the tab during a summary?**
 The job is stopped at the next part boundary, and its record is removed. A download that has already started keeps running, and the model is kept when it finishes. The reader sees nothing about the cancelled job.
 
 **Can the extension tell every error apart?**
-Not yet. The memory pattern now needs a whole word, but any "cache" message at loading reads as a download failure. Only one real engine error is recorded, so most of the patterns have not been checked against real messages.
+Not yet. The memory pattern now needs a whole word, but any "cache" message at loading reads as a download failure. Only two real engine errors are recorded, the spike's Cache Storage error and the window message seen on the Intel chip. Most of the patterns have not been checked against real messages.
 
 
 <div style="page-break-after: always"></div>
@@ -2975,7 +3054,7 @@ The client works in one folder, `finalsem\project`. The two batch files and `man
 
 ![Folder tree of finalsem with one-line notes](../figures/V13_repo_tree.png)
 
-Reading the figure: the tree lists the folders of `finalsem/`. Its `project` folder holds `manifest.json`, the two batch files, the `src` folder with the extension's parts (background, content, core, engines, lib, offscreen and ui), the `tests` folder, and the `scripts` folder for the computer check, the Chrome graphics setting and the real-model run. The `docs` folder holds the decision record, the figures, the screenshots and the test runs.
+Reading the figure: the tree lists the folders of `finalsem/`. Its `project` folder holds `manifest.json`, the two batch files, the `src` folder with the extension's parts (background, content, core, engines, lib, offscreen and ui), the `tests` folder, and the `scripts` folder for the computer check, the Chrome graphics setting and the real-model run. The `docs` folder holds the decision record, the figures, the screenshots and the test runs. The real-model script in `scripts` also deletes a browser profile's old service worker folders before each launch, which chapter 14 explains; the downloaded model is kept in IndexedDB and is not touched.
 
 ### What this means in plain words
 
@@ -3223,12 +3302,12 @@ Table: The four test layers
 
 | Layer | Files | Count | What it shows |
 |---|---|---|---|
-| Unit tests | `tests/unit` (six files) | 70 | Each piece of logic, with fakes. No browser, no network |
-| Browser tests | `tests/e2e` (smoke test, V01 to V24 and V18b) | 26 | The whole chain in hidden Chromium, with the pretend model |
+| Unit tests | `tests/unit` (six files) | 76 | Each piece of logic, with fakes. No browser, no network |
+| Browser tests | `tests/e2e` (smoke test, V01 to V27 and V18b) | 29 | The whole chain in hidden Chromium, with the pretend model |
 | Windows script checks | `tests/bat` | 15 (B1 to B10c) | `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key |
-| Real-model runs | `scripts/local-run.mjs` | Three modes | The real model's speed and output on the developer's laptop |
+| Real-model runs | `scripts/local-run.mjs` | Five plans | The real model's speed and output on the developer's laptop |
 
-The layers answer different questions. Only the real-model runs show how fast the real model is and how its answers read. The commands are `npm test`, `npm run test:e2e`, the Windows check script, and `node scripts/local-run.mjs` with a mode name.
+The layers answer different questions. Only the real-model runs show how fast the real model is and how its answers read. The commands are `npm test`, `npm run test:e2e`, the Windows check script, and `node scripts/local-run.mjs` with a plan name.
 
 ### What this means in plain words
 
@@ -3243,15 +3322,15 @@ Table: The six unit test files
 | `chunker.test.js` | 10 | Cutting text into parts. Identical to Version 1 |
 | `merger.test.js` | 8 | Joining part summaries, in levels when there are many. Identical to Version 1 |
 | `pipeline.test.js` | 7 | The job flow for short and long pages, and early refusals. Identical to Version 1 |
-| `local-engine.test.js` | 20 | The engine's calls to the fake offscreen page, retries, the idle close and countdown, and removal of copied markers |
-| `gpu-and-errors.test.js` | 11 | Graphics checks, model choice, progress labels, error codes, and the word "room" |
+| `local-engine.test.js` | 25 | The engine's calls to the fake offscreen page, retries, the cut-in-half retry, the idle close and countdown, and removal of copied markers |
+| `gpu-and-errors.test.js` | 12 | Graphics checks, model choice, progress labels, error codes (including the context-window code), and the word "room" |
 | `small.test.js` | 14 | Formatting, settings, plain error messages, prompts and URL checks |
 
 Two files are new in Version 2, one was changed, and three are identical to Version 1.
 
 ### What this means in plain words
 
-The 70 tests check each piece of logic with fake parts. They need no browser and no internet.
+The 76 tests check each piece of logic with fake parts. They need no browser and no internet.
 
 ## Browser tests and the pretend model
 
@@ -3267,9 +3346,9 @@ A worked example shows the level of detail. Scenario V01 checks that the downloa
   }
 ```
 
-The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026. All 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. The current suite has the same 26 scenarios, and all of them pass.
+The first full run is recorded in `docs/test-runs/run-1.md`. It was run with `npm run test:e2e` on 21 October 2026. All 26 browser tests passed in each of three runs in a row, at about 77 seconds per run. The suite now has 29 scenarios. V25 to V27 were added on 24 October, and the three of them passed when run on their own that day. The change list reports all 29 passing in the current suite.
 
-Table: The 26 browser scenarios, what each checks, and the result
+Table: The 29 browser scenarios, what each checks, and the result
 
 | ID | What is checked | Result |
 |---|---|---|
@@ -3299,8 +3378,11 @@ Table: The 26 browser scenarios, what each checks, and the result
 | V22 | A tab closed mid-job leaves no record behind | Pass (fault found in run 1, fixed) |
 | V23 | The offscreen page closes after the idle time, and the next summary works | Pass |
 | V24 | A normal summary opens only the popup window | Pass |
+| V25 | A part that does not fit the model window is cut in half, and the page is still summarized | Pass (added 24 October) |
+| V26 | A long answer keeps the job alive: the record is refreshed while the model works | Pass (added 24 October) |
+| V27 | An unexpected failure shows the technical detail under the vague message | Pass (added 24 October) |
 
-Run 1 also found three faults in the test setup itself. Chapter 15 tells those stories with the two extension faults.
+Run 1 also found three faults in the test setup itself. Chapter 15 tells those stories with the extension faults.
 
 ### What this means in plain words
 
@@ -3308,21 +3390,27 @@ The browser tests press the real buttons, but on a fake model. They show that th
 
 ## Real-model runs
 
-The script `scripts/local-run.mjs` measures the real model in hidden Chromium. It has three modes. Each mode keeps its own browser profile folder, so the downloaded model is kept between runs.
+The script `scripts/local-run.mjs` measures the real model in hidden Chromium. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
 
-Table: The three real-model modes
+Table: The real-model plans
 
-| Mode | Flags and outside websites | Profile folder | Cases |
+| Plan | Flags and outside websites | Profile folder | Cases |
 |---|---|---|---|
 | `nvidia` | `--force_high_performance_gpu`; outside websites allowed | `.model-profile` | Short article, long article, Wikipedia "Lighthouse" (live) |
 | `nvidia-offline` | The same flag and a host rule that blocks outside addresses; cache only | `.model-profile`, the same as `nvidia` | Short article, long article |
 | `intel` | No flags; outside websites allowed | `.model-profile-intel` | Short article, long article |
+| `intel-wikipedia` | No flags; outside websites allowed | `.model-profile-intel` | Wikipedia "Lighthouse" (live) |
+| `intel-short` | No flags; outside websites allowed | `.model-profile-intel` | Short article |
 
-Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and three screenshots. It writes a JSON file and a Markdown table. The clean records are `v2-local-nvidia-cold-first-attempt.md`, `v2-local-nvidia-offline.md` (made before the label fix), `v2-local-nvidia-offline-after-label-fix.md` and `v2-local-intel.md`. The records made under load are `v2-local-nvidia.md`, `v2-local-nvidia-cold-second-attempt-with-load.md` and `v2-local-nvidia-offline-first-attempt-with-load.md`. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting.
+Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and three screenshots. It writes a JSON file and a Markdown table. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting.
+
+The clean records are `v2-local-nvidia-cold-first-attempt.md`, `v2-local-nvidia-offline.md` (made before the label fix), `v2-local-nvidia-offline-after-label-fix.md` and `v2-local-intel.md`. The records made under load are `v2-local-nvidia.md`, `v2-local-nvidia-cold-second-attempt-with-load.md` and `v2-local-nvidia-offline-first-attempt-with-load.md`. The three Intel Wikipedia records of 24 October are shown in the Intel table below.
+
+**A stale service worker.** A persistent browser profile keeps the extension's service worker script from its first use. On 24 October a real run lacked the new `halvedParts` statistic, which showed that the profile was running old code. The failing run was made with the code from before the changes. The second try also ran the old code, because the profile still held the old script. The run script now deletes the profile's `Service Worker` and `Code Cache` folders before each launch. The downloaded model is kept in IndexedDB, so it is not affected. Real-model runs made before 24 October ran the service-worker code as it was when each profile was first used. Changes made later to service-worker-side code, such as the marker removal, the idle close and the five-minute limit, were covered by unit and browser tests, but no real-model run exercised them until the Intel Wikipedia run.
 
 ### What this means in plain words
 
-Each real-model run leaves a timeline, the statistics and a screenshot, so every number can be traced back to a record.
+Each real-model run leaves a timeline, the statistics and a screenshot, so every number can be traced back to a record. A profile can keep old code, so a run is only as current as the folders it starts from.
 
 ## First use on the NVIDIA chip, clean run
 
@@ -3397,31 +3485,36 @@ The runs under load are slower in several steps. The records do not prove what c
 
 ## Intel chip
 
-The `intel` mode does not force the separate card. The extension chose the small model, SmolLM2 360M, by itself, because the chip is built into the processor. The clean run is in `v2-local-intel.md` and `v2-local-intel.json`. It was made before the fix that removes copied markers, and it has not been repeated since.
+The `intel` plan does not force the separate card. The extension chose the small model, SmolLM2 360M, by itself, because the chip is built into the processor. The clean short and long runs were made before the marker fix, and they have not been repeated on the short article. Three Wikipedia runs were added on 24 October, after a real Chrome run on the same article failed (chapter 15 tells that story). They are shown in the same table.
 
-Table: Clean run on the Intel chip, with the small model
+Table: Intel chip, clean short and long runs, and three runs on the Wikipedia article (7 parts)
 
-| Measure | Short article | Long article (2 parts) |
-|---|---|---|
-| Total time | 199.2 s | 149.1 s (popup 148.7 s) |
-| Download, about 204 MB | 0.9 to 81.2 s | Already stored |
-| Warm-up | 83.7 to 123.1 s (about 39 s) | Already stored |
-| Writing the answer | 123.1 to 199.0 s (about 76 s) | Parts start at 0.9 s and 65.7 s; merge from 122.6 s |
-| Writing speed | 4 tokens a second | 5 tokens a second |
+| Measure | Short article (clean) | Long article, 2 parts (clean) | Wikipedia, old code, failed | Wikipedia, old code, second try | Wikipedia, code as it is now |
+|---|---|---|---|---|---|
+| Record | `v2-local-intel.md` | `v2-local-intel.md` | `v2-local-intel-wikipedia-before-fix.md` | `v2-local-intel-wikipedia-second-try-old-code.md` | `v2-local-intel-wikipedia.md` |
+| Outcome | Summary | Summary | TIMEOUT | Summary | Summary |
+| Total time | 199.2 s | 149.1 s (popup 148.7 s) | 615.6 s | 704.5 s | 616.4 s |
+| Model at start | First use: download 0.9 to 81.2 s | Stored | Stored | Stored | Stored |
+| Warm-up | 83.7 to 123.1 s (about 39 s) | Stored | Started at 6.2 s | Started at 4 s | Started at 3.1 s |
+| Parts (seconds each) | Writing the answer 123.1 to 199.0 s (about 76 s) | Parts start at 0.9 s and 65.7 s; merge from 122.6 s | 76, 127, 66, 50 and 77 s. Part 6 started at 435.8 s and had not answered 180 s later | 75, 124, 73, 56, 90, 121 and 60 s; merge 100 s | 70.6, 68.4, 65.9, 75.1, 79.2, 121.5 and 68.6 s; merge about 62.7 s |
+| Writing speed | 4 tokens a second | 5 tokens a second | Not recorded | 4 tokens a second | 4.1 tokens a second |
+| Notes | Before the marker fix | Before the marker fix | Old code: 180 s answer limit, no halving | Same old code and profile, which still held the old service worker script | 10-minute answer limit, halving and heartbeat. No part overflowed the window (`halvedParts` is 0). The saved summary has no markers |
+
+The same old code timed out once and succeeded on the second try, after 704.5 s. Answer times on this chip vary a lot, which is why the answer limit was raised from 180 seconds to 10 minutes. On this chip, the 7-part Lighthouse summary takes about 10 to 12 minutes, which is 616.4 s with the code as it is now and 704.5 s with the old code. Whether a part overflows the model's window depends on the page text, which changes from day to day, and no part overflowed on the day of the new run. The halving step is therefore covered by unit tests and by scenario V25, not by a real run.
 
 ![Popup for the short article on the Intel chip, recorded before the marker fix](../screenshots/v2-intel-short-popup.png)
 
-Real-model screenshot, Intel chip, short article, first use, recorded before the marker fix. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the copied marker `<<<PAGE TEXT START>>>`, which the later fix removes from answers.
+Real-model screenshot, Intel chip, short article, first use, recorded before the marker fix. The model line reads "SmolLM2 360M. Not downloaded yet (about 204 MB, first use only)", and the graphics note is shown. The summary begins with the copied marker `<<<PAGE TEXT START>>>`, which the later code removes from answers.
 
 ### What this means in plain words
 
-On the built-in chip, a short summary takes a little over three minutes on first use, and writing the answer alone takes about 76 seconds. The smaller model works, but it is slow.
+On the built-in chip, a short summary takes a little over three minutes on first use, and writing the answer alone takes about 76 seconds. A long page takes 10 to 12 minutes. The smaller model works, but it is slow.
 
 ## What the saved summaries show
 
-The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more. Only the Intel short summary contains the copied markers. It ends with the end marker too.
+The three original JSON files hold seven summaries, all made before the marker fix. The offline run after the label fix adds two more, and the Intel Wikipedia runs add two more. Only the short Intel summary of the original set contains the copied markers.
 
-Five of the seven summaries that use bullets have more than six bullet lines, counting nested lines. They are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9, of which six are at the top level). The Wikipedia article is live, so its facts cannot be checked here.
+Five of the seven summaries that use bullets, across the original and after-fix runs, have more than six bullet lines, counting nested lines. They are the under-load long article (10), the under-load Wikipedia article (13), the clean offline short article (8), the after-fix offline short article (8) and the after-fix long article (9, of which six are at the top level). The Wikipedia article is live, so its facts cannot be checked here.
 
 The clearest factual slip is in the under-load long article. The fixture says the Pharos lighthouse "was built in the third century BC", but the summary said "around 3000 BC". The same summary repeats the merge prompt's labels. Its opening lines, as saved, are:
 
@@ -3439,11 +3532,13 @@ The after-fix long summary shows a milder copy. Its first bullet repeats the "Pa
 
 Real-model screenshot, offline long article, clean run after the label fix. The first numbered point is "Page title provides a brief overview of the content within." The stats line reads 15.7 s, and the popup's summary box scrolls, so the list continues below the visible part.
 
-Each record is a single run. The table above shows what happened in those runs, not how often it happens.
+The two Intel Wikipedia summaries differ. The old-code second try contains invented facts, several dates and names, and the record's note points to one of them. That summary must not be quoted as fact. The new-code summary is three short generic points, a list of 14,700 lighthouses, 54 diagrams and 651 photographs, and the counts were not checked against the page. Its saved text repeats the three points once more.
+
+Each record is a single run. The tables above show what happened in those runs, not how often it happens.
 
 ### What this means in plain words
 
-The model follows the shape of the prompt, but it can copy the prompt's labels, give a wrong date, or add bullets that say nothing. The marker fix removed one kind of copying. A reader still has to check the facts against the page.
+The model follows the shape of the prompt, but it can copy the prompt's labels, give a wrong date, invent facts, or write generic points. The marker removal stopped one kind of copying. A reader still has to check the facts against the page.
 
 ## Speed
 
@@ -3451,7 +3546,7 @@ The speeds below are measured in tokens a second, which is the decode speed of e
 
 - Clean NVIDIA runs with the 1 billion parameter model: 34 to 53 tokens a second.
 - Offline after the label fix: 65 for the short article (one request) and 45 for the two-part article. These are single measurements.
-- Intel with SmolLM2 360M, clean run: 4 to 5 tokens a second.
+- Intel with SmolLM2 360M, clean run: 4 to 5 tokens a second. Intel Wikipedia runs with the same model: 4 to 4.1 tokens a second.
 - Intel with the 1 billion parameter model: about 2 tokens a second, from an earlier speed test recorded in the development log. No run file holds it.
 - NVIDIA with the 1 billion parameter model: about 63 tokens a second writing and about 600 reading the prompt, from an earlier speed test recorded in the development log. No run file holds these, and the log does not say which text was used.
 - Download sizes in the real runs, from the popup: about 695 MB for the main model and about 204 MB for SmolLM2. The pretend model's 664 MB and 300 MB are fixed numbers, not measurements.
@@ -3464,7 +3559,7 @@ Reading the figure: the NVIDIA bars come from the clean runs with the large mode
 
 ### What this means in plain words
 
-The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the smaller model, and even then a short summary takes minutes.
+The separate card writes many times faster than the built-in chip. The built-in chip gives usable answers only with the smaller model, and even then a short summary takes minutes and a long page takes about ten to twelve.
 
 ## What these tests do not show
 
@@ -3474,11 +3569,12 @@ From run 1, the browser tests do not show:
 - real download speed, graphics-card behaviour or shader warm-up, which only the real-model records cover;
 - the visible Chrome the client will use, because every test ran in hidden Chromium.
 
-From the README, these items are not yet verified:
+From the README and the change list, these items are not yet verified:
 
 - the client's laptop, whose details have not been received;
 - `setup.bat --gpu` against a real Chrome installation;
 - a manual click-through in the visible Chrome, using the V2 checklist;
+- a real answer timeout, because no automated test triggers the TIMEOUT path;
 - languages other than English, because the model is small and is meant for English text.
 
 The real-model records cover two fixture articles and one live Wikipedia page. No formal rating of summary quality exists in the repository, so this report does not call any summary good or poor.
@@ -3508,7 +3604,7 @@ Not yet. Every real-model number comes from the developer's laptop, which has an
 
 This chapter tells the problems met while building Version 2. The sources are kept narrow on purpose. The stories come from the rows of the development log dated 21 October 2026, which are the Version 2 rows, and from the first browser test run, `docs/test-runs/run-1.md`. The rows dated 20 October 2026 belong to Version 1 and are not repeated here.
 
-Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the set of faults in the test setup that run 1 found.
+Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the failure in the real Chrome on 24 October, and problem 13 is the set of faults in the test setup that run 1 found.
 
 ## The model cache refused to open
 
@@ -3741,7 +3837,7 @@ A fallback that changes the result must be visible to the person reading it. The
 **Fix.**
 
 - **The idle close during a load.** A quick status check could start the five-minute idle countdown while a model load was still running. The offscreen manager now counts the messages in flight, starts the countdown only when the last one finishes, and does nothing on close while any message is running. A unit test covers this.
-- **The dead-job limit.** A job counted as dead after three minutes without an update, the same length as a slow answer's limit. A slow answer could then look interrupted while it was still running. The dead-job limit is now five minutes in the service worker and in the popup. The 180-second answer limit is unchanged.
+- **The dead-job limit.** A job counted as dead after three minutes without an update, the same length as a slow answer's limit. A slow answer could then look interrupted while it was still running. The dead-job limit is now five minutes in the service worker and in the popup. The answer limit was 180 seconds at that point too. It is now 10 minutes, and a heartbeat keeps a job alive during one long answer (see the next story).
 - **The word "oom".** The memory check matched "oom" inside other words, such as "room". It now matches only the whole word, and a unit test covers "room".
 - **The undo command.** `scripts/set-chrome-gpu.ps1 -Remove` failed without `-ChromePath`, so the undo command in the README did not work. The script now finds Chrome itself when the path is not given. Test B10c checks that a plain `-Remove` works.
 - **A silent registry failure.** `setup.bat --gpu` did not report when the registry write failed. It now prints "The graphics setting was NOT changed" and carries on, because the extension works without the setting, only more slowly.
@@ -3768,6 +3864,29 @@ The shape of the `oom` fix and the countdown fix is worth showing. The countdown
 ### What this means in plain words
 
 A timeout copied from a fast cloud service does not fit a slow local one. Reading your own code a second time still finds things that the tests did not look for.
+
+## A vague error in the real Chrome
+
+**What was seen.** On 24 October the project owner ran the extension in the real Chrome, on the developer's laptop with the Intel chip (so SmolLM2), on the Wikipedia "Lighthouse" article. The popup said "Something went wrong inside the extension. Try again." and gave no reason. A hidden run of the same case failed with TIMEOUT after 615.6 seconds. Part 6 of 7 had not answered 180 seconds after it started at 435.8 seconds, and parts 1 and 2 had taken 76 and 127 seconds.
+
+**Cause.** There were two separate weaknesses. First, one answer on the Intel chip can take longer than the 180-second limit, because reading a dense part and writing up to 300 tokens at 4 to 5 tokens a second adds up. Second, the model refuses a prompt that does not fit its 4096-token window, with the text "Prompt tokens exceed context window size". The code did not recognise that text, so the failure fell through to the general SERVICE_ERROR message. Dense parts (tables, numbers, references) use more tokens per character than the 6,000-character limit assumes. The decision record had planned to halve such a part and try again (D1, item 4), and that step had not been built.
+
+**Fix.** The window error now has its own code, CONTEXT_TOO_LONG, which is the only message shown if halving also fails. The code that recognises the window error is short.
+
+`src/core/engine-errors.js` (the window error is recognised)
+
+```
+  // WebLLM: "Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096"
+  if (/prompt tokens exceed|context window size/.test(text)) return ERROR_CODES.CONTEXT_TOO_LONG;
+```
+
+A part that does not fit is cut in half at a paragraph or sentence break, and each half is summarized. This goes up to three levels deep, and not for text under 600 characters. A page that was one part becomes two parts and a merge request, and the job records how many parts were cut (`stats.halvedParts`). The answer limit is now 10 minutes (`generateTimeoutMs` 600000). The offscreen page's ten-second heartbeat also refreshes the running job's record, so the five-minute dead-job rule cannot fire during one long answer. For SERVICE_ERROR and MODEL_LOAD_FAILED, the popup shows a "Technical detail" line with the first 240 characters of the error detail. Three browser scenarios cover the new paths (V25 to V27), and the unit tests now total 76.
+
+A second finding came from the same episode. A persistent browser profile kept an old copy of the service worker script, so one real run ran old code. The real-run script now clears those folders before it starts (chapter 14).
+
+### What this means in plain words
+
+A vague message is a bug report with nothing in it, so the cause has to be shown to the reader. A long, dense page can fail on the slowest chip, so the parts that do not fit are now shortened and the answer is given more time. The lesson is to test long, dense pages on the slowest chip, not only on the fixtures, because the skipped recommendation to halve and retry came back as the first real-Chrome failure.
 
 ## Three faults in the test setup
 
@@ -3811,32 +3930,34 @@ This chapter lists what Version 2 does not yet do or show, and what to do next, 
 
 **The client's laptop.** The client's graphics chip, memory and free disk space were requested, and the answer has not come back (README). Every real-model number in chapter 14 comes from the developer's laptop, which has an NVIDIA RTX 3050 and a built-in Intel chip. The client's speed, model choice and disk margin are therefore [to be measured].
 
-**The graphics switch on a real Chrome.** `setup.bat --gpu` and the undo command now work as written and report a failure, but they have been tested only against a throw-away registry key (tests B10, B10b and B10c). They have not been tried on the client's Chrome setting. Chapter 13 gives the commands.
+**The graphics switch on a real Chrome.** `setup.bat --gpu` and its undo command now work as written and report a failure, but they have been tested only against a throw-away registry key (tests B10, B10b and B10c). They have not been tried on the client's Chrome setting. Chapter 13 gives the commands.
 
 **The visible browser.** All browser tests ran in hidden Chromium. In the test copy, the toolbar's `activeTab` grant is replaced by an extra host permission. The Load unpacked step in branded Chrome has not been run and recorded, and the V2 click-through checklist is not done (README).
 
-**The Intel chip after the marker fix.** The copied markers are removed from every answer in the code, but the only Intel run was made before that change. Its saved summary still shows them. The fixed output on the Intel chip has not been recorded.
+**The short Intel article with the current code.** The copied markers are removed from every answer in the code, and the short Intel run that showed them was made before that change. The Wikipedia run made with the current code has no markers in its saved summary, but a short-article run on the Intel chip with the current code has not been recorded.
 
 ### What this means in plain words
 
-The tests show that the software works in a test browser on one laptop. They do not yet show the client's install, the graphics switch, the Intel output after the fix, or the extension in the normal browser window.
+The tests show that the software works in a test browser on one laptop. They do not yet show the client's install, the graphics switch, a short Intel summary with the current code, or the extension in the normal browser window.
 
 ## Output quality
 
 The model is small, and its answers have faults that the code does not catch. The examples come from saved records, each a single run, so they are examples and not a rate.
 
-- **Copied wording.** The merge step can repeat the prompt's own wording. The long NVIDIA summary under load repeated "These are summaries of consecutive parts of one web page". The after-fix long summary still begins with the bullet "Page title provides a brief overview of the content within.", which gives no fact.
-- **Factual slips.** The same under-load summary gave "around 3000 BC" for the Pharos lighthouse, where the fixture says "the third century BC".
+- **Copied wording.** The merge step can repeat the prompt's own wording. The under-load long summary repeated "These are summaries of consecutive parts of one web page", and the after-fix long summary still begins with the bullet "Page title provides a brief overview of the content within.", which gives no fact.
+- **Factual slips and invented facts.** The under-load long summary gave "around 3000 BC" for the Pharos lighthouse, where the fixture says "the third century BC". The old-code second try on the Intel chip contains invented facts, dates and names, and its record's note points to one of them.
+- **Generic answers.** The new-code Wikipedia summary is three short points whose counts (a list of 14,700 lighthouses, 54 diagrams and 651 photographs) were not checked against the page.
 - **Bullet counts.** The prompt asks for three to six bullets, and several saved summaries have more (chapter 14 gives the counts).
 - **No formal rating.** The repository rates no summary for quality, so this report does not call the summaries good or poor. The model is meant for English only, and no other language is tested.
 
 ### What this means in plain words
 
-The model can repeat the prompt, give a wrong date, or add a bullet that says nothing. A reader must check the page before trusting a fact in a summary.
+The model can repeat the prompt, give a wrong date, invent a fact, or write generic points. A reader must check the page before trusting a fact in a summary.
 
 ## Speed, memory and first use
 
 - **The built-in chip is slow.** The small model wrote 4 to 5 tokens a second. The short article took 199.2 seconds on first use, and the two-part article took 149.1 seconds. The earlier speed test gives about 2 tokens a second for the larger model. No saved run measures a short answer on this chip with the model already stored.
+- **A long page takes 10 to 12 minutes on the Intel chip.** The 7-part Lighthouse article with SmolLM2 took 616.4 seconds with the current code, and 704.5 seconds with the old code. The answer limit was raised to 10 minutes for this reason, and the job record is refreshed during each answer so that the five-minute dead-job rule does not fire.
 - **First use is long.** The download took about 81 seconds for the small model on the Intel chip, and about 138 to 158 seconds for the larger model on the NVIDIA chip. The download time depends on the network, which the test did not control. The warm-up took 30 to 56 seconds, and the cause of the difference between runs is not measured. In the offline runs on the same browser profile, the warm-up took about half a second, so the first-use warm-up is the one that is slow. The popup reads the main model's size from its file list, about 695 MB in the real runs.
 - **Memory is not measured.** The loaded model stays in the offscreen page until it has been idle for five minutes (`idleCloseMs`). A code comment in `offscreen-manager.js` says that closing the page "frees about a gigabyte of graphics memory". No run file measures that, so the figure is [to be measured]. The 879 MB and 376 MB figures in `config.js` are WebLLM's list values, not measured use.
 - **The reading speed is not stored.** The development log records about 600 tokens a second for reading the prompt, from an earlier speed test. The saved runs do not keep that figure, so no saved run measures it.
@@ -3844,7 +3965,7 @@ The model can repeat the prompt, give a wrong date, or add a bullet that says no
 
 ### What this means in plain words
 
-On the NVIDIA chip the first use takes minutes and later uses take seconds. On the built-in chip every use takes minutes. The memory held while the model is loaded has not been measured.
+On the NVIDIA chip the first use takes minutes and later uses take seconds. On the built-in chip every use takes minutes, and a long page takes ten to twelve. The memory held while the model is loaded has not been measured.
 
 ## Design gaps and unfinished behaviour
 
@@ -3853,15 +3974,15 @@ On the NVIDIA chip the first use takes minutes and later uses take seconds. On t
 - **The model line is not refreshed during a download or warm-up.** It is refreshed when a job ends. A reader who watches a long first use does not see the line change until the job is over.
 - **A load error that mentions "cache" counts as a download failure.** At the load stage, any error text containing "cache" is classified as `MODEL_DOWNLOAD_FAILED`, even when the cause is different.
 - **Built-in graphics detection recognises Intel only.** A built-in chip from another maker would not get the small model or the note.
-- **The timeout path has no automated test.** The pretend model has no timeout. A unit test feeds a `TIMEOUT` reply into the engine, but the timeout itself, which is in the real engine, is never triggered.
+- **The TIMEOUT path has no automated test.** The pretend model has no timeout. A unit test feeds a `TIMEOUT` reply into the engine, but no test triggers the timeout itself in the real engine.
+- **The halving step has only been exercised by unit tests and the pretend model.** Scenario V25 uses the pretend model's `longprompt` mode. No real run has overflowed the window: the new-code Wikipedia run had `halvedParts` set to 0, and whether a part overflows depends on the page text of the day.
 - **The under-8-GB rule has not been seen on real hardware.** A computer below 8 GB, as reported by `navigator.deviceMemory`, gets the small model. The rule has been tested with fake values only.
-- **The half-and-retry step was not built.** The decision record planned to halve a part and try again when the model rejects it as too long for its window (`docs/DECISIONS.md`, D1, item 4). No run hit a window error, and the part limit (`maxChunks`, 12) refuses very long pages first. A window error would probably reach the reader as a general message, and no test covers that path.
 - **The dashboard fallback has no Version 2 browser test.** The extractor falls back to the rendered page text when Readability finds under 200 characters. The fixture `tests/fixtures/dashboard.html` exists, but no Version 2 browser test loads it.
 - **The secret scan knows only the Version 1 key.** `scripts/secret-scan.mjs` looks for the old Gemini key through `tests/helpers/key.mjs`. It does not check for any key that Version 2 might use, and when it finds no key it exits without scanning any file.
 
 ### What this means in plain words
 
-Some behaviour is unfinished. A tab closed during a download keeps the download running, a saved choice of the smaller model stays set until the stored data is cleared, and the model line does not change while a first use is in progress.
+Some behaviour is unfinished. A tab closed during a download keeps the download running, a saved choice of the smaller model stays set until the stored data is cleared, and the model line does not change while a first use is in progress. The halving step works in the tests, but no real page has yet needed it.
 
 ## Records to tidy
 
@@ -3869,11 +3990,12 @@ These are not faults in the product, but a reader who opens the files will meet 
 
 - `v2-local-nvidia-cold-second-attempt-with-load.md` repeats the numbers of `v2-local-nvidia.md`.
 - The note in `v2-local-nvidia-offline-first-attempt-with-load.md` says that run was slower, but only its long article was slower. Its short article was faster.
+- The note in `v2-local-intel-wikipedia.md` attributes an invented fact to the new-code run. The invented facts are in the summary of the old-code second try, `v2-local-intel-wikipedia-second-try-old-code.json`. The note needs correcting.
 - The decision record quotes a writing speed for the separate card that mixes a saved figure with an earlier speed test. The earlier test's figure, about 63 tokens a second, has no saved file. The saved clean runs give 34 to 53. This report uses the saved runs and labels the earlier figure.
 
 ### What this means in plain words
 
-The files are correct in their numbers, but two of them repeat or overstate, so a reader must read the notes as well as the tables.
+The files are correct in their numbers, but some notes repeat or overstate, so a reader must read the notes as well as the tables.
 
 ## Questions this chapter answers
 
@@ -3881,10 +4003,10 @@ The files are correct in their numbers, but two of them repeat or overstate, so 
 The client's laptop has not been tested, so its speed, model choice and disk margin are unknown. The tests ran on one developer laptop, in a hidden browser.
 
 **Can the summaries be trusted as facts?**
-No. The saved summaries show copied wording, a wrong date and empty bullets, so a reader must check the facts against the page.
+No. The saved summaries show copied wording, a wrong date, invented facts in one old-code run and generic points in the new-code run, so a reader must check the facts against the page.
 
 **Why is the built-in chip such a problem?**
-It writes about 4 to 5 tokens a second with the small model. On first use the short article took 199 seconds, and the answer alone took about 76 seconds. No saved run measures a short answer on this chip with the model already stored.
+It writes about 4 to 5 tokens a second with the small model. On first use the short article took 199 seconds, and a 7-part article takes 10 to 12 minutes. No saved run measures a short answer on this chip with the model already stored.
 
 **What happens if a tab is closed during the first download?**
 The download keeps running in the background, because the engine's preparation step ignores the abort signal. Nothing shows its result to a reader, because the tab that asked for it has closed.
@@ -3896,33 +4018,34 @@ A test on the client's laptop. A built-in chip makes the small model and its not
 
 1. **Test on the client's laptop.** Collect its graphics chip, memory and free disk space, then run `setup.bat` and one summary on that machine. Record the model line, the first-use time and the stats line, labelled as the client's machine.
 2. **Run the manual click-through in the visible Chrome.** Cover Load unpacked, pinning, one summary, one offline summary with the network switched off, and the notice after a memory failure. Keep the screenshots and the checklist results.
-3. **Repeat the Intel run after the marker fix.** Record the new short and long summaries, so that the saved output shows the fix on the chip where the markers appeared.
-4. **Reduce copied wording and bullet overruns.** Remove repeated labels from the merge answer, keep the bullets within three to six, and have a reader rate a fixed set of pages against their text.
+3. **Record a short-article Intel run with the current code.** Keep the saved summary, so that the marker removal is shown on the chip where the markers appeared.
+4. **Reduce copied wording, invented facts and bullet overruns.** Remove repeated labels from the merge answer, keep the bullets within three to six, and have a reader rate a fixed set of pages against their text.
 5. **Test the graphics switch on a real Chrome.** Use a spare browser profile, run `setup.bat --gpu`, check `chrome://gpu`, then undo the change with the plain `-Remove` command.
-6. **Pass the abort signal into the download.** Stop the model download when the tab that asked for it has closed.
-7. **Let the reader or the developer reset the smaller-model choice.** Show the saved choice in the popup, with a button that clears it.
-8. **Measure memory and reading speed.** Record the memory held while the model is loaded and after the idle close, and store the reading speed in the run files.
-9. **Test the timeout and the dashboard fallback, or remove the claims.** Add a test with a slow fake answer that triggers the timeout, and a browser test that loads `dashboard.html`.
-10. **Fix the secret scan.** Make it fail when it has nothing to scan for, and check for key-like patterns that Version 2 could leak.
+6. **Test halving on a real page that overflows the window.** Use a dense page that is known to exceed the window, and record `halvedParts` in the saved stats.
+7. **Pass the abort signal into the download.** Stop the model download when the tab that asked for it has closed.
+8. **Let the reader or the developer reset the smaller-model choice.** Show the saved choice in the popup, with a button that clears it.
+9. **Measure memory and reading speed.** Record the memory held while the model is loaded and after the idle close, and store the reading speed in the run files.
+10. **Test the timeout and the dashboard fallback, or remove the claims.** Add a test that triggers the timeout with a slow fake answer, and a browser test that loads `dashboard.html`.
+11. **Fix the secret scan and the note in the Wikipedia record.** Make the scan fail when it has nothing to scan for, check for key-like patterns that Version 2 could leak, and correct the note that attributes the invented fact to the wrong run.
 
 ### What this means in plain words
 
-The client's laptop comes first, because its results decide which path applies. The visible-browser check and the Intel run after the marker fix come next, since those are the results a reader would look for first.
+The client's laptop comes first, because its results decide which path applies. The visible-browser check and a short Intel run with the current code come next, since those are the results a reader would look for first.
 
 
 <div style="page-break-after: always"></div>
 
 # Conclusion
 
-Version 2 summarizes the page a reader has open with a small language model that runs inside Chrome, on the laptop's own graphics card. Version 1 sent the page text to Google's Gemini service and needed a key. Version 2 needs no key and no account, and the page text stays on the computer. The internet is used once, for the first download of the model. Most of the project was reused from Version 1: reading the page, cutting long text into parts, merging the part summaries, the popup, and the background job that keeps running when the popup closes. The new parts are the offscreen page that holds the model, the WebLLM library that runs it, the engine that connects the two, the graphics-card check, and the setup scripts.
+Version 2 summarizes the page a reader has open with a small language model that runs inside Chrome, on the laptop's own graphics card. Version 1 sent the page text to Google's Gemini service and needed a key. Version 2 needs no key and no account, and the page text stays on the computer. The internet is used once, for the first download of the model. Most of the project was reused from Version 1: reading the page, cutting long text into parts, merging the part summaries, the popup, and the background job that keeps running when the popup closes. The new parts are the offscreen page that holds the model, the WebLLM library that runs it, the engine that connects the two, the graphics-card check, the setup scripts, and, after a failure in the real Chrome on 24 October, the handling of parts that do not fit the model's window.
 
-The project was tested at three levels. The 70 unit tests check the logic of each piece without a browser. The 26 browser tests load the extension in a hidden Chromium and press the real button, with a pretend model that can be made to fail on purpose. The 15 Windows checks run the batch files in throw-away copies and the graphics script against a throw-away registry key. Real-model runs measured the actual model on the developer's laptop, which has an NVIDIA RTX 3050 and a built-in Intel chip. In the clean runs, a first use on the NVIDIA chip took about 197 seconds, most of it the download and the warm-up. A short article with the model already stored took 15.3 seconds with no internet, before a popup fix, and 17.7 seconds after it. The built-in Intel chip, which the extension handles with a smaller model, took 199 seconds for a short article on first use and wrote at 4 to 5 tokens a second.
+The project is tested at three levels. The 76 unit tests check the logic of each piece without a browser. The 29 browser tests load the extension in a hidden Chromium and press the real button, with a pretend model that can be made to fail on purpose. The 15 Windows checks run the batch files in throw-away copies and the graphics script against a throw-away registry key. Real-model runs measured the actual model on the developer's laptop, which has an NVIDIA RTX 3050 and a built-in Intel chip. In the clean runs, a first use on the NVIDIA chip took about 197 seconds, most of it the download and the warm-up. A short article with the model already stored took 15.3 seconds with no internet, before a popup fix, and 17.7 seconds after it. On the built-in Intel chip, which the extension handles with a smaller model, a short article took 199 seconds on first use, and the seven-part Lighthouse article took 616 seconds with the current code, about ten minutes.
 
-The main lessons are practical. A library's default storage can fail inside a particular kind of extension page, so each feature has to be tested in the page that uses it. The same laptop can run the model about thirty times faster or slower depending on which chip Chrome chooses, so the speed has to be measured on the path the client will use, and the screen has to say which chip is in use. A word in a library's message is not proof of what it is doing, and the popup now checks whether a model is stored before it says "downloading". A protection for the model, such as the prompt's markers, can leak into the output, and a fallback that changes the result has to be visible to the reader. A timeout copied from a fast cloud service does not fit a slow local one. Each of these lessons came from a fault that a run, a screenshot or a reading of the code exposed, and each fault is recorded in chapter 15.
+The main lessons are practical. A library's default storage can fail inside a particular kind of extension page, so each feature has to be tested in the page that uses it. The same laptop can run the model about thirty times faster or slower depending on which chip Chrome chooses, so the speed has to be measured on the path the client will use, and the screen has to say which chip is in use. A word in a library's message is not proof of what it is doing. A protection for the model, such as the prompt's markers, can leak into the output, and a fallback that changes the result has to be visible to the reader. A timeout copied from a fast cloud service does not fit a slow local one. A vague error message is a bug report with nothing in it, so the cause has to be shown. A persistent browser profile can keep old code, so a real run is only as current as the folders it starts from. Each of these lessons came from a fault that a run, a screenshot, a reading of the code or a real Chrome failure exposed, and each is recorded in chapter 15.
 
-The honest state of the work has three parts. The software works in a test browser on one laptop, and the failure cases are covered by tests. The client's laptop is untested, because its details have not arrived, so the client's speed, model choice and disk margin are still [to be measured]. The small model's answers still have faults that matter to a reader: it can repeat the prompt's wording, one saved summary gives a wrong date, and some bullets say nothing. The memory the model holds while loaded has not been measured, and a tab closed during the first download does not stop that download. The visible-browser check, the Intel run after the marker fix, and the graphics switch on a real Chrome are still to do.
+The honest state of the work has three parts. The software works in a test browser on one laptop, and the failure cases are covered by tests. The client's laptop is untested, because its details have not arrived, so the client's speed, model choice and disk margin are still [to be measured]. Parts that do not fit the model's window are now cut in half and summarized, but no real page has yet needed that step, so it is proven only by tests and the pretend model. The small model's answers still have faults that matter to a reader: it can repeat the prompt's wording, give a wrong date or an invented fact, and write generic points. The memory the model holds while loaded has not been measured, a tab closed during the first download does not stop that download, and the timeout path has no automated test. The visible-browser check, a short-article Intel run with the current code, and the graphics switch on a real Chrome are still to do.
 
-The next step with the most value is the client's laptop. Its graphics chip decides which of the two paths applies: the separate card, which writes tens of tokens a second, or the built-in chip, which needs the small model and waits minutes for each summary. The Intel run after the marker fix and the reduction of copied wording come next, because a reader would notice those faults first. Version 2 is a working local version with its limits written down, and what remains is to test it where the client will use it.
+The next step with the most value is the client's laptop. Its graphics chip decides which of the two paths applies: the separate card, which writes tens of tokens a second, or the built-in chip, which needs the small model, takes minutes for a short summary and about ten to twelve minutes for a long page. The short Intel run with the current code and the reduction of copied wording come next, because a reader would notice those faults first. Version 2 is a working local version with its limits written down, and what remains is to test it where the client will use it.
 
 
 <div style="page-break-after: always"></div>
@@ -3954,7 +4077,7 @@ The list below holds the only external sources used in this part of the report. 
 
 # [nonum] Appendix A: File guide
 
-This appendix lists every file under `finalsem/project`, except `node_modules`, `test-output` and the `.model-profile*` browser profile folders. There are 60 files. Each row gives the path, what the file does, and whether it is reused from Version 1, changed from it, or new in Version 2. The status comes from a byte-by-byte comparison (`cmp`) with `midsem/project`, run on the current files. A file counts as **reused** only when it is identical to the Version 1 file, and as **changed** when it exists in both folders but differs. Files that exist only in Version 2 are **new**.
+This appendix lists every file under `finalsem/project`, except `node_modules`, `test-output` and the `.model-profile*` browser profile folders. There are 60 files. Each row gives the path, what the file does, and whether it is reused from Version 1, changed from it, or new in Version 2. The status comes from a byte-by-byte comparison (`cmp`) with `midsem/project`, run again on the current files after the 24 October changes. The comparison gives the same statuses as before: a file counts as **reused** only when it is identical to the Version 1 file, **changed** when it exists in both folders but differs, and **new** when it exists only in Version 2.
 
 ![Folder tree of finalsem with one-line notes](../figures/V13_repo_tree.png)
 
@@ -3962,7 +4085,7 @@ Reading the figure: the tree lists the folders of `finalsem/`, with a short note
 
 ![Reuse of Version 1 modules in Version 2](../figures/V14_reuse_v1_v2.png)
 
-Reading the figure: the figure covers the files under `src` only. It lists eight reused unchanged files, eight changed files and ten new files, and three Version 1 files removed. The current counts for five of the changed files differ from the figure: `service-worker.js` 85 (figure 83), `prompts.js` 61 (figure 48), `popup.js` 172 (figure 146), `popup.html` 16 (figure 15) and `ui.css` 38 (figure 5). The lists of reused, changed and new files still hold. The figure's numbers need redrawing before the report is submitted.
+Reading the figure: the figure covers the files under `src` only. It lists eight reused unchanged files, eight changed files and ten new files, and three Version 1 files removed. Its numbers are the changed lines of a diff against Version 1, for example `service-worker.js` 92, `popup.js` 181, `popup.html` 17, `ui.css` 39 and `errors.js` 58.
 
 Table: Every file under finalsem/project, with its purpose and its status against Version 1
 
@@ -3980,38 +4103,38 @@ Table: Every file under finalsem/project, with its purpose and its status agains
 | `setup.log` | Log of the last setup run (generated by setup, not source) | Changed (generated) |
 | `scripts/check-computer.ps1` | Describes Windows, processor, memory, graphics chips and free disk space on drive C. Exits 1 only when disk space is short | New |
 | `scripts/check-extension.ps1` | Checks that `manifest.json` parses, is Manifest V3, and names files that exist | Changed |
-| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, in the `nvidia`, `nvidia-offline` and `intel` modes | New |
+| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, with five plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`). Deletes the profile's old service worker and code cache folders before each launch | New |
 | `scripts/secret-scan.mjs` | Checks the repository for the old Gemini key before a push | Changed |
 | `scripts/set-chrome-gpu.ps1` | Writes or removes the per-user setting that asks Windows for the separate graphics card. Finds Chrome itself, so `-ChromePath` is optional | New |
 | `scripts/shoot-ui-states.mjs` | Takes the pretend-model popup screenshots for the report | New |
 | `src/background/extract-tab.js` | Runs the page extractor in a tab and refuses restricted pages | Reused unchanged |
 | `src/background/offscreen-manager.js` | Creates, sends messages to and closes the offscreen page. Counts messages in flight, so the page is never closed while one is running. Holds the idle close and the test seam | New |
-| `src/background/service-worker.js` | Owns the summary job: start, progress writes, interrupted and orphaned jobs, cleanup when a tab closes, and a five-minute dead-job limit | Changed |
+| `src/background/service-worker.js` | Owns the summary job: start, progress writes, interrupted and orphaned jobs, cleanup when a tab closes, the five-minute dead-job limit, and the heartbeat that refreshes running job records on each KEEPALIVE | Changed |
 | `src/content/extract.js` | Injected into the page. Reads the main text with Readability, and falls back to the visible text under 200 characters | Reused unchanged |
 | `src/core/chunker.js` | Splits long text into parts within a size limit | Reused unchanged |
-| `src/core/config.js` | The two models, the default settings and the names of the stored settings | Changed |
-| `src/core/engine-errors.js` | Turns the engine's error text into one of the project's error codes. Matches "oom" as a whole word only | New |
-| `src/core/errors.js` | The error codes and the plain-English message for each one | Changed |
+| `src/core/config.js` | The two models, the default settings (including the 10-minute answer limit) and the names of the stored settings | Changed |
+| `src/core/engine-errors.js` | Turns the engine's error text into one of the project's error codes. Recognises the context-window message as `CONTEXT_TOO_LONG`, and matches "oom" as a whole word only | New |
+| `src/core/errors.js` | The 15 error codes and the plain-English message for each one | Changed |
 | `src/core/gpu-check.js` | Checks the graphics adapter and shader-f16 support, chooses the model, and maps download progress. A stored model is always "loading" | New |
 | `src/core/merger.js` | Joins the part summaries into one, in levels when there are many | Reused unchanged |
 | `src/core/pipeline.js` | The flow of a job: extract, check the length, prepare the model, summarize the parts, merge | Changed |
 | `src/core/prompts.js` | The prompt texts for a one-part page, a part and the merge. Removes copied page markers from answers (`stripPageMarkers`) | Changed |
 | `src/core/url.js` | Compares two addresses while ignoring the part after `#` | Reused unchanged |
-| `src/engines/local.js` | The local engine: graphics check, preparing the model, the fallback to the small model, and the generate calls. Applies the marker removal to every answer | New |
+| `src/engines/local.js` | The local engine: graphics check, preparing the model, the fallback to the small model, the cut-in-half retry for parts that do not fit the window (`stats.halvedParts`), and the marker removal | New |
 | `src/lib/READABILITY_LICENSE.md` | Licence text of the Readability library | Reused unchanged |
 | `src/lib/WEBLLM_LICENSE` | Licence text of WebLLM | New |
 | `src/lib/readability.js` | Mozilla Readability, the library that finds an article's main text | Reused unchanged |
 | `src/lib/web-llm.js` | WebLLM 0.2.86 in one file, so no build step is needed | New |
 | `src/offscreen/engine-worker.js` | Web worker that runs WebLLM's handler, keeping the hidden page responsive | New |
-| `src/offscreen/mock-engine.js` | The pretend model for the tests, with its modes (`ok`, `oom`, `html` and others) | New |
+| `src/offscreen/mock-engine.js` | The pretend model for the tests, with its 12 modes (`ok`, `oom`, `html`, `longprompt`, `crash` and others) | New |
 | `src/offscreen/offscreen.html` | The empty page shell of the offscreen page | New |
-| `src/offscreen/offscreen.js` | The hidden page: graphics check, stored-model check, download, load, warm-up, answers and keep-alive messages | New |
-| `src/ui/popup.html` | Popup layout, with the element IDs the script uses. Includes the notice for a summary made by the smaller model | Changed |
-| `src/ui/popup.js` | Popup logic: model line, button, progress, result, errors, the graphics note, the fallback notice, and the five-minute dead-job limit | Changed |
+| `src/offscreen/offscreen.js` | The hidden page: graphics check, stored-model check, download, load, warm-up, answers, and the 10-second KEEPALIVE | New |
+| `src/ui/popup.html` | Popup layout, with the element IDs the script uses. Includes the fallback notice and the `#error-detail` line for technical detail | Changed |
+| `src/ui/popup.js` | Popup logic: model line, button, progress, result, errors, the graphics note, the fallback notice, the technical detail line, and the five-minute dead-job limit | Changed |
 | `src/ui/summary-format.js` | Turns the summary text into paragraphs and bullets, and never produces HTML | Reused unchanged |
 | `src/ui/ui.css` | The printed-page style of the popup. Dead key-box and options-page rules removed; one rule added for the notice | Changed |
 | `tests/bat/test-bat-scripts.ps1` | The 15 checks of `setup.bat`, `run.bat` and the graphics script in throw-away copies | Changed |
-| `tests/e2e/pipeline.test.js` | The browser scenarios V01 to V24, with V18b | Changed |
+| `tests/e2e/pipeline.test.js` | The browser scenarios V01 to V27, with V18b (28 tests in this file; with the smoke test, 29 browser tests) | Changed |
 | `tests/e2e/smoke.test.js` | The first-run smoke test | Changed |
 | `tests/fixtures/article-long.html` | A long article, used to test parts and merging | Reused unchanged |
 | `tests/fixtures/article-short.html` | A short article, used by most tests | Reused unchanged |
@@ -4023,13 +4146,13 @@ Table: Every file under finalsem/project, with its purpose and its status agains
 | `tests/helpers/fixtures-server.mjs` | Serves the fixture pages on 127.0.0.1 | Reused unchanged |
 | `tests/helpers/key.mjs` | Looks for the old Gemini key. Used only by the secret scan | Reused unchanged |
 | `tests/unit/chunker.test.js` | The 10 chunker tests | Reused unchanged |
-| `tests/unit/gpu-and-errors.test.js` | The 11 tests of the graphics check, the model choice, the progress mapping and the error codes | New |
-| `tests/unit/local-engine.test.js` | The 20 tests of the local engine, including the marker removal and the idle countdown | New |
+| `tests/unit/gpu-and-errors.test.js` | The 12 tests of the graphics check, the model choice, the progress mapping, the error codes and the context-window code | New |
+| `tests/unit/local-engine.test.js` | The 25 tests of the local engine, including the cut-in-half retry, the marker removal and the idle countdown | New |
 | `tests/unit/merger.test.js` | The 8 merger tests | Reused unchanged |
 | `tests/unit/pipeline.test.js` | The 7 pipeline tests | Reused unchanged |
 | `tests/unit/small.test.js` | The 14 tests of formatting, settings, errors, prompts and marker removal | Changed |
 
-Count by status: 22 reused unchanged, 22 changed (two of them are generated files), and 16 new. The total is 60 files.
+Count by status: 22 reused unchanged, 22 changed (two of them are generated files), and 16 new. The total is 60 files. The unit tests number 76 in all, and the browser tests 29.
 
 Thirteen files exist in Version 1 but not in Version 2, and they were removed on purpose. They are the Gemini engine (`src/engines/gemini.js`), the Options page (`src/ui/options.html` and `options.js`), the Gemini helpers and their tests (`tests/helpers/mock-gemini.mjs`, `tests/unit/gemini.test.js`, `tests/unit/fixes.test.js`), the Chrome flag check (`tests/e2e/chrome-flag-check.mjs`), and six live and benchmark scripts (`scripts/activetab-spike.mjs`, `collect-examples.mjs`, `live-check.mjs`, `live-run.mjs`, `model-bench.mjs` and `quota-probe.mjs`).
 
@@ -4069,11 +4192,11 @@ Table: Messages between the service worker and the offscreen page
 |---|---|---|---|
 | Worker to page | `LOCAL_STATUS` | `modelId` | `{ok: true, gpu: {vendor, architecture, integrated}, deviceMemoryGB, cached, downloadMB, model: {id}}`, or `{ok: false, error: {code, detail}}` |
 | Worker to page | `LOCAL_LOAD` | `modelId` | `{ok: true, loadMs}`, or `{ok: true, alreadyLoaded: true, loadMs: 0}` when the model is already loaded. Or `{ok: false, error}`. The page checks whether the model is stored before loading, so a stored model is reported as loading, not downloading |
-| Worker to page | `LOCAL_GENERATE` | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `{ok: true, text, stats: {promptTokens, completionTokens, prefillTps, decodeTps}}`, or `{ok: false, error}`. The worker removes copied page markers from `text` before using it |
+| Worker to page | `LOCAL_GENERATE` | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `{ok: true, text, stats: {promptTokens, completionTokens, prefillTps, decodeTps}}`, or `{ok: false, error}`. The worker removes copied page markers from `text` before using it. A part whose prompt does not fit the window fails with `CONTEXT_TOO_LONG` |
 | Page to worker | `MODEL_PROGRESS` | `phase`, `percent`, `text` | No reply. The worker passes it on to the job. Phases are `downloading` and `loading`. A download is reported only when the model is not stored. The warm-up is sent as `loading` at 100% with the text "Warming up the model (first time only)" |
-| Page to worker | `KEEPALIVE` | none | No reply. Sent every 10 seconds while the page is busy, so the worker stays awake |
+| Page to worker | `KEEPALIVE` | none | No reply. Sent every 10 seconds while the page works. The worker keeps itself awake, and it refreshes the `updatedAt` time of every running job record, so one long answer is not shown as dead |
 
-`LOCAL_GENERATE` requests are made one at a time, in the order they were asked. The offscreen manager keeps a chain for them. The manager also counts the messages in flight, and it closes the page after the idle time only when none is in flight.
+`LOCAL_GENERATE` requests are made one at a time, in the order they were asked. The offscreen manager keeps a chain for them. It also counts the messages in flight, and it closes the page after the idle time only when none is in flight.
 
 ## The job record in session storage
 
@@ -4091,9 +4214,9 @@ Table: Fields of the job record
 | `notice` | Always `null` in the job record. The fallback notice is worked out in the popup from the stats, so this field is not used for it |
 | `summary` | The final summary text, once done |
 | `error` | `{code, message, detail}` when the job fails |
-| `stats` | Parts, requests, time, extraction method, model label, switch reason (`modelSwitchReason`), graphics details, load time and writing speed |
+| `stats` | Parts, requests, time, extraction method, model label, switch reason (`modelSwitchReason`), graphics details, load time, writing speed and `halvedParts`, the number of parts that were cut in half because they did not fit the model window (0 when none were) |
 | `url`, `pageUrl`, `title` | The tab's address when the job started, the page's address at the end, and the page title |
-| `startedAt`, `updatedAt` | Time stamps in milliseconds. A running job not updated for five minutes counts as stale (`STALE_MS`, in the service worker and in the popup) |
+| `startedAt`, `updatedAt` | Time stamps in milliseconds. A running job not updated for five minutes counts as stale (`STALE_MS`, in the service worker and in the popup). The heartbeat keeps a running job's `updatedAt` current during a long answer |
 
 ## Settings in chrome.storage.local
 
@@ -4108,9 +4231,9 @@ Table: Stored settings, their defaults and what each does
 | `maxChunks` | 12 | Whole number, at least 1 | Largest number of parts. A page that needs more is refused as too long |
 | `engineMode` | `real` | Text starting with `mock` | Test seam. `real` runs the real model. Any `mock` value runs the pretend model in the mode named after the colon |
 | `idleCloseMs` | 300000 (five minutes) | Whole number, at least 1 | Idle time after which the offscreen page is closed, counted only when no message is in flight |
-| `generateTimeoutMs` | 180000 (three minutes) | Whole number, at least 1 | Time limit for one answer. An answer past the limit fails with `TIMEOUT` |
+| `generateTimeoutMs` | 600000 (ten minutes) | Whole number, at least 1 | Time limit for one answer. An answer past the limit fails with `TIMEOUT`. It was 180000 (three minutes) before 24 October |
 
-Four more settings are defaults in the code and cannot be changed through storage: `minTextChars` (200, a page with less readable text is refused), `maxTokensPart` (300, the longest part summary), `maxTokensFinal` (320, the longest final summary and the one-part answer) and `temperature` (0.2, low values make the answers more predictable). A fifth value, `mockDelayMs`, is read directly by the offscreen manager and not by `loadSettings()`. It sets the pause in milliseconds for each pretend answer, and its default is 0.
+Four more settings are defaults in the code and cannot be changed through storage: `minTextChars` (200, a page with less readable text is refused), `maxTokensPart` (300, the longest part summary), `maxTokensFinal` (320, the longest final summary and the one-part answer) and `temperature` (0.2, low values make the answers more predictable). A fifth value, `mockDelayMs`, is read directly by the offscreen manager and not by `loadSettings()`. It sets the pause in milliseconds for each pretend answer, and its default is 0. Two more constants sit in the code: `MIN_HALVING_CHARS` (600, the shortest text that is cut in half) and `MAX_HALVING_DEPTH` (3, the number of times a part may be cut).
 
 Table: The two models and their sizes, from `src/core/config.js`
 
@@ -4130,14 +4253,15 @@ Table: The popup elements for messages and notices
 | `model-line` | Always | The model name, whether it is stored, and its size. Refreshed when a job ends, and when the popup opens |
 | `gpu-note` | Integrated graphics | The graphics note that names the chip and says that answers are slow |
 | `error`, `error-text` | A failed job, a stale job, or a refused start | The message for the error code, from the table below |
+| `error-detail` | A failed job with the code SERVICE_ERROR or MODEL_LOAD_FAILED | "Technical detail: " followed by the first 240 characters of the error's detail, with spaces collapsed |
 | `result-notice` | A finished summary made by the smaller model after a memory failure or a failed load | "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." Not shown for the integrated-graphics case |
 | `notice` | Never shown in Version 2 | Reserved; the job record's `notice` field is always `null` |
 
 ## Error codes and the messages the reader sees
 
-Source: `src/core/errors.js` for the codes and messages. The table also says where each code is raised. Every message below is shown exactly as written in the code.
+Source: `src/core/errors.js` for the codes and messages, and `src/core/engine-errors.js` for the classification. The table also says where each code is raised. Every message below is shown exactly as written in the code.
 
-Table: The 14 error codes, their exact messages and when each is raised
+Table: The 15 error codes, their exact messages and when each is raised
 
 | Code | Exact message | When it is raised |
 |---|---|---|
@@ -4146,25 +4270,26 @@ Table: The 14 error codes, their exact messages and when each is raised
 | `GPU_MEMORY` | The graphics card ran out of memory. Close other heavy tabs or programs and try again. | An engine error that names memory (the word "oom" counts only as a whole word). The larger model is retried once with the smaller one |
 | `MODEL_DOWNLOAD_FAILED` | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | A load error that names a network or fetch problem. Not retried with the other model |
 | `MODEL_LOAD_FAILED` | The model could not be started. Press the button to try again. | Other load errors, and a request for an answer before the model is loaded. A failed primary load is retried once with the smaller model |
-| `TIMEOUT` | The model took too long to answer. Try again, or use a shorter page. | One answer takes longer than `generateTimeoutMs` |
+| `TIMEOUT` | The model took too long to answer. Try again, or use a shorter page. | One answer takes longer than `generateTimeoutMs` (ten minutes) |
 | `EMPTY_ANSWER` | The model returned no summary for this page. | The answer is empty after copied markers are removed and spaces trimmed (`src/engines/local.js`) |
 | `TOO_LITTLE_TEXT` | This page has too little readable text to summarize. | Readable text is shorter than `minTextChars` (`src/core/pipeline.js`) |
 | `TOO_LONG` | This page is too long for the local model on this computer. Try a shorter page. | The page needs more parts than `maxChunks` |
+| `CONTEXT_TOO_LONG` | A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | The model refuses a prompt that does not fit its window ("Prompt tokens exceed context window size"), and cutting the part in half also fails. While halving succeeds, the reader does not see this code |
 | `RESTRICTED_PAGE` | Chrome does not allow extensions to read this page. | A browser-internal, file or Chrome Web Store address (`src/background/extract-tab.js`) |
 | `EXTRACT_FAILED` | Could not read the text of this page. | The extractor cannot run in the tab for another reason, or returns nothing |
-| `SERVICE_ERROR` | Something went wrong inside the extension. Try again. | Any error not covered above, such as an unreachable offscreen page or an unknown message |
+| `SERVICE_ERROR` | Something went wrong inside the extension. Try again. | Any error not covered above, such as an unreachable offscreen page or an unknown message. The popup adds the technical detail line |
 | `INTERRUPTED` | The summary was interrupted. Press Summarize to try again. | A job still marked running when the worker starts again. The popup shows the same words for a job not updated for five minutes, but from its own text rather than this code |
 | `CANCELLED` | Cancelled. | The job's page changed or its tab closed. The worker writes nothing for it |
 
-The popup shows the message of the code it receives. The technical detail is kept for the console and is not shown to the reader.
+The popup shows the message of the code it receives. The technical detail is kept for the console. For SERVICE_ERROR and MODEL_LOAD_FAILED, the popup also shows the first 240 characters of the detail in the `error-detail` line.
 
 ## Test counts and the pretend model's modes
 
-Source: `tests/` and `src/offscreen/mock-engine.js`. The product has 70 unit tests (`tests/unit`, run without a browser), 26 browser tests (`tests/e2e`, hidden Chromium, using the pretend model) and 15 Windows script checks (`tests/bat`, B1 to B10c). The unit tests and the script checks do not use the pretend model.
+Source: `tests/` and `src/offscreen/mock-engine.js`. The product has 76 unit tests (`tests/unit`, run without a browser), 29 browser tests (`tests/e2e`, hidden Chromium, using the pretend model) and 15 Windows script checks (`tests/bat`, B1 to B10c). The unit tests and the script checks do not use the pretend model.
 
 The pretend model's modes are read from the page address, as `offscreen.html?mock=<mode>&delay=<ms>`, and the test sets them through `engineMode`. A mode of `mock` alone means `ok`.
 
-Table: The pretend model's modes and what each one makes the extension do
+Table: The pretend model's 12 modes and what each one makes the extension do
 
 | Mode | What the pretend model does |
 |---|---|
@@ -4178,6 +4303,8 @@ Table: The pretend model's modes and what each one makes the extension do
 | `empty` | The model answers with no text |
 | `html` | The model answers with markup-looking text, so the test can check that it is shown as plain text |
 | `slow` | Each answer takes at least 1.5 seconds |
+| `longprompt` | A prompt longer than 3,500 characters is refused with the context-window message, so halving is exercised (scenario V25) |
+| `crash` | Every answer fails with SERVICE_ERROR and a technical detail, so the detail line is exercised (scenario V27) |
 
 The pretend download runs in eight steps, 120 milliseconds apart, each with the progress text `Fetching param cache[i/8]`. The pretend sizes are 664 MB for the larger model and 300 MB for the smaller one, and the model line shows them. These are fixed numbers, not measurements. "Stored" is remembered in the extension's own browser storage under a key that starts with `page-summarizer-mock-model-cached:`.
 

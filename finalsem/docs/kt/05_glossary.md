@@ -10,7 +10,7 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **Chunk (part).** A piece of the page text of at most 6,000 characters (`chunkChars` in `config.js`), sent to the model as one request. The screens call it a part. A page that needs more than 12 parts is refused with TOO_LONG (`maxChunks`).
 
-**Context window.** The number of tokens a model can look at in one go, including the prompt and the answer. The decision record gives the window of Llama 3.2 1B as 4,096 tokens, and the part size is set to fit inside it.
+**Context window.** The number of tokens a model can look at in one go, including the prompt and the answer. The decision record gives the window of Llama 3.2 1B as 4,096 tokens, and the part size is set to fit inside it. A dense part can still exceed it. WebLLM then refuses the prompt with "Prompt tokens exceed context window size", and the extension halves the part (see Halving).
 
 **Decode.** The step in which the model writes its answer, one token at a time. Each token needs a full pass through the model, so decode is slower than prefill. The saved clean NVIDIA runs decoded at 34 to 53 tokens a second. An unsaved speed test, recorded in the DEVLOG, gave about 63.
 
@@ -18,13 +18,15 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **Graphics card (GPU).** The chip that does many small calculations at the same time, built for pictures and games. This project runs the model on it, through WebGPU. The developer's laptop has an NVIDIA RTX 3050 with 6 GB.
 
+**Halving (halve and retry).** When WebLLM refuses a part because it does not fit the context window, the extension cuts the part in half at a paragraph or sentence break and summarizes each half. This is repeated up to three levels deep, and never for text under 600 characters. It was added on 24 October, after a dense Wikipedia part was refused in the real Chrome.
+
 **IndexedDB.** A store inside the browser where a web page or extension keeps larger data by name. The model files are kept here, and the project asks for unlimited storage so the browser does not delete them. In the test, the quota was about 10.7 GB.
 
 **Integrated graphics.** A graphics chip built into the processor, instead of a separate card. Intel's built-in chip on the developer's laptop is much slower for this model. The 1B model wrote about 2 tokens a second on it, and the extension chooses the small model there.
 
 **Job record.** The data stored for one summary, under the key `job:<tab id>` in session storage. It holds the status, the phase, the progress, the summary, any error and the stats. The popup redraws from it.
 
-**Keepalive.** A message the offscreen page sends to the service worker every 10 seconds while it is busy. It keeps the service worker from being stopped in the middle of a job. The interval is set in `offscreen.js`.
+**Keepalive.** A message the offscreen page sends to the service worker every 10 seconds while it is busy. It keeps the service worker from being stopped in the middle of a job. The interval is set in `offscreen.js`. Since 24 October, each keepalive also refreshes the update time of every running job record, so a long answer is not shown as dead.
 
 **Llama 3.2 1B.** The primary model, with the id `Llama-3.2-1B-Instruct-q4f16_1-MLC`. "1B" means about one billion parameters. The popup says the download is about 695 MB, and WebLLM's list gives 879 MB of graphics memory for it.
 
@@ -34,7 +36,7 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **MLC.** The name in the model ids (for example `-MLC` at the end) marks the compiled form that WebLLM's model list uses. The name comes from the MLC project, on which WebLLM is built. This is background; the repository does not measure it.
 
-**Mock (pretend model).** A stand-in model that answers from fixed text and can fail on purpose. It is selected with `?mock=<mode>` on the offscreen page. The browser tests use it, and its ten modes include `nowebgpu`, `oom` and `downloadfail`.
+**Mock (pretend model).** A stand-in model that answers from fixed text and can fail on purpose. It is selected with `?mock=<mode>` on the offscreen page. The browser tests use it, and its twelve modes include `nowebgpu`, `oom`, `downloadfail`, `longprompt` and `crash`.
 
 **Model weights.** The numbers a model learned, stored in a file. The 1B model's weights are about 695 MB in this project, because they are stored in 4-bit form.
 
@@ -60,9 +62,11 @@ The entries are in alphabetical order. Where a number comes from the repository,
 
 **SmolLM2 360M.** The fallback model, with the id `SmolLM2-360M-Instruct-q4f16_1-MLC`. It needs 376 MB of graphics memory and its download is about 204 MB. The extension chooses it on integrated graphics, on a computer with less than 8 GB of memory, or after the primary model fails to load.
 
-**Stale job.** A job whose record has had no update for five minutes. The popup and the service worker both treat it as dead. The answer timeout of 180 seconds is a separate limit, and Version 1 used three minutes for its own dead-job limit.
+**Stale job.** A job whose record has had no update for five minutes. The popup and the service worker both treat it as dead. The answer timeout is a separate limit, now 10 minutes. Version 1 used three minutes for its own dead-job limit. A running job stays alive while the keepalive refreshes it.
 
 **Temperature.** A setting that controls how much a model varies its choice of next word. The project uses 0.2, so the answer stays close to the most likely words and to the text.
+
+**Timeout (answer limit).** The longest time the extension waits for one model answer. It is 10 minutes (`generateTimeoutMs`, 600,000 ms). It was 180 seconds until 24 October, when answers on the Intel chip ran past three minutes. When it passes, the job stops with TIMEOUT.
 
 **Token.** The piece of text a model reads and writes: a word, part of a word, or a punctuation mark. A page of 6,000 characters is about 1,500 tokens, according to the comment in `config.js`. The repository does not store how many tokens each answer had.
 

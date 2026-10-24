@@ -56,7 +56,7 @@ On the built-in Intel chip, the 1B model wrote about 2 tokens a second. That fig
 
 **12. Why cap a page at 12 parts?**
 
-Each part is one model call, and on the Intel chip the long article's first part took about 65 seconds, so many parts would take many minutes on a laptop. A page that needs more than 12 parts is refused with TOO_LONG before any download starts. The Lighthouse article, at 36,752 characters, needed seven parts and was accepted.
+Each part is one model call, and on the Intel chip each part of the Wikipedia article took about 66 to 122 seconds in the current run, so many parts would take many minutes on a laptop. A page that needs more than 12 parts is refused with TOO_LONG before any download starts. The Lighthouse article, at 36,752 characters, needed seven parts and was accepted.
 
 ## Privacy
 
@@ -80,7 +80,7 @@ The clean NVIDIA first run took 196.8 s. Of that, the download of the 695 MB mod
 
 **17. Why is the Intel chip so slow, and what can the user do about it?**
 
-The built-in chip wrote 4 to 5 tokens a second with SmolLM2, against 34 to 53 on the separate card, in the saved runs. A short article took 199.2 s on first use: about 81 s of download, about 39 s of warm-up and 76 s of writing. The user can run `setup.bat --gpu`, or set Chrome to High performance in the Windows Graphics settings, then restart Chrome.
+The built-in chip wrote 4 to 5 tokens a second with SmolLM2, against 34 to 53 on the separate card, in the saved runs. A short article took 199.2 s on first use: about 81 s of download, about 39 s of warm-up and 76 s of writing. A long Wikipedia article took 616.4 s, about 10 minutes, with the current code, and its summaries are not reliable. The user can run `setup.bat --gpu`, or set Chrome to High performance in the Windows Graphics settings, then restart Chrome.
 
 **18. How fast is it on your laptop?**
 
@@ -88,7 +88,7 @@ On the developer's Acer laptop with the NVIDIA RTX 3050, the saved clean runs ga
 
 **19. What happens to a long page on the card?**
 
-Each part is one model call, and the parts run one after another, because the card does one job at a time. The Lighthouse article made eight requests: seven for the parts and one for the merge. Those eight took 74.1 s on the clean run. A page of more than 12 parts is refused.
+Each part is one model call, and the parts run one after another, because the card does one job at a time. The Lighthouse article made eight requests: seven for the parts and one for the merge. Those eight took 74.1 s on the clean run. On the Intel chip the same article took 616.4 s with the current code, and that summary is not reliable. A page of more than 12 parts is refused.
 
 **20. Why does the second summary start faster than the first?**
 
@@ -110,27 +110,27 @@ The popup shows MODEL_DOWNLOAD_FAILED: "The model download stopped. Check your i
 
 **24. What if Chrome stops the service worker during a job?**
 
-The job record still says "running", so the next start of the worker marks it INTERRUPTED. The popup then tells the user to press Summarize again, which scenario V20 checks. A job with no update for five minutes counts as dead in the popup and the service worker. The keepalive message every 10 seconds is meant to keep the worker awake during work. The repository does not measure how often Chrome stops it in practice.
+The job record still says "running", so the next start of the worker marks it INTERRUPTED. The popup then tells the user to press Summarize again, which scenario V20 checks. A job with no update for five minutes counts as dead in the popup and the service worker. The keepalive message every 10 seconds is meant to keep the worker awake during work. Since 24 October it also refreshes the update time of every running job, so one long answer is not shown as dead. The repository does not measure how often Chrome stops it in practice.
 
 ## Testing
 
 **25. How did you test it?**
 
-There are three layers. The 70 unit tests run in Node, in six files. The 26 browser scenarios run in hidden Chromium with the pretend model. The 15 script checks (B1 to B10c) test the setup and launcher files. The test setup passes all of them. The real model was run separately with `scripts/local-run.mjs`, and that produced the saved clean runs. The run-1 record in the test-run folder predates the later changes, so run the commands again before you quote the counts.
+There are three layers. The 76 unit tests run in Node, in six files. The 29 browser scenarios run in hidden Chromium with the pretend model, which has twelve modes. The 15 script checks (B1 to B10c) test the setup and launcher files. The test setup passes all of them. The real model was run separately with `scripts/local-run.mjs`, and that produced the saved clean runs. The run-1 record in the test-run folder predates the later changes, so run the commands again before you quote the counts.
 
 **26. Why use a pretend model in the tests?**
 
 A real model cannot be made to fail on demand, and it is slow and needs a graphics card. The pretend model can produce no WebGPU, no shader-f16, out-of-memory errors, a failed download, an empty answer, and markup in the answer. The real-model runs prove that the real model works, and the scenarios prove the extension's logic.
 
-**27. Did the tests and the review find real bugs?**
+**27. Did the tests and the review find real bugs? What failed in the real Chrome?**
 
-Yes. Scenario V09 found that the popup printed "intel" in lowercase, and `vendorName` in `popup.js` fixed it. Scenario V22 found that a job record came back after its tab was closed, because a queued write finished late. A code review found more. A stored model was labelled "Downloading" for about 0.8 s. The small model's answers copied the page marker. The fallback to the small model was silent, and the idle close could cut off a running load. Each is fixed, and the DEVLOG rows dated 21 October tell those stories.
+Yes. The real Chrome failed on 24 October. On the Wikipedia Lighthouse article, on the developer's laptop with the Intel chip, the popup said "Something went wrong inside the extension. Try again." with no reason. A hidden run of the same case failed with TIMEOUT, because one answer ran past the 180-second limit. WebLLM's refusal of an oversized prompt also fell through to that vague message, because the extension did not know its text. The fixes were a 10-minute limit, halving of parts that do not fit, a heartbeat for running jobs, and a "Technical detail" line in the popup. The first real-Chrome run had found a gap that the spike and the fixtures had missed. Earlier, scenario V09 found that the popup printed "intel" in lowercase, and `vendorName` in `popup.js` fixed it. Scenario V22 found that a job record came back after its tab was closed, because a queued write finished late. A code review found more. A stored model was labelled "Downloading" for about 0.8 s. The small model's answers copied the page marker. The fallback to the small model was silent, and the idle close could cut off a running load. Each is fixed, and the DEVLOG rows dated 21 October tell those stories.
 
 ## Honesty about the limits
 
 **28. How good is a 1B model, really?**
 
-The repository does not score summary quality, so the honest answer is that it is not measured. The saved outputs show faults. The Intel summary began with the page's own marker text, "<<<PAGE TEXT START>>>". That output was recorded before the marker fix, and the markers are now removed from every answer. The NVIDIA long-article summary said "These are summaries of consecutive parts of one web page", which describes the process instead of the article. That line still appears in some answers, and it is listed as a limit. The Lighthouse summary named the Sumburgh Head lighthouse twice, for two different firsts. A person should compare each summary with its page before any quality claim is made.
+The repository does not score summary quality, so the honest answer is that it is not measured. The saved outputs show faults. The Wikipedia article on the Intel chip is the worst case. The old-code second try invented facts, which must not be quoted as facts, and the current run gave three short, generic points whose counts (14,700 lighthouses, 54 diagrams and 651 photographs) were not checked against the page. The Intel summary began with the page's own marker text, "<<<PAGE TEXT START>>>". That output was recorded before the marker fix, and the markers are now removed from every answer. The NVIDIA long-article summary said "These are summaries of consecutive parts of one web page", which describes the process instead of the article. That line still appears in some answers, and it is listed as a limit. The Lighthouse summary named the Sumburgh Head lighthouse twice, for two different firsts. A person should compare each summary with its page before any quality claim is made.
 
 ![Screenshot, real model, Intel built-in chip, short article: the popup shows the SmolLM2 model line, the Intel graphics note, and a summary that begins with the marker text, recorded before the marker fix](../screenshots/v2-intel-short-popup.png)
 
@@ -138,7 +138,7 @@ Caption: real model, Intel built-in chip, the short article, recorded before the
 
 **29. What was not tested?**
 
-The client's laptop has not been run. The visible daily Chrome has not been used, because every browser scenario and real-model run used hidden Chromium. `setup.bat --gpu` was tried only against a throw-away registry key. Only English text was tried. Summary quality was not compared with any other model. These are also known limits. Closing the tab during a download does not stop the download, because `prepare()` ignores the abort signal. No automated scenario covers the 180-second timeout path, since the pretend model has no timeout. The dashboard fixture is not used by any Version 2 browser scenario. The "halve the part and retry" step was not built.
+The client's laptop has not been run. The visible daily Chrome has not been used, because every browser scenario and real-model run used hidden Chromium. `setup.bat --gpu` was tried only against a throw-away registry key. Only English text was tried. Summary quality was not compared with any other model. These are also known limits. Closing the tab during a download does not stop the download, because `prepare()` ignores the abort signal. No automated scenario covers the 10-minute timeout path, since the pretend model has no timeout. The dashboard fixture is not used by any Version 2 browser scenario. The halving step was built on 24 October. It is covered by four unit tests and scenario V25, but the saved real run did not trigger it.
 
 **30. Why do the decode speeds differ between documents? The DEVLOG says 63 tokens a second, the saved runs say 34 to 53.**
 

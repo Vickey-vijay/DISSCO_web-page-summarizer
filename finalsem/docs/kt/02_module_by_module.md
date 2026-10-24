@@ -48,7 +48,7 @@ Three Version 1 files are gone: `src/engines/gemini.js`, `src/ui/options.html` a
 
 **Purpose.** The popup is the window that opens from the toolbar. It shows what the job record says and starts a job. It never runs the model.
 
-**Main functions.** `getTargetTab` (line 33) finds the active tab. `vendorName` (line 50, exported) turns "intel" into "Intel" for the note. `renderModelState` (line 55) writes the model line and sets the button text. `loadModelState` (line 79) asks the service worker for the model state. `refreshModelLineOnce` (line 82) reloads that state once when a job ends. `switchNotice` (line 89) returns the notice text for a summary made by the smaller model after a memory or load failure. `progressLabel` (line 110) turns a job's phase into a sentence. `render` (line 139) draws the job. `init` (line 178) runs when the popup opens. A `chrome.storage.onChanged` listener redraws when the record changes, and a timer redraws every few seconds, so a job whose worker has died is marked stale. `STALE_MS` (line 29) is five minutes.
+**Main functions.** `getTargetTab` (line 36) finds the active tab. `vendorName` (line 53, exported) turns "intel" into "Intel" for the note. `renderModelState` (line 58) writes the model line and sets the button text. `loadModelState` (line 97) asks the service worker for the model state. `refreshModelLineOnce` (line 83) reloads that state once when a job ends. `switchNotice` (line 90) returns the notice text for a summary made by the smaller model after a memory or load failure. `progressLabel` (line 128) turns a job's phase into a sentence. `render` (line 157) draws the job, and for SERVICE_ERROR and MODEL_LOAD_FAILED it fills the "Technical detail" line with the first 240 characters of the detail (line 195). `init` (line 211) runs when the popup opens. A `chrome.storage.onChanged` listener redraws when the record changes, and a timer redraws every few seconds, so a job whose worker has died is marked stale. `STALE_MS` (line 30) is five minutes.
 
 **What to say if asked.** "The popup is a display. It does not hold the work, so closing it cannot stop a summary. It redraws from the record in session storage, and it refreshes the model line after every job."
 
@@ -56,7 +56,7 @@ Three Version 1 files are gone: `src/engines/gemini.js`, `src/ui/options.html` a
 
 ### `src/ui/popup.html` and `src/ui/ui.css` (changed)
 
-**Purpose.** The layout and the printed-page style that Version 1 used. The popup has no key box in Version 2. A result notice element, `#result-notice`, sits above the summary. The stylesheet no longer carries the key-box and options-page rules, which were dead code.
+**Purpose.** The layout and the printed-page style that Version 1 used. The popup has no key box in Version 2. A result notice element, `#result-notice`, sits above the summary, and an error-detail element, `#error-detail`, sits under the error message. The stylesheet no longer carries the key-box and options-page rules, which were dead code.
 
 **What breaks if removed.** The popup would show unstyled text. The logic would still work.
 
@@ -74,7 +74,7 @@ Three Version 1 files are gone: `src/engines/gemini.js`, `src/ui/options.html` a
 
 **Purpose.** It owns the job. It starts the job when the popup asks, runs the pipeline, writes progress and the result to session storage, and cleans up when a tab closes or the worker restarts.
 
-**Main functions.** `writeJob` (line 34) writes a patch to the record, but only if the record still has this job's id. `makeEngine` (line 52) builds the local engine from the settings. `runJob` (line 63) runs the pipeline. `startJob` (line 109) creates the record and answers the popup. `getModelState` (line 155) answers `GET_MODEL_STATE`. The `tabs.onRemoved` listener (line 191) removes the record after the writes queued for that tab. `sweepOrphans` (line 204) marks an old running job as INTERRUPTED. `STALE_MS` (line 23) is five minutes.
+**Main functions.** `writeJob` (line 34) writes a patch to the record, but only if the record still has this job's id. `makeEngine` (line 52) builds the local engine from the settings. `runJob` (line 63) runs the pipeline. `startJob` (line 110) creates the record and answers the popup. `getModelState` (line 156) answers `GET_MODEL_STATE`. The `KEEPALIVE` listener (line 188) refreshes the update time of every running job (line 192), so one long answer is not shown as dead. The `tabs.onRemoved` listener (line 198) removes the record after the writes queued for that tab. `sweepOrphans` (line 211) marks an old running job as INTERRUPTED. `STALE_MS` (line 23) is five minutes.
 
 The guard in `writeJob` is the heart of the file:
 
@@ -120,7 +120,7 @@ Figure V05 shows the messages between the two pages.
 
 ![The messages between the service worker and the offscreen page: LOCAL_STATUS, LOCAL_LOAD with MODEL_PROGRESS, LOCAL_GENERATE, KEEPALIVE every 10 s, and the idle close](../figures/V05_offscreen_messages.png)
 
-Reading the figure: the service worker sends LOCAL_STATUS and gets back the card, whether the model is stored, and its size. It sends LOCAL_LOAD, and the offscreen page reports MODEL_PROGRESS many times. It sends LOCAL_GENERATE and gets back the text and the stats. KEEPALIVE comes back every 10 seconds while work runs. The footnote names the two files.
+Reading the figure: the service worker sends LOCAL_STATUS and gets back the card, whether the model is stored, and its size. It sends LOCAL_LOAD, and the offscreen page reports MODEL_PROGRESS many times. It sends LOCAL_GENERATE and gets back the text and the stats. KEEPALIVE comes back every 10 seconds while work runs. Since 24 October each KEEPALIVE also refreshes the update time of the running job records in the service worker, which the figure does not show. The footnote names the two files.
 
 **Note on the figure's idle box.** The box says that each message restarts the five-minute timer. The code clears the timer on every send and starts the countdown only when the in-flight count returns to zero, so the sentence to use is the code's version.
 
@@ -136,7 +136,7 @@ Figure V04 shows the steps the engine takes around this page.
 
 ![The steps of prepare(): card check, model choice, load with download when needed, warm-up, and the error branch with its single retry](../figures/V04_model_preparation.png)
 
-Reading the figure: prepare() is called by the pipeline. It asks the offscreen page for the card's status. If WebGPU or shader-f16 is missing, the job stops and the popup says why. Otherwise the model is chosen: Llama 3.2 1B, unless integrated graphics, under 8 GB of memory, or a saved fallback picks SmolLM2 360M. The load downloads the model if it is not stored. A GPU_MEMORY or MODEL_LOAD_FAILED error saves the fallback and retries once with SmolLM2. Any other error stops with its message. The warm-up is a one-token answer, about 30 s the first time. The footnote gives the sizes: Llama about 695 MB, SmolLM2 about 204 MB.
+Reading the figure: prepare() is called by the pipeline. It asks the offscreen page for the card's status. If WebGPU or shader-f16 is missing, the job stops and the popup says why. Otherwise the model is chosen: Llama 3.2 1B, unless integrated graphics, under 8 GB of memory, or a saved fallback picks SmolLM2 360M. The load downloads the model if it is not stored. A GPU_MEMORY or MODEL_LOAD_FAILED error saves the fallback and retries once with SmolLM2. Any other error stops with its message. The warm-up is a one-token answer, about 30 s the first time. The footnote gives the sizes: Llama about 695 MB, SmolLM2 about 204 MB. The figure predates the halving step (a part that is refused for size is cut in half inside `summarizeChunk`, not here) and the new code CONTEXT_TOO_LONG. Its warm-up note still holds.
 
 **What to say if asked.** "Cache Storage failed inside this page during the spike, and IndexedDB worked. That is why the model is in IndexedDB. The page checks the stored copy before the load, so a stored model is never labelled as a download."
 
@@ -152,11 +152,11 @@ Reading the figure: prepare() is called by the pipeline. It asks the offscreen p
 
 ### `src/offscreen/mock-engine.js` (new)
 
-**Purpose.** A pretend model for the browser tests. It answers from fixed text and can fail on purpose. The modes are `ok`, `nowebgpu`, `nof16`, `intel`, `oom`, `oomall`, `downloadfail`, `empty`, `html` and `slow`. Its download sizes (664 MB and 300 MB) are fixed numbers, not measurements.
+**Purpose.** A pretend model for the browser tests. It answers from fixed text and can fail on purpose. The modes are `ok`, `nowebgpu`, `nof16`, `intel`, `oom`, `oomall`, `downloadfail`, `empty`, `html`, `slow`, `longprompt` (refuses a prompt over 3,500 characters the way WebLLM refuses an oversized prompt) and `crash` (every answer fails with SERVICE_ERROR and a technical detail). That is twelve modes. Its download sizes (664 MB and 300 MB) are fixed numbers, not measurements.
 
 **What to say if asked.** "The browser scenarios use it so that failures can be forced on purpose. A real model cannot be made to fail on demand. The pretend model proves the extension's logic, and the real-model runs prove the real thing."
 
-**What breaks if removed.** The 26 browser scenarios could not run. The real extension would be unchanged.
+**What breaks if removed.** The 29 browser scenarios could not run. The real extension would be unchanged.
 
 ## 4. The engine and the graphics-card checks
 
@@ -164,7 +164,7 @@ Reading the figure: prepare() is called by the pipeline. It asks the offscreen p
 
 **Purpose.** The engine the pipeline calls. It has the same two functions as Version 1's cloud engine, `summarizeChunk` and `mergeSummaries`, and one more, `prepare`. It does not touch the model itself. It sends messages to the offscreen page.
 
-**Main functions.** `call` (line 21) sends one message and turns a failed reply into an `AppError`. `generate` (line 33) sends `LOCAL_GENERATE`, rejects an empty answer (EMPTY_ANSWER), and removes any copied page markers from the answer (`stripPageMarkers`, line 41). `checkStatus` (line 59) asks for the card's status and switches to the small model on integrated graphics. `prepare` (line 71) checks, downloads and loads. If the load fails with GPU_MEMORY or MODEL_LOAD_FAILED, it saves the fallback choice and tries once with SmolLM2 (`RETRY_WITH_FALLBACK`, line 14).
+**Main functions.** `call` (line 26) sends one message and turns a failed reply into an `AppError`. `generate` (line 38) sends `LOCAL_GENERATE`, rejects an empty answer (EMPTY_ANSWER), and removes any copied page markers from the answer (`stripPageMarkers`, line 46). `checkStatus` (line 65) asks for the card's status and switches to the small model on integrated graphics. `prepare` (line 77) checks, downloads and loads. If the load fails with GPU_MEMORY or MODEL_LOAD_FAILED, it saves the fallback choice and tries once with SmolLM2 (`RETRY_WITH_FALLBACK`, line 19). `summarizeChunk` (line 97) summarizes a part, and halves it when WebLLM refuses it for size (see below).
 
 The integrated-graphics switch is the most important few lines:
 
@@ -181,7 +181,9 @@ The integrated-graphics switch is the most important few lines:
     },
 ```
 
-*Source: `src/engines/local.js`, lines 59 to 68.*
+*Source: `src/engines/local.js`, lines 65 to 74.*
+
+Halving was not built at first. It was added on 24 October, after the real-Chrome failure. When a part raises CONTEXT_TOO_LONG, `summarizeChunk` calls `chunkText` on the part with a limit of half its length plus 100 characters. Each half is summarized on its own. The recursion stops at `MAX_HALVING_DEPTH` (3 levels, line 15) and never applies to text under `MIN_HALVING_CHARS` (600 characters, line 16). A page that was one part therefore becomes two parts, and its pieces go into one merge request. A page with several parts keeps its pieces in order without a merge. Each cut increments `halvedParts`, which the job record keeps in its stats.
 
 **What to say if asked.** "The engine keeps the same contract as the cloud engine, so the pipeline did not change. Its only extra step is `prepare`, which the pipeline calls once before the first part."
 
@@ -199,7 +201,7 @@ The integrated-graphics switch is the most important few lines:
 
 ### `src/core/engine-errors.js` (new)
 
-**Purpose.** WebLLM throws plain errors with free text. `classifyEngineError` (line 10) reads that text and returns one of our codes: NO_SHADER_F16, NO_WEBGPU, GPU_MEMORY, MODEL_DOWNLOAD_FAILED, MODEL_LOAD_FAILED or SERVICE_ERROR. The out-of-memory test matches `oom` only as a whole word (line 16), so a word such as "room" is not read as a memory error.
+**Purpose.** WebLLM throws plain errors with free text. `classifyEngineError` (line 10) reads that text and returns one of our codes: NO_SHADER_F16, NO_WEBGPU, GPU_MEMORY, MODEL_DOWNLOAD_FAILED, MODEL_LOAD_FAILED, SERVICE_ERROR or CONTEXT_TOO_LONG. The last one is matched from WebLLM's text "Prompt tokens exceed context window size" (line 13), so a part that is too big is no longer reported as a vague service error. The out-of-memory test matches `oom` only as a whole word (line 16), so a word such as "room" is not read as a memory error.
 
 **Limit to state honestly.** At the load stage, any error text containing "cache" is counted as a download failure.
 
@@ -259,7 +261,7 @@ Reading the figure: a page of 36,752 characters is cut into seven parts of at mo
 
 ### `src/core/config.js` (changed)
 
-**Purpose.** Every number that can be tuned, in one place. `MODELS` names the primary model `Llama-3.2-1B-Instruct-q4f16_1-MLC` with `vramMB: 879`, and the fallback `SmolLM2-360M-Instruct-q4f16_1-MLC` with `vramMB: 376`. `DEFAULTS` gives `chunkChars` 6,000, `minTextChars` 200, `maxChunks` 12, `maxTokensPart` 300, `maxTokensFinal` 320, `temperature` 0.2, `generateTimeoutMs` 180,000, `idleCloseMs` 300,000 and `engineMode` `real`. `loadSettings` (line 45) merges stored overrides, but only for the keys in `STORAGE_KEYS`.
+**Purpose.** Every number that can be tuned, in one place. `MODELS` names the primary model `Llama-3.2-1B-Instruct-q4f16_1-MLC` with `vramMB: 879`, and the fallback `SmolLM2-360M-Instruct-q4f16_1-MLC` with `vramMB: 376`. `DEFAULTS` gives `chunkChars` 6,000, `minTextChars` 200, `maxChunks` 12, `maxTokensPart` 300, `maxTokensFinal` 320, `temperature` 0.2, `generateTimeoutMs` 600,000 (10 minutes, changed from 180,000 on 24 October), `idleCloseMs` 300,000 and `engineMode` `real`. `loadSettings` (line 45) merges stored overrides, but only for the keys in `STORAGE_KEYS`.
 
 **What to say if asked.** "A 4,096-token window cannot take a long page at once, so each part is about 1,500 tokens of text. The temperature of 0.2 keeps answers close to the text."
 
@@ -267,7 +269,7 @@ Reading the figure: a page of 36,752 characters is cut into seven parts of at mo
 
 ### `src/core/errors.js` (changed)
 
-**Purpose.** The fourteen error codes and their plain messages. `AppError` carries a code, a technical detail and a message. `describeError` gives the popup the code and the message, and the detail goes to the console.
+**Purpose.** The fifteen error codes and their plain messages. CONTEXT_TOO_LONG was added on 24 October, with the message "A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page." It is shown only when halving also fails. `AppError` carries a code, a technical detail and a message. `describeError` gives the popup the code and the message, and the detail goes to the console.
 
 **What to say if asked.** "The popup only sees codes and sentences, never a raw library error. A unit test checks that each code has a message."
 
@@ -338,7 +340,7 @@ With `--gpu`, the script calls `set-chrome-gpu.ps1`. If that fails, setup prints
 
 ### `scripts/local-run.mjs` (new)
 
-**Purpose.** The measurement script. The modes are `nvidia` (cold start on the separate card), `nvidia-offline` (outside sites blocked) and `intel`. It writes `docs/test-runs/v2-local-<mode>.json` and `.md`, and screenshots into `docs/screenshots`. Its header says the first run downloads about 660 MB.
+**Purpose.** The measurement script. The modes are `nvidia` (cold start on the separate card), `nvidia-offline` (outside sites blocked), `intel` (both Intel cases), `intel-wikipedia` (the long Wikipedia article, slow) and `intel-short`. Before launching, it deletes the profile's `Service Worker` and `Code Cache` folders, because a persistent profile had kept an old service-worker script. The downloaded model is not touched, since it lives in IndexedDB. It writes `docs/test-runs/v2-local-<mode>.json` and `.md`, and screenshots into `docs/screenshots`. Its header says the first run downloads about 660 MB.
 
 **What to say if asked.** "Every real-model number in the test-run folder came from this script. It is slow and uses about 660 MB, so it is run on purpose, not in the tests."
 
@@ -348,9 +350,9 @@ With `--gpu`, the script calls `set-chrome-gpu.ps1`. If that fails, setup prints
 
 ## 8. The tests
 
-**Unit tests (`tests/unit`, six files, 70 tests).** `chunker.test.js` (10), `gpu-and-errors.test.js` (11), `local-engine.test.js` (20), `merger.test.js` (8), `pipeline.test.js` (7) and `small.test.js` (14). The chunker and merger tests are the same as in Version 1.
+**Unit tests (`tests/unit`, six files, 76 tests).** `chunker.test.js` (10), `gpu-and-errors.test.js` (12), `local-engine.test.js` (25), `merger.test.js` (8), `pipeline.test.js` (7) and `small.test.js` (14). The chunker and merger tests are the same as in Version 1.
 
-**Browser scenarios (`tests/e2e`, 26 scenarios).** `smoke.test.js` has the smoke scenario. `pipeline.test.js` has the 25 scenarios V01 to V24, with V18b. They use the pretend model and run hidden. The helpers in `tests/helpers` start the fixture server and the extension. `tests/helpers/key.mjs` is a helper whose role was not read for this chapter, so it is not described here.
+**Browser scenarios (`tests/e2e`, 29 scenarios).** `smoke.test.js` has the smoke scenario. `pipeline.test.js` has 28 scenarios: V01 to V27, with V18b. V25 covers the cut part, V26 the heartbeat and V27 the technical-detail line. They use the pretend model and run hidden. The helpers in `tests/helpers` start the fixture server and the extension. `tests/helpers/key.mjs` is a helper whose role was not read for this chapter, so it is not described here.
 
 **Script checks (`tests/bat/test-bat-scripts.ps1`).** Fifteen checks, B1 to B10c, including the check that plain `-Remove` finds Chrome and undoes the setting, and that the setting stays on the throw-away key.
 

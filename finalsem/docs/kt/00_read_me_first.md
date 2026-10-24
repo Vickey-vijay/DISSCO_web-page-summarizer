@@ -4,7 +4,7 @@
 
 ## What this document is
 
-This is the knowledge transfer (KT) guide for Page Summarizer, Version 2. It is for the student who explains the project at the viva, and for whoever maintains the extension later. Every number in it comes from the repository: the code in `finalsem/project`, the saved runs in `finalsem/docs/test-runs`, `finalsem/docs/DECISIONS.md` and `DEVLOG.md`. Where a number is missing, the pack says `[to be measured]`. The pack was revised after a code review. Chapter 01 has a section "What changed after review" and the limits that still hold. Chapters 02 to 04 name each change where it applies.
+This is the knowledge transfer (KT) guide for Page Summarizer, Version 2. It is for the student who explains the project at the viva, and for whoever maintains the extension later. Every number in it comes from the repository: the code in `finalsem/project`, the saved runs in `finalsem/docs/test-runs`, `finalsem/docs/DECISIONS.md` and `DEVLOG.md`. Where a number is missing, the pack says `[to be measured]`. The pack was revised after a code review and again after a failure in the real Chrome on 24 October 2026. Chapter 01 has a section "What changed after review" and the limits that still hold. Chapters 02 to 04 name each change where it applies. Chapter 06 tells the real-Chrome story.
 
 ## What the project is
 
@@ -18,7 +18,7 @@ Page Summarizer is a Chrome extension. You click its icon on an article, press a
 | What you need to start | A free Gemini key | Nothing to paste. The first use downloads the model |
 | Internet | Needed for every summary | Needed once, for the download |
 | Part size and limit | 8,000 characters, at most 30 parts | 6,000 characters, at most 12 parts |
-| Automated tests | 65 unit and 28 browser (its run 3) | 70 unit, 26 browser scenarios, 15 script checks |
+| Automated tests | 65 unit and 28 browser (its run 3) | 76 unit, 29 browser scenarios, 15 script checks |
 
 Version 1 is untouched in its own folder, so the midterm submission stays as it was.
 
@@ -43,7 +43,7 @@ Version 1 is untouched in its own folder, so the midterm submission stays as it 
 ## The five things to remember
 
 1. **The model runs on the laptop.** The page text stays on the computer. The network is used only for the first download, which the popup reports as about 695 MB for Llama 3.2 1B (about 204 MB for SmolLM2 360M).
-2. **Speed depends on the graphics chip.** In the saved clean runs the NVIDIA RTX 3050 wrote 34 to 53 tokens a second. The built-in Intel chip uses a smaller model, writes 4 to 5 tokens a second, and took 199.2 s for a short article on first use.
+2. **Speed depends on the graphics chip.** In the saved clean runs the NVIDIA RTX 3050 wrote 34 to 53 tokens a second. The built-in Intel chip uses a smaller model, writes 4 to 5 tokens a second, and took 199.2 s for a short article on first use. A long Wikipedia article takes 10 to 12 minutes there (616.4 s in the saved run with the current code), and the summaries from that article are not reliable.
 3. **The first use is slow.** In the clean NVIDIA run the download took 158.3 s, the load 3.8 s and the warm-up 30.5 s. Later, the same short article took 15.3 s with the outside websites blocked.
 4. **Summary quality was not scored.** Some saved outputs show faults, such as a summary that starts with the page's marker text. That output was recorded before the marker fix. Say that the quality was read, not measured.
 5. **Some things are not verified.** The client's laptop, the visible daily Chrome, `setup.bat --gpu` on a real Chrome, and any language other than English.

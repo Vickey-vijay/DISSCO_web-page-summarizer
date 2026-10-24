@@ -69,19 +69,19 @@ Table: Project objectives and the state of Version 2
 - The graphics card check, with the messages for missing WebGPU and missing 16-bit math.
 - The switch to the smaller model on a weak built-in chip, with a one-line note in the popup.
 - A fallback to the smaller model after a memory failure, remembered for later, with a notice in the popup when the smaller model wrote the summary.
+- Halving a part that the model's window cannot take at once, and a plain refusal when a half is still too long.
 - The offscreen page that holds the model and its messages, and the job that runs in the background.
 - Setup and run scripts for Windows (`setup.bat`, `run.bat`), a computer check (`scripts/check-computer.ps1`) and an opt-in script that asks Windows to run Chrome on the separate graphics card.
-- Tests: 70 unit tests, 26 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
+- Tests: 76 unit tests, 29 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
 
 ### What is not built or not verified
 
 - Other models beyond the two in `src/core/config.js`.
-- The step that halves the part size and tries again when a model reports that its window is too small. The design allowed for it. No run needed it, and the part limit refuses very long pages first, so it was not built (`DECISIONS.md`, D1, item 4).
 - A summary-quality comparison between Version 1 and Version 2.
 - Clearing the saved switch to the smaller model. Once it is saved, it stays until the stored settings are cleared. Closing a tab during the download does not stop the download either.
 - Languages other than English. The model is small and is meant for English text.
 - Chrome's built-in Summarizer API. It was studied as background only.
-- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a manual click-through in the visible Chrome window. All runs so far used a hidden Chromium browser.
+- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in the visible Chrome window. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 
 ## Test machines
 

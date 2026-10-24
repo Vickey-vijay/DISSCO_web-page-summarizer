@@ -2,7 +2,7 @@
 
 This chapter tells the problems met while building Version 2. The sources are kept narrow on purpose. The stories come from the rows of the development log dated 21 October 2026, which are the Version 2 rows, and from the first browser test run, `docs/test-runs/run-1.md`. The rows dated 20 October 2026 belong to Version 1 and are not repeated here.
 
-Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the set of faults in the test setup that run 1 found.
+Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the failure in the real Chrome on 24 October, and problem 13 is the set of faults in the test setup that run 1 found.
 
 ## The model cache refused to open
 
@@ -235,7 +235,7 @@ A fallback that changes the result must be visible to the person reading it. The
 **Fix.**
 
 - **The idle close during a load.** A quick status check could start the five-minute idle countdown while a model load was still running. The offscreen manager now counts the messages in flight, starts the countdown only when the last one finishes, and does nothing on close while any message is running. A unit test covers this.
-- **The dead-job limit.** A job counted as dead after three minutes without an update, the same length as a slow answer's limit. A slow answer could then look interrupted while it was still running. The dead-job limit is now five minutes in the service worker and in the popup. The 180-second answer limit is unchanged.
+- **The dead-job limit.** A job counted as dead after three minutes without an update, the same length as a slow answer's limit. A slow answer could then look interrupted while it was still running. The dead-job limit is now five minutes in the service worker and in the popup. The answer limit was 180 seconds at that point too. It is now 10 minutes, and a heartbeat keeps a job alive during one long answer (see the next story).
 - **The word "oom".** The memory check matched "oom" inside other words, such as "room". It now matches only the whole word, and a unit test covers "room".
 - **The undo command.** `scripts/set-chrome-gpu.ps1 -Remove` failed without `-ChromePath`, so the undo command in the README did not work. The script now finds Chrome itself when the path is not given. Test B10c checks that a plain `-Remove` works.
 - **A silent registry failure.** `setup.bat --gpu` did not report when the registry write failed. It now prints "The graphics setting was NOT changed" and carries on, because the extension works without the setting, only more slowly.
@@ -262,6 +262,29 @@ The shape of the `oom` fix and the countdown fix is worth showing. The countdown
 ### What this means in plain words
 
 A timeout copied from a fast cloud service does not fit a slow local one. Reading your own code a second time still finds things that the tests did not look for.
+
+## A vague error in the real Chrome
+
+**What was seen.** On 24 October the project owner ran the extension in the real Chrome, on the developer's laptop with the Intel chip (so SmolLM2), on the Wikipedia "Lighthouse" article. The popup said "Something went wrong inside the extension. Try again." and gave no reason. A hidden run of the same case failed with TIMEOUT after 615.6 seconds. Part 6 of 7 had not answered 180 seconds after it started at 435.8 seconds, and parts 1 and 2 had taken 76 and 127 seconds.
+
+**Cause.** There were two separate weaknesses. First, one answer on the Intel chip can take longer than the 180-second limit, because reading a dense part and writing up to 300 tokens at 4 to 5 tokens a second adds up. Second, the model refuses a prompt that does not fit its 4096-token window, with the text "Prompt tokens exceed context window size". The code did not recognise that text, so the failure fell through to the general SERVICE_ERROR message. Dense parts (tables, numbers, references) use more tokens per character than the 6,000-character limit assumes. The decision record had planned to halve such a part and try again (D1, item 4), and that step had not been built.
+
+**Fix.** The window error now has its own code, CONTEXT_TOO_LONG, which is the only message shown if halving also fails. The code that recognises the window error is short.
+
+`src/core/engine-errors.js` (the window error is recognised)
+
+```
+  // WebLLM: "Prompt tokens exceed context window size: number of prompt tokens: N; context window size: 4096"
+  if (/prompt tokens exceed|context window size/.test(text)) return ERROR_CODES.CONTEXT_TOO_LONG;
+```
+
+A part that does not fit is cut in half at a paragraph or sentence break, and each half is summarized. This goes up to three levels deep, and not for text under 600 characters. A page that was one part becomes two parts and a merge request, and the job records how many parts were cut (`stats.halvedParts`). The answer limit is now 10 minutes (`generateTimeoutMs` 600000). The offscreen page's ten-second heartbeat also refreshes the running job's record, so the five-minute dead-job rule cannot fire during one long answer. For SERVICE_ERROR and MODEL_LOAD_FAILED, the popup shows a "Technical detail" line with the first 240 characters of the error detail. Three browser scenarios cover the new paths (V25 to V27), and the unit tests now total 76.
+
+A second finding came from the same episode. A persistent browser profile kept an old copy of the service worker script, so one real run ran old code. The real-run script now clears those folders before it starts (chapter 14).
+
+### What this means in plain words
+
+A vague message is a bug report with nothing in it, so the cause has to be shown to the reader. A long, dense page can fail on the slowest chip, so the parts that do not fit are now shortened and the answer is given more time. The lesson is to test long, dense pages on the slowest chip, not only on the fixtures, because the skipped recommendation to halve and retry came back as the first real-Chrome failure.
 
 ## Three faults in the test setup
 

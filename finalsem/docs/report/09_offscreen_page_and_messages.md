@@ -61,7 +61,7 @@ Table: The five message types between the service worker and the offscreen page
 | `LOCAL_LOAD` | Service worker to page | `modelId` | `loadMs`, or `alreadyLoaded`, or an error | Once per job, after the check |
 | `LOCAL_GENERATE` | Service worker to page | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `text` and `stats`, or an error | Once per part, and once per merge step |
 | `MODEL_PROGRESS` | Page to service worker | `phase`, `percent`, `text` | None | During a download or load |
-| `KEEPALIVE` | Page to service worker | None | None | Every 10 seconds while the page is busy |
+| `KEEPALIVE` | Page to service worker | None | None | Every 10 seconds while the page is busy; the service worker also refreshes the running job records |
 
 Figure: the message protocol between the two pages.
 
@@ -171,11 +171,16 @@ function endWork() {
 
 `src/background/service-worker.js`
 ```js
-  // KEEPALIVE from the offscreen page needs no answer: receiving it is what keeps this worker alive.
-  return false;
+  if (message?.type === 'KEEPALIVE') {
+    // The offscreen page sends this every 10 s while it works. Receiving it keeps this worker alive,
+    // and it also proves the running jobs are alive: one answer can take minutes on a slow chip,
+    // and the popup treats a job with no update for 5 minutes as dead.
+    for (const [tabId, running] of controllers) void writeJob(tabId, running.jobId, {});
+    return false;
+  }
 ```
 
-The timer runs while at least one request is in progress. The service worker does nothing with the message beyond receiving it, and the code comment says that receiving it is what keeps the worker awake. Chrome's general rule for idle workers is background knowledge, and the project does not measure it. The 10-second interval is the project's own choice.
+The timer runs while at least one request is in progress. Each KEEPALIVE does two things in the service worker. Receiving it keeps the worker awake, and it refreshes the `updatedAt` time of every running job record. A single answer can take minutes on a slow chip, and the popup treats a job with no update for 5 minutes as dead, so without that refresh a long answer would look interrupted while it was still running. Chrome's general rule for idle workers is background knowledge, and the project does not measure it. The 10-second interval is the project's own choice.
 
 **What this means in plain words.** While the page is busy, it contacts the service worker every 10 seconds, so Chrome does not put the worker to sleep in the middle of a job.
 
@@ -290,7 +295,7 @@ Browser tests cannot depend on a real graphics card or a 695 MB download. The pr
   }
 ```
 
-The table lists each mode and the browser test that uses it. The modes are defined in the header of `mock-engine.js`.
+There are twelve modes. The table lists each mode and the browser test that uses it. The modes are defined in the header of `mock-engine.js`.
 
 Table: The pretend model modes and the browser tests that use them
 
@@ -306,6 +311,8 @@ Table: The pretend model modes and the browser tests that use them
 | `empty` | The model answers with no text | V13 |
 | `html` | The model answers with HTML-looking text, which the popup must show as plain text | V14 |
 | `slow` | Each answer takes at least 1.5 seconds | Not used by the browser test file |
+| `longprompt` | Returns the window-size error for a part, to test the halving | V25 |
+| `crash` | Fails in the way that shows the technical detail line | V27 |
 
 The fake download runs eight steps of 120 milliseconds, reporting each step as progress. The pretend model records that a model is stored in the page's `localStorage`, under one key per model. It does not use IndexedDB, so it says nothing about the real cache. The pretend model also never sends the "Loading the model into the graphics card" message at the point where the screenshot `ui-03` is taken. That picture was made by writing the job record by hand into session storage, and its caption says so.
 
@@ -322,7 +329,7 @@ Table: Design decisions for the offscreen page and the messages
 | Where the model runs | Service worker; popup; offscreen page | Offscreen page (DECISIONS D1, item 2) | The service worker stops when idle, and the popup closes when the reader clicks away | The page reaches the rest of the extension only by messages |
 | Where the job lives | In the page; in the service worker | Service worker, with the job record in session storage | The job must survive a closed popup and be readable by the popup | Every progress update is a message and a storage write |
 | Generation order | Parallel; queued | Queued, one at a time | The card does one job at a time (manager comment) | A second tab waits for the first tab's current part |
-| Keepalive | None; every 10 seconds | Every 10 seconds while busy | A load can take minutes, and the worker must not stop in the middle | Messages are sent for as long as the job runs |
+| Keepalive | None; every 10 seconds | Every 10 seconds while busy, and each one refreshes the running job records | A load can take minutes, and the worker must not stop in the middle | Messages are sent for as long as the job runs |
 | Idle close | Never close; close after each job; close after 5 minutes idle, and never while a message runs | Close after 5 minutes idle, with the in-flight rule | Frees the card's memory, and a reload from the browser takes seconds | A reader who returns after five minutes waits for the load again |
 | Pretend model | A separate test build; an address parameter | Address parameter | One code path for the real and pretend engines | The test seam ships with the extension |
 
@@ -338,18 +345,18 @@ Table: Failures in the messaging path
 | The page gives no answer | `call()` throws `SERVICE_ERROR`, "the offscreen page did not answer" | The same message |
 | The page receives an unknown message type | The page answers `SERVICE_ERROR`, "unknown message" | The same message |
 | A handler throws, for example `requestAdapter()` | The `catch` sends `SERVICE_ERROR` with the error text | The same message, with the detail kept for the console |
-| A generation hangs | After `generateTimeoutMs` (180 seconds) the page calls `interruptGenerate` and reports `TIMEOUT` | "The model took too long to answer. Try again, or use a shorter page." |
+| A generation hangs | After `generateTimeoutMs` (10 minutes) the page calls `interruptGenerate` and reports `TIMEOUT` | "The model took too long to answer. Try again, or use a shorter page." |
 | The page closed between two jobs | The next request calls `ensure()` and creates the page again, and the model reloads from IndexedDB | No message, only a slower start |
 | A quick message finishes while a load is still running | The countdown does not start, and `close()` refuses to run while a message is in progress | No effect on the load (unit test only) |
 | The service worker stops during a job | `sweepOrphans` marks the job `INTERRUPTED` when the worker starts again (browser test V20) | "The summary was interrupted. Press Summarize to try again." |
-| A job is silent for more than 5 minutes | The popup and the service worker treat it as dead | "The summary was interrupted." |
+| A job with no update for 5 minutes, because the page has stopped sending KEEPALIVE | The popup and the service worker treat it as dead | "The summary was interrupted." |
 | Two requests create the page at once | The shared `creating` promise lets both wait for one creation | No visible effect |
 
-The stale limit is 5 minutes in the service worker and the popup. It was 3 minutes before the fix. At 3 minutes it was the same length as the 180-second generation timeout, so a slow answer could look interrupted while still running. The timeout now fires first (DEVLOG, 2026-10-21, "V2 review while writing the report", item 2). A load with no progress writes for 5 minutes is still shown as interrupted, because the load has no timeout of its own.
+The stale limit is 5 minutes in the service worker and the popup. It was 3 minutes before the fix, when it matched the old 180-second answer limit. The answer limit is now 10 minutes, so a single answer longer than 5 minutes is kept alive by the KEEPALIVE refresh (DEVLOG, 2026-10-21 and 2026-10-24). A load has no timeout of its own, and the same refresh covers it while the page is busy.
 
 None of the browser tests named in this chapter runs two tabs at once, so the queued case is covered only by the unit test.
 
-**What this means in plain words.** Every message failure ends as a short, generic message, and the technical detail goes to the console. The page now stays open while a message is in progress, so a quick request cannot cut off a running load.
+**What this means in plain words.** Every message failure ends as a short, generic message. For `SERVICE_ERROR` and `MODEL_LOAD_FAILED` the popup also shows the first 240 characters of the technical detail, in a line that starts "Technical detail:". The page now stays open while a message is in progress, so a quick request cannot cut off a running load.
 
 ## What went wrong while building it
 
@@ -367,7 +374,7 @@ The unit tests in `tests/unit/local-engine.test.js` cover the manager. They chec
 
 The browser tests in `tests/e2e/pipeline.test.js` cover the same path with the real extension. V15 closes the popup in the middle of a job and reopens it. V20 stops the service worker in the middle of a job. V22 closes the tab during a job. V23 closes the page after the idle time, with `idleCloseMs` set to 400 ms, and then checks that the next summary still works. V24 checks that nothing opens except the popup window: no tab and no options page.
 
-The whole suite has 70 unit tests and 26 browser tests, all passing, and 15 Windows script checks (B1 to B10c).
+The whole suite has 76 unit tests and 29 browser tests, all passing, and 15 Windows script checks (B1 to B10c). Scenario V26 checks that KEEPALIVE keeps a 16-second pretend answer from showing as interrupted, and V27 checks the technical detail line.
 
 **What this means in plain words.** The unit tests check the manager's rules, and the browser tests check the same rules through the whole extension. The in-flight rule has only the unit test.
 
@@ -376,7 +383,7 @@ The whole suite has 70 unit tests and 26 browser tests, all passing, and 15 Wind
 - The in-flight rule is checked at unit level only. No browser test closes the page during a load.
 - The keepalive interval is the project's own choice. It is not measured against Chrome's actual idle limit on the test laptop.
 - The one-at-a-time rule applies to generation only, and it is enforced in the service worker. A caller that bypassed the manager could overlap.
-- A load with no progress writes for 5 minutes is still shown as interrupted, and the load has no timeout of its own.
+- The load has no timeout of its own. Its job record is refreshed only while the page sends KEEPALIVE, so a stopped page still shows as interrupted after 5 minutes.
 - The test seam ships with the extension.
 - The reason for the `*.hf.co` host permission is not written down in the repository.
 
@@ -389,7 +396,7 @@ Chrome can stop a service worker that is idle, and the page's header comment say
 The graphics card does one job at a time, and the manager puts every `LOCAL_GENERATE` on one promise chain, so the parts of two jobs take turns. A unit test checks the order with three requests. Loading has its own guard inside the page.
 
 **What keeps the page alive during a long download, and when does it close?**
-The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it. The page closes five minutes after the last request has finished, and never while a request is still running. The model stays in IndexedDB, so the next use reloads it.
+The page sends `KEEPALIVE` every 10 seconds while a request is in progress, and the service worker receives it and refreshes the running job records. The page closes five minutes after the last request has finished, and never while a request is still running. The model stays in IndexedDB, so the next use reloads it.
 
 **What happens if the page disappears during a job?**
 The next message fails, and the call reports `SERVICE_ERROR`. The job then shows the generic message, and the reader can press the button again. A later job creates the page and loads the model from IndexedDB.
