@@ -71,9 +71,7 @@ These are not faults in the product, but a reader who opens the files will meet 
 - `v2-local-nvidia-cold-second-attempt-with-load.md` repeats the numbers of `v2-local-nvidia.md`.
 - The note in `v2-local-nvidia-offline-first-attempt-with-load.md` says that run was slower, but only its long article was slower. Its short article was faster.
 - The note in `v2-local-intel-wikipedia.md` attributes an invented fact to the 24 October run. The invented facts are in the summary of the old-code second try, `v2-local-intel-wikipedia-second-try-old-code.json`. The note needs correcting.
-- The development log's row of 26 October says 92 unit tests. The suite has 93, and the change list says 93.
-- Figures V08 and V17 still show SmolLM2 as the Intel model. They need redrawing with the benchmark's figures and the current default.
-- `scripts/check-computer.ps1` still prints a note that Version 2 will use the small model on built-in graphics. That is out of date, and the script's wording needs changing.
+- Figure V13 does not show the benchmark or the page-text script, and figure V14 does not list `condense.js` and `trim-text.js`. Both need redrawing for the 26 October files.
 - The decision record quotes a writing speed for the separate card that mixes a saved figure with an earlier speed test. The earlier test's figure, about 63 tokens a second, has no saved file. This report uses the saved runs and labels the earlier figure.
 
 ### What this means in plain words
@@ -108,7 +106,7 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 10. **Let the reader or the developer reset the smaller-model choice.** Show the saved choice in the popup, with a button that clears it.
 11. **Measure memory and reading speed.** Record the memory held while the model is loaded and after the idle close, and store the reading speed in the run files.
 12. **Test the timeout and the dashboard fallback, or remove the claims.** Add a test that triggers the timeout with a slow fake answer, and a browser test that loads `dashboard.html`.
-13. **Fix the secret scan and the records.** Make the scan fail when it has nothing to scan for, check for key-like patterns, correct the note on the 24 October Wikipedia run, redraw V08 and V17, and change the note in `scripts/check-computer.ps1`.
+13. **Fix the secret scan and the records.** Make the scan fail when it has nothing to scan for, check for key-like patterns, correct the note on the 24 October Wikipedia run, and redraw V13 and V14 for the 26 October files and scripts.
 
 ### What this means in plain words
 

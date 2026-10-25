@@ -156,7 +156,7 @@ Table: What runs where on the client's laptop
 
 ![What runs where on the client's laptop: Chrome processes, the graphics card and the disk cache](../figures/V12_deployment.png)
 
-Reading the figure: The figure places the popup, service worker, offscreen page, web worker, Chrome's GPU process and graphics card on the laptop, with the disk beside them. Only the first download reaches Hugging Face and GitHub, drawn as a dashed arrow. The figure does not show the client's chip, which is recorded in `docs/CLIENT_LAPTOP.md`: an Intel Iris Xe built into the processor, with no separate card, and Chrome 156 with WebGPU hardware accelerated. The extension has not yet been run on that laptop.
+Reading the figure: The figure places the popup, service worker, offscreen page, web worker, Chrome's GPU process and graphics card on the laptop, with the disk beside them. Only the first download reaches Hugging Face and GitHub, drawn as a dashed arrow. The card box reads "NVIDIA or Intel", and the footer says the client's laptop has not been tested yet, that the same parts run there, and that the graphics card decides the speed. The footer also says Chrome's own process layout is not measured, and points to figures V08 and V17 for speed. The client's chip is recorded in `docs/CLIENT_LAPTOP.md`: an Intel Iris Xe built into the processor, with no separate card, and Chrome 156 with WebGPU hardware accelerated. The extension has not yet been run on that laptop.
 
 The model cache sits in the client's Chrome profile, not in the project folder. The `.model-profile` folders in `finalsem/project` are test profiles from `scripts/local-run.mjs`, and `.gitignore` excludes them. `setup.bat --gpu` has nothing to switch on the client's laptop, because it has only one graphics chip.
 
@@ -228,9 +228,9 @@ Before the parts are cut, the engine answers one question: how many characters o
 
 Copied page markers are removed from every answer. The removal now also drops a repeated copy of the prompt's safety sentence and an empty "Summary:" label, because the small model produced both. Such an answer becomes EMPTY_ANSWER, not a summary that repeats the prompt.
 
-![Flow of prepare: check the status, pick the small model on integrated graphics, download if needed, load, warm up, and retry once on a memory failure](../figures/V04_model_preparation.png)
+![Flow of prepare: check the card, choose the model, download if needed, load, warm up, and retry once with the small model on a memory failure](../figures/V04_model_preparation.png)
 
-Reading the figure: The figure follows `prepare` from top to bottom. NO_WEBGPU or NO_SHADER_F16 stops the job. A GPU_MEMORY or MODEL_LOAD_FAILED error with Llama 3.2 1B saves the fallback and retries once. The figure predates 26 October: its box that chooses SmolLM2 for integrated graphics is out of date, because the automatic switch on built-in graphics was removed (decision D7). SmolLM2 is now chosen only by Quality: Fast, by a memory under 8 GB, or after a saved fallback.
+Reading the figure: The figure follows `prepare` from top to bottom. NO_WEBGPU or NO_SHADER_F16 stops the job. The model step chooses Llama 3.2 1B on every chip. SmolLM2 360M is chosen when Settings has Quality: Fast, when memory is under 8 GB, or when a saved fallback applies. A GPU_MEMORY or MODEL_LOAD_FAILED error with Llama 3.2 1B saves the fallback and retries once with SmolLM2. Any other error stops with its message.
 
 ![A long page cut into parts of about 6,000 characters, each summarized and then merged](../figures/V16_chunking_v2.png)
 
@@ -268,7 +268,7 @@ This is a pretend-model picture. The notice reads "The main model did not fit in
 
 ![How the errors flow from the code to the popup](../figures/V11_error_flow.png)
 
-Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. The figure predates the 24 and 26 October changes: it has no CONTEXT_TOO_LONG row and no technical-detail line, and its TIMEOUT row says 3 minutes, while the answer limit is now 10 minutes.
+Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. TIMEOUT is drawn as no answer within 10 minutes, which matches the answer limit. The figure has no CONTEXT_TOO_LONG row. Its footer says the technical detail goes to the console and the job record; the popup line for SERVICE_ERROR and MODEL_LOAD_FAILED is not drawn.
 
 **What this means in plain words.** Each failure has one name in the code and one message on the screen, and the popup shows the cause when the message alone would not help. The gap is the timeout, which has a message but no automated test.
 

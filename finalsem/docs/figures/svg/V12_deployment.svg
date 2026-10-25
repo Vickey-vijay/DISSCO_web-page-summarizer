@@ -48,4 +48,4 @@
 <path d="M940,580 L940,640" fill="none" stroke="#1C1B1A" stroke-width="2.4" marker-end="url(#ah)"/>
 <path d="M1160,370 L1080,370" fill="none" stroke="#1C1B1A" stroke-width="2.4" stroke-dasharray="9 6" marker-end="url(#ah)"/>
 <text x="40" y="806" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The client's laptop has not been tested yet. The same parts run there; the graphics card decides the speed.</text>
-<text x="40" y="838" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Chrome's own process layout is not measured here. The boxes show what each part does (see Figures V08 and V17).</text></svg>
+<text x="40" y="838" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Chrome's own process layout is not measured here. The boxes show what each part does (see Figures V08 and V17 for speed).</text></svg>

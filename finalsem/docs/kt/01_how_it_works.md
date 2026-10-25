@@ -135,7 +135,7 @@ Every failure becomes a code, defined in `src/core/errors.js`, with a plain mess
 
 ![Error codes with what causes them and the exact message, coloured by what the extension does next](../figures/V11_error_flow.png)
 
-Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown. The figure predates two changes: it has no CONTEXT_TOO_LONG row, and its TIMEOUT row says 3 minutes, while the limit is now 10 minutes.
+Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown. The TIMEOUT row now says 10 minutes, as the code does. The figure still has no CONTEXT_TOO_LONG row.
 
 A job counts as dead after five minutes without an update, in both the service worker and the popup. If Chrome stops the service worker mid-job, the next start marks the old record as INTERRUPTED. If the tab moves to another page, the old job is aborted.
 

@@ -192,7 +192,7 @@ Every failure becomes a code, defined in `src/core/errors.js`, with a plain mess
 
 ![Error codes with what causes them and the exact message, coloured by what the extension does next](../figures/V11_error_flow.png)
 
-Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown. The figure predates two changes: it has no CONTEXT_TOO_LONG row, and its TIMEOUT row says 3 minutes, while the limit is now 10 minutes.
+Reading the figure: the yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) are retried once with SmolLM2 360M before the message is shown. The red rows stop the job and show their message. The grey rows are refused early or are not shown. CANCELLED is never shown. The TIMEOUT row now says 10 minutes, as the code does. The figure still has no CONTEXT_TOO_LONG row.
 
 A job counts as dead after five minutes without an update, in both the service worker and the popup. If Chrome stops the service worker mid-job, the next start marks the old record as INTERRUPTED. If the tab moves to another page, the old job is aborted.
 
@@ -373,7 +373,7 @@ Figure V04 shows the steps around this page.
 
 ![The steps of prepare(): card check, model choice, load with download when needed, warm-up, and the error branch with its single retry](../figures/V04_model_preparation.png)
 
-Reading the figure: prepare() is called by the pipeline and asks the offscreen page for the card's status. If WebGPU or shader-f16 is missing, the job stops and the popup says why. Otherwise the model is chosen. The figure shows Llama 3.2 1B, and SmolLM2 360M only when Quality: Fast is chosen, a memory failure happened, or the browser reports under 8 GB. The load downloads the model if it is not stored. A GPU_MEMORY or MODEL_LOAD_FAILED error saves the fallback and retries once with SmolLM2. The figure predates three changes: the built-in graphics no longer switch to SmolLM2 by themselves, a part refused for size is cut in half inside `summarizeChunk`, and CONTEXT_TOO_LONG exists. The footnote gives the sizes: Llama about 695 MB, SmolLM2 about 204 MB.
+Reading the figure: prepare() is called by the pipeline and asks the offscreen page for the card's status. If WebGPU or shader-f16 is missing, the job stops and the popup says why. Otherwise the model is chosen. The figure shows Llama 3.2 1B, and SmolLM2 360M only when Quality: Fast is chosen, a memory failure happened, or the browser reports under 8 GB. The load downloads the model if it is not stored. A GPU_MEMORY or MODEL_LOAD_FAILED error saves the fallback and retries once with SmolLM2. The figure now matches the model rule: Llama 3.2 1B on every chip, and SmolLM2 only for Quality: Fast, under 8 GB, or a saved fallback. It does not show the halving step inside `summarizeChunk`, nor the CONTEXT_TOO_LONG code. The footnote gives the sizes: Llama about 695 MB, SmolLM2 about 204 MB.
 
 **What to say if asked.** "Cache Storage failed inside this page during the spike, and IndexedDB worked. That is why the model is in IndexedDB."
 
@@ -458,6 +458,10 @@ The main model is used by default, on every chip. The fallback is used for Quali
 The rule, in page order: the opening of the page in full, up to 35 percent of the budget (`LEAD_SHARE`, line 16); then from the rest, the first sentences of each paragraph, spread evenly over the page (`firstSentences`, line 28), with the headings of the sections kept (`isHeading`, line 19, for lines of at most 70 characters with no final stop). The result is at most one part of 6,000 characters, so there is no merge request.
 
 Why the rule: the developer's Intel chip reads about 26 to 29 tokens a second for SmolLM2 and 15.6 for Llama 3.2 1B, and reading takes about 80 percent of a part's time. The only real way to make a long page quick there is to read less of it. The shortened run read about a fifth of the Lighthouse page (21 percent) and summarized it in 124.6 s.
+
+![Built-in graphics read slowly, so a long page is shortened first: the Lighthouse page took 124.6 s with the rule, against 616.4 s before and 74.1 s on the NVIDIA card](../figures/V17_two_graphics_chips.png)
+
+Reading the figure: the client's chip is an Iris Xe in a Core i7-1355U. The speeds in the boxes were measured on the developer's Intel Gen-12 chip, the nearest guide, not on the client's laptop. Llama 3.2 1B reads 15.6 and writes 2 tokens a second there. The whole Lighthouse page took 616.4 s with the small model before 26 October, and 74.1 s on the NVIDIA card. With the rule, the page is cut to 5,968 characters read (21 percent of the text, after 8,788 characters of back matter are removed), one part, with short answers, and it took 124.6 s. The popup then offers the whole page, which the figure estimates at about 12 minutes.
 
 **What to say if asked.** "The page is cut to what the chip can read in about two minutes, and the popup says how much was read. The rest is not summarized unless the person chooses the whole page."
 
@@ -1130,6 +1134,10 @@ The built-in chip reads about 15 tokens a second and writes about 2 with Llama 3
 **18. How fast is it on your laptop?**
 
 On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
+
+![Speed on the two graphics chips from the saved runs: writing speed in tokens a second, and seconds for one summary, before and after 26 October](../figures/V08_speed_chart.png)
+
+Reading the figure: the left side is writing speed in tokens a second. On the developer's Intel chip, Llama 3.2 1B now writes about 2 tokens a second, against 4 and 5 for the small model before 26 October. The NVIDIA card wrote 34 to 53. The right side is seconds for one summary. The whole Lighthouse page took 616.4 s with the small model before 26 October, and 124.6 s now, with 21 percent read. The client's laptop is not drawn, because it has not been measured.
 
 **19. What is the cost in coverage?**
 

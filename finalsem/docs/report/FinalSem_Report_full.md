@@ -189,7 +189,7 @@ The first version chose the cloud route on purpose. A local model needed a capab
 
 ![Version 1 and Version 2 compared: the cloud engine against the engine on the laptop](../figures/V07_v1_vs_v2.png)
 
-Reading the figure: a table with one row per measure, and two columns. Version 1 (cloud, Gemini) needs a free key pasted into the popup, needs the internet for every summary, and sends the page text to Google over HTTPS. Version 2 needs no key, needs the internet once to download the model (about 695 MB, or about 204 MB for SmolLM2), and keeps the page text on the laptop. The timing rows show 1.7 seconds for the short article in Version 1, measured with the live service, and 15.3 seconds for the short article in Version 2 with the model stored, or 196.8 seconds on first use with the download included. The seven-part row shows 17.8 seconds for Version 1 and 74.1 seconds for Version 2. The free-tier row shows 15 requests a minute for the default cloud model, and no service quota for Version 2. The summary-quality row says that neither version was measured. The model row still says SmolLM2 on Intel graphics. That row predates the change of 26 October, when Llama 3.2 1B became the default on every chip.
+Reading the figure: a table with one row per measure, and two columns. Version 1 (cloud, Gemini) needs a free key pasted into the popup, needs the internet for every summary, and sends the page text to Google over HTTPS. Version 2 needs no key, needs the internet only once to download the model (about 695 MB), and keeps the page text on the laptop. The model row names Llama 3.2 1B, with SmolLM2 360M as a Fast choice. The timing rows show 1.7 seconds for the short article in Version 1, measured with the live service, and 15.3 seconds for the short article in Version 2 with the model stored, or 196.8 seconds on first use with the download included. The seven-part row shows 17.8 seconds for Version 1 and 74.1 seconds for Version 2 on the NVIDIA card. The long-page row shows that Version 1 did not measure this case, and that Version 2 took 124.6 seconds on built-in Intel graphics, having read about a fifth of the Lighthouse page (616.4 seconds for the whole page before). The free-tier row shows 15 requests a minute for the default cloud model, and no service quota for Version 2. The summary-quality row says that neither version was measured.
 
 ## What Version 2 changes
 
@@ -676,6 +676,10 @@ The developer laptop has two chips. Chrome decides which one a page uses, and th
 
 On the built-in Intel chip the 1B model is the default. The run record of 26 October gives the figures (`v2-local-intel-better.md`). A short article took 200.6 seconds on first use, including the download. The Wikipedia article on lighthouses took 124.6 seconds, because the extension read 5,968 of its 27,964 characters, about a fifth. The long fixture article took 103.8 seconds, with about half of its text read. The model wrote at 1.8 to 2.0 tokens a second. The record describes the three summaries as accurate. This report has not checked them line by line.
 
+![Built-in graphics read slowly, so a long page is shortened first: the client's Intel chip, the NVIDIA card, the Lighthouse page before and after, and the four things the extension does](../figures/V17_two_graphics_chips.png)
+
+Reading the figure: two chip boxes sit at the top. The client's Intel Iris Xe chip reads 15.6 and writes 2 tokens a second with Llama 3.2 1B (measured on the developer laptop's Intel chip). The NVIDIA RTX 3050 on the developer laptop reads about 600 and writes 34 to 53 tokens a second with the same model. The reading figure of 600 comes from an earlier speed test with no saved run file (chapter 2). Below them, the whole Lighthouse page took 616.4 seconds with SmolLM2 before 26 October, and 74.1 seconds on the NVIDIA card. The large box lists the four things the extension does on built-in graphics, which bring the same page to 124.6 seconds: it cuts back matter and citation markers, keeps the opening and the first sentences in one part, keeps answers short, and tells the reader in the popup, with a "Read the whole page (slower)" choice. The footer box says that the Windows Graphics setting or `setup.bat --gpu` moves Chrome to the separate card, and that there is nothing to do on the client's laptop.
+
 The faster setting, Quality: Fast, uses SmolLM2 360M (`v2-local-intel-fast.md`). It took 39.5 seconds for the short article with the model already stored, and 64.7 seconds for the Lighthouse article, writing at about 4 tokens a second. The Lighthouse answer in that run failed: it repeated the prompt's safety sentence and an empty "Summary:" label. The run was made before the fix that reports such an answer as an error, so Fast is an optional choice and not the default.
 
 Runs made before 26 October used SmolLM2 as the automatic choice on the Intel chip, and they are labelled that way. The whole Lighthouse article took 616.4 seconds in one run and 704.5 seconds in a second try with the older code (`v2-local-intel-wikipedia.md`). The short article took 199.2 seconds on first use (`v2-local-intel.md`). On the NVIDIA card, with Llama 3.2 1B and the model already downloaded, the same Lighthouse article took 74.1 seconds in a clean run (`v2-local-nvidia-cold-first-attempt.md`). That is a different chip and setup, so it is not a fair test of the client's laptop.
@@ -763,7 +767,7 @@ Table: Non-functional requirements for Version 2
 
 ![Version 1 and Version 2 compared: engine, key, network, speed and privacy](../figures/V07_v1_vs_v2.png)
 
-Reading the figure: The figure sets Version 1, a cloud model that needs a key and the internet for every summary, against Version 2, a model on the laptop that needs no key and keeps the page text there. The Version 2 times are the clean runs only, so the seven-part article shows 74.1 s and the short article 15.3 s when the model is stored, against 196.8 s on first use. The Version 1 timings appear only as the figure's comparison column.
+Reading the figure: The figure sets Version 1, a cloud model that needs a key and the internet for every summary, against Version 2, a model on the laptop that needs no key and keeps the page text there. Its Version 2 rows are clean runs: 15.3 s for the short article with the model stored and 196.8 s on first use (NVIDIA), 74.1 s for the seven-part article (NVIDIA), and 124.6 s for a long page on built-in Intel graphics, with about a fifth of the Lighthouse page read, against 616.4 s for the whole page before 26 October. The built-in row is marked as not measured in Version 1, and the Version 1 timings are not repeated here.
 
 Table: Requirements that differ from Version 1
 
@@ -969,7 +973,7 @@ Table: What runs where on the client's laptop
 
 ![What runs where on the client's laptop: Chrome processes, the graphics card and the disk cache](../figures/V12_deployment.png)
 
-Reading the figure: The figure places the popup, service worker, offscreen page, web worker, Chrome's GPU process and graphics card on the laptop, with the disk beside them. Only the first download reaches Hugging Face and GitHub, drawn as a dashed arrow. The figure does not show the client's chip, which is recorded in `docs/CLIENT_LAPTOP.md`: an Intel Iris Xe built into the processor, with no separate card, and Chrome 156 with WebGPU hardware accelerated. The extension has not yet been run on that laptop.
+Reading the figure: The figure places the popup, service worker, offscreen page, web worker, Chrome's GPU process and graphics card on the laptop, with the disk beside them. Only the first download reaches Hugging Face and GitHub, drawn as a dashed arrow. The card box reads "NVIDIA or Intel", and the footer says the client's laptop has not been tested yet, that the same parts run there, and that the graphics card decides the speed. The footer also says Chrome's own process layout is not measured, and points to figures V08 and V17 for speed. The client's chip is recorded in `docs/CLIENT_LAPTOP.md`: an Intel Iris Xe built into the processor, with no separate card, and Chrome 156 with WebGPU hardware accelerated. The extension has not yet been run on that laptop.
 
 The model cache sits in the client's Chrome profile, not in the project folder. The `.model-profile` folders in `finalsem/project` are test profiles from `scripts/local-run.mjs`, and `.gitignore` excludes them. `setup.bat --gpu` has nothing to switch on the client's laptop, because it has only one graphics chip.
 
@@ -1041,9 +1045,9 @@ Before the parts are cut, the engine answers one question: how many characters o
 
 Copied page markers are removed from every answer. The removal now also drops a repeated copy of the prompt's safety sentence and an empty "Summary:" label, because the small model produced both. Such an answer becomes EMPTY_ANSWER, not a summary that repeats the prompt.
 
-![Flow of prepare: check the status, pick the small model on integrated graphics, download if needed, load, warm up, and retry once on a memory failure](../figures/V04_model_preparation.png)
+![Flow of prepare: check the card, choose the model, download if needed, load, warm up, and retry once with the small model on a memory failure](../figures/V04_model_preparation.png)
 
-Reading the figure: The figure follows `prepare` from top to bottom. NO_WEBGPU or NO_SHADER_F16 stops the job. A GPU_MEMORY or MODEL_LOAD_FAILED error with Llama 3.2 1B saves the fallback and retries once. The figure predates 26 October: its box that chooses SmolLM2 for integrated graphics is out of date, because the automatic switch on built-in graphics was removed (decision D7). SmolLM2 is now chosen only by Quality: Fast, by a memory under 8 GB, or after a saved fallback.
+Reading the figure: The figure follows `prepare` from top to bottom. NO_WEBGPU or NO_SHADER_F16 stops the job. The model step chooses Llama 3.2 1B on every chip. SmolLM2 360M is chosen when Settings has Quality: Fast, when memory is under 8 GB, or when a saved fallback applies. A GPU_MEMORY or MODEL_LOAD_FAILED error with Llama 3.2 1B saves the fallback and retries once with SmolLM2. Any other error stops with its message.
 
 ![A long page cut into parts of about 6,000 characters, each summarized and then merged](../figures/V16_chunking_v2.png)
 
@@ -1081,7 +1085,7 @@ This is a pretend-model picture. The notice reads "The main model did not fit in
 
 ![How the errors flow from the code to the popup](../figures/V11_error_flow.png)
 
-Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. The figure predates the 24 and 26 October changes: it has no CONTEXT_TOO_LONG row and no technical-detail line, and its TIMEOUT row says 3 minutes, while the answer limit is now 10 minutes.
+Reading the figure: Each error code is one row, with when it happens and the message the reader sees. Yellow rows retry once with SmolLM2 360M, red rows stop the job and show a message, and grey rows are refused early or not shown. TIMEOUT is drawn as no answer within 10 minutes, which matches the answer limit. The figure has no CONTEXT_TOO_LONG row. Its footer says the technical detail goes to the console and the job record; the popup line for SERVICE_ERROR and MODEL_LOAD_FAILED is not drawn.
 
 **What this means in plain words.** Each failure has one name in the code and one message on the screen, and the popup shows the cause when the message alone would not help. The gap is the timeout, which has a message but no automated test.
 
@@ -1230,9 +1234,9 @@ This record is kept as the reference for what D3 built and why it was changed. D
 
 This is the single Intel run of the D3 period. The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The model line names SmolLM2 360M, which was the automatic choice then. The result begins with the copied marker line, because the run predates the marker fix.
 
-![Speed on the two graphics chips, clean runs of the D3 period: writing speed in tokens a second, and time for the short article](../figures/V08_speed_chart.png)
+![Speed on the two graphics chips, clean runs, before and after 26 October: writing speed in tokens a second, and seconds for one summary](../figures/V08_speed_chart.png)
 
-Reading the figure: The NVIDIA bars show 34 to 53 tokens a second for the clean runs. The Intel bars show 4 and 5 for SmolLM2, the automatic choice before 26 October, and a dashed bar marks the DEVLOG speed-test value of about 2 for the 1B model. The figure does not show the Llama 3.2 1B runs of 26 October, which are in the D7 record below.
+Reading the figure: The left panel gives writing speed in tokens a second. NVIDIA with Llama 3.2 1B gives 34 to 53 for the clean runs. Intel built-in graphics with Llama 3.2 1B now gives 2.0 for the short article, 1.8 for the Lighthouse page and 1.9 for the long article, and Intel with SmolLM2 360M, before 26 October, gave 4 and 5. The right panel gives seconds for one summary: NVIDIA 196.8 s for a short first use and 74.1 s for the Lighthouse page as a whole. Intel 616.4 s for the Lighthouse page as a whole with SmolLM2 before 26 October; now 124.6 s for the Lighthouse page with 21 percent read, 103.8 s for the long article with 50 percent read, and 200.6 s for a short first use. The footer says the Intel runs are on the developer laptop, not the client's.
 
 **What this means in plain words.** D3 made the weak chip usable by giving it a smaller model. Measuring the whole path showed that reading was the real cost, so D7 kept the accurate model and read less of each page.
 
@@ -1284,9 +1288,9 @@ The Quality: Fast choice (SmolLM2) took 39.5 s for the short article with the mo
 - **Trade-off accepted.** Most laptops with two chips start on the weak one until someone acts. The client's laptop has one graphics chip, so there is nothing to switch there.
 - **Measured afterwards.** The registry change was tested only against a throw-away key. The undo command, `powershell -File scripts\set-chrome-gpu.ps1 -Remove`, now works without a Chrome path. If the change fails, `setup.bat --gpu` says so and setup continues.
 
-![Chrome's two routes to the separate card, the undo command and the default on this laptop](../figures/V17_two_graphics_chips.png)
+![Built-in graphics read slowly, so a long page is shortened first, with the note on laptops with two chips](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: The figure shows Chrome on the Intel chip by default, and the Windows setting or `setup.bat --gpu` moving it to the NVIDIA card. Its speed boxes are the D3-period values (4 to 5 tokens a second with SmolLM2 on Intel), and its undo line still shows the optional `-ChromePath` argument, which the script accepts without needing it.
+Reading the figure: The figure says that built-in graphics read slowly, so a long page is shortened first. Its Intel box, Iris Xe in the client's Core i7-1355U, reads 15.6 and writes 2 tokens a second with Llama 3.2 1B, measured on the developer laptop's Intel Gen-12 chip; its NVIDIA box reads about 600 and writes 34 to 53. The main box lists the four steps for built-in graphics, with 124.6 s for the Lighthouse page: it cuts the back matter and markers (8,788 of 36,752 characters), keeps the opening and the first sentences of the paragraphs (5,968 characters, 21 percent, one part, no merge request), keeps answers short with the main model, Llama 3.2 1B, and offers "Read the whole page (slower)", about 12 minutes for this page. The last box says a Windows Graphics setting or `setup.bat --gpu` (opt-in) moves Chrome to the separate card, and that there is nothing to do on the client's laptop.
 
 **What this means in plain words.** The project offers the faster chip but does not change the computer's settings on its own, and the client's laptop has no second chip to choose.
 
@@ -1562,11 +1566,11 @@ The client's laptop has a related but different chip: Iris Xe, with more executi
 
 ![Flow of prepare(): check the card, pick the model, download if not stored, load, warm up, and retry once with the small model after a memory or load error](../figures/V04_model_preparation.png)
 
-Reading the figure: the flow runs from top to bottom. A "no" on WebGPU or 16-bit math stops at a message and a disabled button. A "yes" leads to the model choice. This drawing still shows the old rule that chose SmolLM2 on Intel built-in graphics, which was removed on 26 October. Settings > Quality now chooses SmolLM2 instead. The retry branch for memory and load errors is unchanged.
+Reading the figure: the flow runs from top to bottom. A "no" on WebGPU or 16-bit math stops at a message and a disabled button. A "yes" leads to "Choose the model", which is Llama 3.2 1B on every chip unless a rule applies. The side box names the three rules for SmolLM2 360M: Settings, Quality set to Fast; a computer under 8 GB of memory; or a saved fallback. A memory or load error with Llama 3.2 1B saves the fallback and retries once with SmolLM2. Any other error stops with its message, and so does a second failure.
 
-![Two graphics chips in one laptop: Chrome's default choice and the forced choice, with the speed measured for each](../figures/V17_two_graphics_chips.png)
+![Built-in graphics read slowly, so a long page is shortened first: speeds and times on the two chips, and what the extension does on built-in graphics](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: the default path goes to the built-in Intel chip, and the separate path goes to the NVIDIA RTX 3050. This drawing still shows the older SmolLM2 numbers and the rule that chose SmolLM2 on the built-in chip. Since 26 October the default there is Llama 3.2 1B, and the numbers in this chapter's table replace the drawing's. The undo line lists `-ChromePath`, which the script no longer needs.
+Reading the figure: the title is "Built-in graphics read slowly, so a long page is shortened first". The Intel box is headed for the client's Iris Xe chip, but its figures, 15.6 tokens a second reading and 2 writing with Llama 3.2 1B, were measured on the developer laptop's Intel Gen-12 chip. The NVIDIA box reads about 600 tokens a second, from an earlier speed test that was not saved as a run file, and writes 34 to 53 with Llama 3.2 1B. For the Lighthouse page, SmolLM2 took 616.4 seconds on the built-in chip before 26 October, and the whole page took 74.1 seconds on the NVIDIA card. The green box lists four things the extension does on built-in graphics, which bring the same page to 124.6 seconds: it cuts the back matter and markers (8,788 of 36,752 characters), keeps the opening and the first sentences (5,968 characters, one part), keeps answers short with the main model, and says what it did in the popup, with an offer to read the whole page (about 12 minutes for this page). The last box says the Windows Graphics setting or `setup.bat --gpu` moves Chrome to the separate card, and that nothing is needed on the client's laptop, which has one chip.
 
 ## Screenshots
 
@@ -3154,7 +3158,7 @@ The model files live in IndexedDB, which is why a later job needs no download. T
 
 ![Errors and their routes: which codes stop the job, which retry with the small model, and which only ask the reader to press again](../figures/V11_error_flow.png)
 
-Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. It was drawn before CONTEXT_TOO_LONG existed, so that code is not in it. Its footer says the detail goes only to the console, but the code also keeps it in the job record, and the GPU_MEMORY row shows only the loading case.
+Reading the figure: a table of twelve error codes. Each row gives the code, when it happens, and the popup message copied from `errors.js`, coloured by what follows. Yellow rows (GPU_MEMORY and MODEL_LOAD_FAILED) retry once with SmolLM2. Red rows (NO_WEBGPU, NO_SHADER_F16, MODEL_DOWNLOAD_FAILED, TIMEOUT, EMPTY_ANSWER and INTERRUPTED) stop the job with the message shown. Grey rows (TOO_LITTLE_TEXT, TOO_LONG, RESTRICTED_PAGE and CANCELLED) are refused early or not shown. The drawing leaves out SERVICE_ERROR and EXTRACT_FAILED, which the table above covers. It was drawn before CONTEXT_TOO_LONG existed, so that code is not in it. Its footer says the detail goes to the console and the job record, which matches the code, and the GPU_MEMORY row shows only the loading case.
 
 **What this means in plain words.** A failure leaves the model files and the job record in a known state. Only a memory failure or a failed load while loading changes what the extension remembers.
 
@@ -3352,7 +3356,7 @@ No automated test covers this step on the client's Chrome. A test on Chromium do
 
 ## check-computer.ps1: what it reports and the 3 GB rule
 
-`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it prints a note that says Version 2 will use the small model and can be slow. That note is out of date. The main model is now the default on built-in graphics, and the small model is used only when the reader chooses Fast. The script still needs its wording changed.
+`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it prints a note that says Version 2 works, but reading a page is slow: a long page is shortened first (about two minutes), and the first use downloads the model (about 695 MB).
 
 Only one rule can stop setup here: free disk space. The script exits with code 1 when the free space is below `MinFreeGB`, which defaults to 3.
 
@@ -3409,7 +3413,7 @@ The measured NVIDIA runs in chapter 14 did not use this registry value. They use
 
 ![Two graphics chips and the choice Chrome makes](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: the drawing shows the Intel chip built into the processor as the default path, where the clean run measured 4 to 5 tokens a second with SmolLM2 and a short article took 199.2 s on first use. Those numbers are from runs before 26 October. Since then the main model, Llama 3.2 1B, is the default on this chip, so the drawing needs redrawing. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the NVIDIA RTX 3050, where the clean runs measured 34 to 53 tokens a second with the 1 billion parameter model, and a stored short article took 15.3 s offline. The lower box gives the two ways, says that the `setup.bat --gpu` route was tested only against a test registry key, and gives the undo command as `-Remove`, which works because the script finds Chrome itself. A note at the bottom says that the `--force_high_performance_gpu` flag is used only by the test script to start its browser.
+Reading the figure: the title says that built-in graphics read slowly, so a long page is shortened first. The Intel box is the client's chip, which reads 15.6 and writes 2 tokens a second with Llama 3.2 1B on the developer laptop, and the NVIDIA box is the developer laptop only. The Lighthouse page took 616.4 s with SmolLM2 before 26 October and 74.1 s on NVIDIA with Llama 3.2 1B, and the green box gives the four things the extension does on built-in graphics, which bring the same page to 124.6 s. The NVIDIA box's reading figure of about 600 tokens a second comes from the earlier speed test, which has no saved run file, and the bottom box says that the Windows Graphics setting or `setup.bat --gpu` has nothing to do on the client's laptop.
 
 ### What this means in plain words
 
@@ -3779,7 +3783,7 @@ With the 1 billion parameter model, the clean NVIDIA runs were roughly 17 to 27 
 
 ![Writing speed on the NVIDIA card against the Intel chip](../figures/V08_speed_chart.png)
 
-Reading the figure: the NVIDIA bars come from the clean runs with the large model, 47, 53, 34, 40 and 42 tokens a second. The two Intel bars show SmolLM2 runs from before 26 October, 4 and 5 tokens a second. The dashed bar marks the earlier speed test of about 2 tokens a second. The benchmark of 26 October measured 2.0 for the same model and saved it, so the drawing needs redrawing with the benchmark's figures. The figure leaves out the three runs made under load.
+Reading the figure: the left panel gives writing speed. NVIDIA with Llama 3.2 1B writes 47, 53, 34, 40 and 42 tokens a second. Intel with Llama 3.2 1B now writes 2.0 for the short article, 1.8 for the Lighthouse page and 1.9 for the long article, and the two SmolLM2 bars from before 26 October write 4 and 5. The right panel gives seconds for one summary: 196.8 s and 74.1 s on NVIDIA, 616.4 s before with SmolLM2 on the whole Lighthouse page, and 124.6 s, 103.8 s and 200.6 s now with Llama 3.2 1B. Its notes say that the Intel "now" runs read long pages shortened, that all runs were in hidden Chromium on the developer laptop and not on the client's laptop, and that runs under load are left out.
 
 ### What this means in plain words
 
@@ -4247,9 +4251,7 @@ These are not faults in the product, but a reader who opens the files will meet 
 - `v2-local-nvidia-cold-second-attempt-with-load.md` repeats the numbers of `v2-local-nvidia.md`.
 - The note in `v2-local-nvidia-offline-first-attempt-with-load.md` says that run was slower, but only its long article was slower. Its short article was faster.
 - The note in `v2-local-intel-wikipedia.md` attributes an invented fact to the 24 October run. The invented facts are in the summary of the old-code second try, `v2-local-intel-wikipedia-second-try-old-code.json`. The note needs correcting.
-- The development log's row of 26 October says 92 unit tests. The suite has 93, and the change list says 93.
-- Figures V08 and V17 still show SmolLM2 as the Intel model. They need redrawing with the benchmark's figures and the current default.
-- `scripts/check-computer.ps1` still prints a note that Version 2 will use the small model on built-in graphics. That is out of date, and the script's wording needs changing.
+- Figure V13 does not show the benchmark or the page-text script, and figure V14 does not list `condense.js` and `trim-text.js`. Both need redrawing for the 26 October files.
 - The decision record quotes a writing speed for the separate card that mixes a saved figure with an earlier speed test. The earlier test's figure, about 63 tokens a second, has no saved file. This report uses the saved runs and labels the earlier figure.
 
 ### What this means in plain words
@@ -4284,7 +4286,7 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 10. **Let the reader or the developer reset the smaller-model choice.** Show the saved choice in the popup, with a button that clears it.
 11. **Measure memory and reading speed.** Record the memory held while the model is loaded and after the idle close, and store the reading speed in the run files.
 12. **Test the timeout and the dashboard fallback, or remove the claims.** Add a test that triggers the timeout with a slow fake answer, and a browser test that loads `dashboard.html`.
-13. **Fix the secret scan and the records.** Make the scan fail when it has nothing to scan for, check for key-like patterns, correct the note on the 24 October Wikipedia run, redraw V08 and V17, and change the note in `scripts/check-computer.ps1`.
+13. **Fix the secret scan and the records.** Make the scan fail when it has nothing to scan for, check for key-like patterns, correct the note on the 24 October Wikipedia run, and redraw V13 and V14 for the 26 October files and scripts.
 
 ### What this means in plain words
 
@@ -4362,7 +4364,7 @@ Table: Every file under finalsem/project, with its purpose and its status agains
 | `setup.bat` | Five-step setup with the `--dev`, `--gpu` and `--reset` options. Reports when the graphics setting could not be changed | Changed |
 | `setup.log` | Log of the last setup run (generated by setup, not source) | Changed (generated) |
 | `scripts/bench-models.mjs` | Speed benchmark of the small models on the default graphics chip: reading, writing and one realistic part, one run per model | New |
-| `scripts/check-computer.ps1` | Describes Windows, processor, memory, graphics chips and free disk space on drive C. Exits 1 only when disk space is short. Its note about the small model is out of date | New |
+| `scripts/check-computer.ps1` | Describes Windows, processor, memory, graphics chips and free disk space on drive C. Exits 1 only when disk space is short. Its built-in note says that a long page is shortened first and that the first use downloads about 695 MB | New |
 | `scripts/check-extension.ps1` | Checks that `manifest.json` parses, is Manifest V3, and names files that exist | Changed |
 | `scripts/dump-page-text.mjs` | Prints what the extension reads from a page: the extracted text, its size and its headings | New |
 | `scripts/local-run.mjs` | Measures the real model in hidden Chromium, with seven plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`, `intel-better`, `intel-fast`). Deletes the profile's old service worker and code cache folders before each launch | New |

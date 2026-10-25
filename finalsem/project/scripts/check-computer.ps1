@@ -36,7 +36,7 @@ if ($hasDiscrete -and $hasIntel) {
     Say "  Tip: this computer has built-in AND separate graphics. Chrome may pick the slow built-in one."
     Say "       Run  setup.bat --gpu  to set Chrome to use the separate card, or use Windows Settings > System > Display > Graphics."
 } elseif ($hasIntel -and -not $hasDiscrete) {
-    Say "  Note: only built-in graphics were found. Version 2 will use the small model and can be slow."
+    Say "  Note: only built-in graphics were found. Version 2 works, but reading a page is slow: a long page is shortened first (about 2 minutes), and the first use downloads the model (about 695 MB)."
 }
 Say "  After setup, open chrome://gpu in Chrome and check that WebGPU says 'Hardware accelerated'."
 

@@ -172,7 +172,7 @@ No automated test covers this step on the client's Chrome. A test on Chromium do
 
 ## check-computer.ps1: what it reports and the 3 GB rule
 
-`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it prints a note that says Version 2 will use the small model and can be slow. That note is out of date. The main model is now the default on built-in graphics, and the small model is used only when the reader chooses Fast. The script still needs its wording changed.
+`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it prints a note that says Version 2 works, but reading a page is slow: a long page is shortened first (about two minutes), and the first use downloads the model (about 695 MB).
 
 Only one rule can stop setup here: free disk space. The script exits with code 1 when the free space is below `MinFreeGB`, which defaults to 3.
 
@@ -229,7 +229,7 @@ The measured NVIDIA runs in chapter 14 did not use this registry value. They use
 
 ![Two graphics chips and the choice Chrome makes](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: the drawing shows the Intel chip built into the processor as the default path, where the clean run measured 4 to 5 tokens a second with SmolLM2 and a short article took 199.2 s on first use. Those numbers are from runs before 26 October. Since then the main model, Llama 3.2 1B, is the default on this chip, so the drawing needs redrawing. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the NVIDIA RTX 3050, where the clean runs measured 34 to 53 tokens a second with the 1 billion parameter model, and a stored short article took 15.3 s offline. The lower box gives the two ways, says that the `setup.bat --gpu` route was tested only against a test registry key, and gives the undo command as `-Remove`, which works because the script finds Chrome itself. A note at the bottom says that the `--force_high_performance_gpu` flag is used only by the test script to start its browser.
+Reading the figure: the title says that built-in graphics read slowly, so a long page is shortened first. The Intel box is the client's chip, which reads 15.6 and writes 2 tokens a second with Llama 3.2 1B on the developer laptop, and the NVIDIA box is the developer laptop only. The Lighthouse page took 616.4 s with SmolLM2 before 26 October and 74.1 s on NVIDIA with Llama 3.2 1B, and the green box gives the four things the extension does on built-in graphics, which bring the same page to 124.6 s. The NVIDIA box's reading figure of about 600 tokens a second comes from the earlier speed test, which has no saved run file, and the bottom box says that the Windows Graphics setting or `setup.bat --gpu` has nothing to do on the client's laptop.
 
 ### What this means in plain words
 

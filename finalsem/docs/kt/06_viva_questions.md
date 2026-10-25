@@ -86,6 +86,10 @@ The built-in chip reads about 15 tokens a second and writes about 2 with Llama 3
 
 On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
 
+![Speed on the two graphics chips from the saved runs: writing speed in tokens a second, and seconds for one summary, before and after 26 October](../figures/V08_speed_chart.png)
+
+Reading the figure: the left side is writing speed in tokens a second. On the developer's Intel chip, Llama 3.2 1B now writes about 2 tokens a second, against 4 and 5 for the small model before 26 October. The NVIDIA card wrote 34 to 53. The right side is seconds for one summary. The whole Lighthouse page took 616.4 s with the small model before 26 October, and 124.6 s now, with 21 percent read. The client's laptop is not drawn, because it has not been measured.
+
 **19. What is the cost in coverage?**
 
 The shortened summary covers about a fifth of a long page. The popup says so, with the percentage, and it gives a rough time for reading all of it. For the Lighthouse run the popup estimated about 12 minutes. The summary is then of the opening and the first sentences of the sections, not of the whole article. The user can press "Read the whole page (slower)", and on built-in graphics that takes 5 to 12 minutes, depending on the article. Before 26 October, the whole page took about 10 minutes with the small model, and its summary was unreliable, so the trade is a smaller coverage for a usable answer in about two minutes.

@@ -123,9 +123,9 @@ This record is kept as the reference for what D3 built and why it was changed. D
 
 This is the single Intel run of the D3 period. The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The model line names SmolLM2 360M, which was the automatic choice then. The result begins with the copied marker line, because the run predates the marker fix.
 
-![Speed on the two graphics chips, clean runs of the D3 period: writing speed in tokens a second, and time for the short article](../figures/V08_speed_chart.png)
+![Speed on the two graphics chips, clean runs, before and after 26 October: writing speed in tokens a second, and seconds for one summary](../figures/V08_speed_chart.png)
 
-Reading the figure: The NVIDIA bars show 34 to 53 tokens a second for the clean runs. The Intel bars show 4 and 5 for SmolLM2, the automatic choice before 26 October, and a dashed bar marks the DEVLOG speed-test value of about 2 for the 1B model. The figure does not show the Llama 3.2 1B runs of 26 October, which are in the D7 record below.
+Reading the figure: The left panel gives writing speed in tokens a second. NVIDIA with Llama 3.2 1B gives 34 to 53 for the clean runs. Intel built-in graphics with Llama 3.2 1B now gives 2.0 for the short article, 1.8 for the Lighthouse page and 1.9 for the long article, and Intel with SmolLM2 360M, before 26 October, gave 4 and 5. The right panel gives seconds for one summary: NVIDIA 196.8 s for a short first use and 74.1 s for the Lighthouse page as a whole. Intel 616.4 s for the Lighthouse page as a whole with SmolLM2 before 26 October; now 124.6 s for the Lighthouse page with 21 percent read, 103.8 s for the long article with 50 percent read, and 200.6 s for a short first use. The footer says the Intel runs are on the developer laptop, not the client's.
 
 **What this means in plain words.** D3 made the weak chip usable by giving it a smaller model. Measuring the whole path showed that reading was the real cost, so D7 kept the accurate model and read less of each page.
 
@@ -177,9 +177,9 @@ The Quality: Fast choice (SmolLM2) took 39.5 s for the short article with the mo
 - **Trade-off accepted.** Most laptops with two chips start on the weak one until someone acts. The client's laptop has one graphics chip, so there is nothing to switch there.
 - **Measured afterwards.** The registry change was tested only against a throw-away key. The undo command, `powershell -File scripts\set-chrome-gpu.ps1 -Remove`, now works without a Chrome path. If the change fails, `setup.bat --gpu` says so and setup continues.
 
-![Chrome's two routes to the separate card, the undo command and the default on this laptop](../figures/V17_two_graphics_chips.png)
+![Built-in graphics read slowly, so a long page is shortened first, with the note on laptops with two chips](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: The figure shows Chrome on the Intel chip by default, and the Windows setting or `setup.bat --gpu` moving it to the NVIDIA card. Its speed boxes are the D3-period values (4 to 5 tokens a second with SmolLM2 on Intel), and its undo line still shows the optional `-ChromePath` argument, which the script accepts without needing it.
+Reading the figure: The figure says that built-in graphics read slowly, so a long page is shortened first. Its Intel box, Iris Xe in the client's Core i7-1355U, reads 15.6 and writes 2 tokens a second with Llama 3.2 1B, measured on the developer laptop's Intel Gen-12 chip; its NVIDIA box reads about 600 and writes 34 to 53. The main box lists the four steps for built-in graphics, with 124.6 s for the Lighthouse page: it cuts the back matter and markers (8,788 of 36,752 characters), keeps the opening and the first sentences of the paragraphs (5,968 characters, 21 percent, one part, no merge request), keeps answers short with the main model, Llama 3.2 1B, and offers "Read the whole page (slower)", about 12 minutes for this page. The last box says a Windows Graphics setting or `setup.bat --gpu` (opt-in) moves Chrome to the separate card, and that there is nothing to do on the client's laptop.
 
 **What this means in plain words.** The project offers the faster chip but does not change the computer's settings on its own, and the client's laptop has no second chip to choose.
 

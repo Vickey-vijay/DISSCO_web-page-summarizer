@@ -436,7 +436,7 @@ registerFigure('V04_model_preparation', () => {
   box(M, r[0], MW, 86, { kind: 'neutral', title: 'prepare() starts', lines: ['Called by the pipeline before the first part'] });
   box(M, r[1], MW, 86, { kind: 'blue', title: 'Check the graphics card', lines: ['LOCAL_STATUS: card, shader-f16, stored or not'] });
   box(M, r[2], MW, 86, { kind: 'amber', title: 'WebGPU and shader-f16 available?', lines: ['Checked by the offscreen page'] });
-  box(M, r[3], MW, 86, { kind: 'blue', title: 'Choose the model', lines: ['Llama 3.2 1B, unless a rule applies'] });
+  box(M, r[3], MW, 86, { kind: 'blue', title: 'Choose the model', lines: ['Llama 3.2 1B on every chip, unless a rule applies'] });
   box(M, r[4], MW, 86, { kind: 'blue', title: 'LOCAL_LOAD', lines: ['Download if not stored, then load into the card'] });
   box(M, r[5], MW, 86, { kind: 'blue', title: 'Warm-up', lines: ['One one-token answer; about 30 s the first time'] });
   box(M, r[6], MW, 86, { kind: 'green', title: 'Ready', lines: ['Parts are summarized with LOCAL_GENERATE'] });
@@ -445,7 +445,7 @@ registerFigure('V04_model_preparation', () => {
   box(900, r[3], 640, 112, {
     kind: 'neutral',
     title: 'SmolLM2 360M is chosen when',
-    lines: ['integrated graphics (Intel), under 8 GB memory, or a saved fallback'],
+    lines: ['Settings, Quality: Fast; under 8 GB memory; or a saved fallback'],
   });
   box(900, r[4], 640, 236, {
     kind: 'amber',
@@ -566,12 +566,13 @@ registerFigure('V07_v1_vs_v2', () => {
     { title: 'Version 2: on this laptop', titleSize: 24, kind: 'green' },
   ]) + 8;
   const R = [
-    ['Model', 'gemini-3.5-flash-lite, run by Google', 'Llama 3.2 1B on the graphics card (SmolLM2 360M on Intel graphics)'],
+    ['Model', 'gemini-3.5-flash-lite, run by Google', 'Llama 3.2 1B on the graphics card (SmolLM2 360M as a Fast choice)'],
     ['API key', 'Needed: a free key, pasted in the popup', 'Not needed'],
-    ['Internet', 'Needed for every summary', 'Needed once to download the model: about 695 MB (about 204 MB for SmolLM2). Not needed after that.'],
+    ['Internet', 'Needed for every summary', 'Needed once to download the model: about 695 MB. Not needed after that.'],
     ['Where the page text goes', "Sent to Google's service over HTTPS", 'Stays on this laptop'],
     ['Short article', '1.7 s, measured with the live service', '15.3 s with the model stored (NVIDIA). 196.8 s on first use, download included.'],
     ['Seven-part article', '17.8 s, five parts of 8,000 characters', '74.1 s, seven parts of 6,000 characters (NVIDIA, model stored)'],
+    ['Long page, built-in Intel graphics', '(not measured in Version 1)', '124.6 s, about a fifth of the Lighthouse page read (616.4 s whole page before)'],
     ['Free-tier limits', '15 requests a minute named for the default model (DEVLOG, 20 Oct)', 'No service quota. A page over 12 parts is refused.'],
     ['Summary quality', 'Not measured in this study', 'Not measured in this study'],
   ];
@@ -591,10 +592,10 @@ registerFigure('V07_v1_vs_v2', () => {
 // V08 - speed on the two graphics chips, clean runs only (numbers as in the test-run tables).
 registerFigure('V08_speed_chart', () => {
   begin();
-  const H = 880;
+  const H = 980;
   strip('V08', 'Speed on the two graphics chips (clean runs only, measured)');
   text(40, 116, 'Writing speed, tokens a second', { size: 24, bold: true });
-  text(840, 116, 'Time for the short article, seconds', { size: 24, bold: true });
+  text(840, 116, 'Seconds for one summary', { size: 24, bold: true });
 
   // Left panel: tokens a second, one bar per run.
   const barK = 360 / 60;
@@ -608,17 +609,14 @@ registerFigure('V08_speed_chart', () => {
   const IN = { fill: C.muted, stroke: C.muted };
   text(40, 160, 'NVIDIA RTX 3050, Llama 3.2 1B', { size: 24, bold: true });
   [['Short, first use', 47], ['Two parts, stored', 53], ['Seven parts, stored', 34], ['Short, offline', 40], ['Two parts, offline', 42]]
-    .forEach(([label, v], i) => barRow(186 + i * 56, label, v, NV, String(v)));
-  text(40, 486, 'Intel built-in graphics, SmolLM2 360M', { size: 24, bold: true });
-  [['Short, first use', 4], ['Two parts, stored', 5]].forEach(([label, v], i) => barRow(526 + i * 56, label, v, IN, String(v)));
-  // Same model on Intel (Llama 3.2 1B): only in the DEVLOG speed test, so drawn dashed and labelled.
-  const dy = 526 + 2 * 56;
-  text(40, dy + 24, 'Llama 3.2 1B, DEVLOG', { size: 22 });
-  put(`<rect x="330" y="${dy + 4}" width="${2 * barK}" height="32" fill="none" stroke="${C.muted}" stroke-width="2" stroke-dasharray="6 4"/>`);
-  text(330 + 2 * barK + 12, dy + 28, 'about 2 (speed test only)', { size: 22 });
+    .forEach(([label, v], i) => barRow(186 + i * 46, label, v, NV, String(v)));
+  text(40, 446, 'Intel built-in graphics, Llama 3.2 1B (now)', { size: 24, bold: true });
+  [['Short, first use', 2.0], ['Lighthouse page', 1.8], ['Long article', 1.9]].forEach(([label, v], i) => barRow(472 + i * 46, label, v, IN, v.toFixed(1)));
+  text(40, 636, 'Intel built-in graphics, SmolLM2 360M (before)', { size: 24, bold: true });
+  [['Short, first use', 4], ['Two parts, stored', 5]].forEach(([label, v], i) => barRow(662 + i * 46, label, v, IN, String(v)));
 
-  // Right panel: seconds for the short article.
-  const sK = 560 / 200;
+  // Right panel: seconds for one summary.
+  const sK = 560 / 650;
   const secRow = (y, label, v, color, valText) => {
     text(840, y, label, { size: 22 });
     const w = v * sK;
@@ -626,20 +624,22 @@ registerFigure('V08_speed_chart', () => {
     text(840 + w + 12, y + 38, valText, { size: 22 });
   };
   text(840, 160, 'NVIDIA RTX 3050, Llama 3.2 1B', { size: 24, bold: true });
-  secRow(192, 'First use (download included)', 196.8, NV, '196.8 s');
-  secRow(266, 'Stored, offline', 15.3, NV, '15.3 s');
-  text(840, 360, 'Intel built-in graphics, SmolLM2 360M', { size: 24, bold: true });
-  secRow(392, 'First use (download included)', 199.2, IN, '199.2 s');
-  box(840, 470, 720, 56, { kind: 'v2', lines: ['Not measured: no short-article run on Intel with the model stored'] });
+  secRow(192, 'Short, first use (download included)', 196.8, NV, '196.8 s');
+  secRow(258, 'Lighthouse page, whole page', 74.1, NV, '74.1 s');
+  text(840, 360, 'Intel built-in graphics', { size: 24, bold: true });
+  secRow(392, 'Lighthouse, SmolLM2, whole page (before)', 616.4, IN, '616.4 s');
+  secRow(458, 'Lighthouse, Llama 1B, 21% read (now)', 124.6, IN, '124.6 s');
+  secRow(524, 'Long article, Llama 1B, 50% read (now)', 103.8, IN, '103.8 s');
+  secRow(590, 'Short, first use, Llama 1B (now)', 200.6, IN, '200.6 s');
 
   const notes = [
-    "Tokens a second: the decode speed of each job's last request, as the extension records it (rounded, as in the Markdown tables).",
-    'The Intel runs used SmolLM2 360M (about 204 MB), which the extension picks on integrated graphics.',
-    'The NVIDIA runs used Llama 3.2 1B (about 695 MB). The two chips therefore ran different models.',
-    'The dashed bar is from the DEVLOG speed test (21 Oct), not a saved run file: the only Intel figure for the same model.',
-    'Left out: the three runs done while other programs were using the processor (see their notes in the test-run files).',
+    "Tokens a second: the decode speed of each job's last request, as the extension records it (rounded).",
+    'Intel "now" = Llama 3.2 1B (about 695 MB) with long pages shortened (26 October). "Before" = SmolLM2 360M chosen automatically.',
+    'The NVIDIA runs used the same Llama 3.2 1B, reading the whole page. All runs: hidden Chromium on the developer laptop.',
+    'Not measured on the client laptop (Intel Iris Xe, a faster variant of this Intel chip at 15 watts).',
+    'Left out: runs done while other programs were using the processor (see their notes in the test-run files).',
   ];
-  notes.forEach((n, i) => text(40, 706 + i * 34, n, { size: 22 }));
+  notes.forEach((n, i) => text(40, 786 + i * 34, n, { size: 22 }));
   return { svg: finish(H), height: H };
 });
 
@@ -819,7 +819,7 @@ registerFigure('V12_deployment', () => {
   arrow([[1160, 370], [1080, 370]], { dashed: true });
 
   text(40, 806, "The client's laptop has not been tested yet. The same parts run there; the graphics card decides the speed.", { size: 22 });
-  text(40, 838, "Chrome's own process layout is not measured here. The boxes show what each part does (see Figures V08 and V17).", { size: 22 });
+  text(40, 838, "Chrome's own process layout is not measured here. The boxes show what each part does (see Figures V08 and V17 for speed).", { size: 22 });
   return { svg: finish(H), height: H };
 });
 
@@ -1063,40 +1063,46 @@ registerFigure('V16_chunking_v2', () => {
   return { svg: finish(H), height: H };
 });
 
-// V17 - two graphics chips: Chrome's default, and how to make it use the separate card.
+// V17 - built-in graphics: reading is the slow part, so a long page is shortened before it is read.
 registerFigure('V17_two_graphics_chips', () => {
   begin();
   const H = 900;
-  strip('V17', 'A laptop with two graphics chips: the default is slow, the separate card is fast');
-  box(620, 110, 360, 70, { kind: 'neutral', title: 'Chrome', titleSize: 24 });
-  box(80, 260, 640, 100, { kind: 'neutral', title: 'Intel built-in graphics', lines: ['Part of the processor; Chrome used it by default here'] });
-  box(880, 260, 640, 100, { kind: 'blue', title: 'NVIDIA RTX 3050', lines: ['Separate card with 6 GB'] });
-  arrow([[700, 180], [400, 260]], {});
-  mpill(550, 180, 260, 'default on this laptop');
-  arrow([[900, 180], [1200, 260]], { dashed: true });
-  mpill(1050, 180, 260, 'Windows setting or setup.bat --gpu');
-
-  box(80, 400, 640, 130, {
-    kind: 'neutral',
-    title: 'Measured: 4 to 5 tokens a second',
-    lines: ['SmolLM2 360M, chosen by the extension. Short article, first use: 199.2 s.'],
+  strip('V17', 'Built-in graphics read slowly, so a long page is shortened first');
+  box(80, 110, 700, 130, {
+    kind: 'amber',
+    title: "Intel built-in graphics (the client's chip)",
+    lines: ['Iris Xe in a Core i7-1355U. Reads 15.6 and writes 2 tokens a second with Llama 3.2 1B (developer laptop, Intel Gen-12).'],
   });
-  box(880, 400, 640, 130, {
+  box(820, 110, 700, 130, {
+    kind: 'blue',
+    title: 'NVIDIA RTX 3050 (developer laptop only)',
+    lines: ['Reads about 600 and writes 34 to 53 tokens a second with Llama 3.2 1B.'],
+  });
+  box(80, 280, 700, 110, {
+    kind: 'neutral',
+    title: 'Wikipedia "Lighthouse" page, whole page',
+    lines: ['SmolLM2 360M, 7 parts: 616.4 s (before 26 October).'],
+  });
+  box(820, 280, 700, 110, {
     kind: 'green',
-    title: 'Measured: 34 to 53 tokens a second',
-    lines: ['Llama 3.2 1B. Short article, stored and offline: 15.3 s.'],
+    title: 'Same page, whole page, NVIDIA',
+    lines: ['Llama 3.2 1B, 7 parts: 74.1 s.'],
   });
-
-  box(80, 580, 1440, 250, {
-    kind: 'neutral',
-    title: 'How a real Chrome gets the NVIDIA card (two ways, both set by the user)',
+  box(80, 430, 1440, 290, {
+    kind: 'green',
+    title: 'What the extension does on built-in graphics: 124.6 s for the same page',
     lines: [
-      '1. By hand: Windows Settings, System, Display, Graphics, add Chrome, Options, High performance. Restart Chrome.',
-      '2. setup.bat --gpu (opt-in): writes one per-user value, GpuPreference=2, for Chrome in the Windows graphics settings. Tested only against a test registry key, not yet against a real Chrome.',
-      'Undo: powershell -File scripts\\set-chrome-gpu.ps1 -Remove',
+      '1. Cuts the Notes and Bibliography and the [12] markers: 8,788 of 36,752 characters.',
+      '2. Keeps the opening and the first sentences of the paragraphs: 5,968 characters (21 percent), one part, no merge request.',
+      '3. Keeps answers short (3 sentences) and keeps the accurate main model, Llama 3.2 1B.',
+      '4. Says what it did in the popup, and offers "Read the whole page (slower)": about 12 minutes for this page.',
     ],
   });
-  text(40, 866, 'The flag --force_high_performance_gpu is used only by the test script to start its browser; it is not what a user gets.', { size: 22 });
+  box(80, 760, 1440, 100, {
+    kind: 'neutral',
+    title: 'Laptops with two chips',
+    lines: ['Windows Graphics setting or setup.bat --gpu (opt-in) moves Chrome to the separate card. Nothing to do on the client\'s laptop.'],
+  });
   return { svg: finish(H), height: H };
 });
 

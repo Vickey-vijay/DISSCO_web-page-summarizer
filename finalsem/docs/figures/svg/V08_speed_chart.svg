@@ -1,48 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="880" viewBox="0 0 1600 880" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="880" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V08  Speed on the two graphics chips (clean runs only, measured)</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" font-family="'Segoe UI', Arial, sans-serif" fill="#1C1B1A"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B1A"/></marker></defs><rect x="0" y="0" width="1600" height="980" fill="#ffffff"/><text x="40" y="50" font-size="26" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">V08  Speed on the two graphics chips (clean runs only, measured)</text>
 <line x1="40" y1="68" x2="1560" y2="68" stroke="#D9D2C3" stroke-width="2"/>
 <text x="40" y="116" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Writing speed, tokens a second</text>
-<text x="840" y="116" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="720">Time for the short article, seconds</text>
+<text x="840" y="116" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="720">Seconds for one summary</text>
 <text x="40" y="160" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">NVIDIA RTX 3050, Llama 3.2 1B</text>
 <text x="40" y="210" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, first use</text>
 <rect x="330" y="190" width="282" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
 <text x="624" y="214" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="936">47</text>
-<text x="40" y="266" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, stored</text>
-<rect x="330" y="246" width="318" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="660" y="270" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="900">53</text>
-<text x="40" y="322" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Seven parts, stored</text>
-<rect x="330" y="302" width="204" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="546" y="326" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1014">34</text>
-<text x="40" y="378" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, offline</text>
-<rect x="330" y="358" width="240" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="582" y="382" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="978">40</text>
-<text x="40" y="434" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, offline</text>
-<rect x="330" y="414" width="252" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="594" y="438" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="966">42</text>
-<text x="40" y="486" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Intel built-in graphics, SmolLM2 360M</text>
-<text x="40" y="550" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, first use</text>
-<rect x="330" y="530" width="24" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
-<text x="366" y="554" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1194">4</text>
-<text x="40" y="606" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, stored</text>
-<rect x="330" y="586" width="30" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
-<text x="372" y="610" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1188">5</text>
-<text x="40" y="662" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Llama 3.2 1B, DEVLOG</text>
-<rect x="330" y="642" width="12" height="32" fill="none" stroke="#6B665C" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="354" y="666" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1206">about 2 (speed test only)</text>
+<text x="40" y="256" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, stored</text>
+<rect x="330" y="236" width="318" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="660" y="260" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="900">53</text>
+<text x="40" y="302" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Seven parts, stored</text>
+<rect x="330" y="282" width="204" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="546" y="306" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1014">34</text>
+<text x="40" y="348" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, offline</text>
+<rect x="330" y="328" width="240" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="582" y="352" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="978">40</text>
+<text x="40" y="394" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, offline</text>
+<rect x="330" y="374" width="252" height="32" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="594" y="398" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="966">42</text>
+<text x="40" y="446" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Intel built-in graphics, Llama 3.2 1B (now)</text>
+<text x="40" y="496" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, first use</text>
+<rect x="330" y="476" width="12" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="354" y="500" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1206">2.0</text>
+<text x="40" y="542" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Lighthouse page</text>
+<rect x="330" y="522" width="10.8" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="352.8" y="546" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1207.2">1.8</text>
+<text x="40" y="588" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Long article</text>
+<rect x="330" y="568" width="11.399999999999999" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="353.4" y="592" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1206.6">1.9</text>
+<text x="40" y="636" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="1520">Intel built-in graphics, SmolLM2 360M (before)</text>
+<text x="40" y="686" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Short, first use</text>
+<rect x="330" y="666" width="24" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="366" y="690" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1194">4</text>
+<text x="40" y="732" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Two parts, stored</text>
+<rect x="330" y="712" width="30" height="32" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="372" y="736" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1188">5</text>
 <text x="840" y="160" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="720">NVIDIA RTX 3050, Llama 3.2 1B</text>
-<text x="840" y="192" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">First use (download included)</text>
-<rect x="840" y="204" width="551.04" height="34" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="1403.04" y="230" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="156.96000000000004">196.8 s</text>
-<text x="840" y="266" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Stored, offline</text>
-<rect x="840" y="278" width="42.839999999999996" height="34" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
-<text x="894.84" y="304" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="665.16">15.3 s</text>
-<text x="840" y="360" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="720">Intel built-in graphics, SmolLM2 360M</text>
-<text x="840" y="392" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">First use (download included)</text>
-<rect x="840" y="404" width="557.7599999999999" height="34" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
-<text x="1409.7599999999998" y="430" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="150.24000000000024">199.2 s</text>
-<rect x="840" y="470" width="720" height="56" rx="4" ry="4" fill="none" stroke="#6B665C" stroke-width="2.2" stroke-dasharray="9 6"/>
-<text x="1200" y="503.72" font-size="22" font-weight="400" fill="#6B665C" text-anchor="middle" data-fit="688">Not measured: no short-article run on Intel with the model stored</text>
-<text x="40" y="706" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Tokens a second: the decode speed of each job's last request, as the extension records it (rounded, as in the Markdown tables).</text>
-<text x="40" y="740" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The Intel runs used SmolLM2 360M (about 204 MB), which the extension picks on integrated graphics.</text>
-<text x="40" y="774" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The NVIDIA runs used Llama 3.2 1B (about 695 MB). The two chips therefore ran different models.</text>
-<text x="40" y="808" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The dashed bar is from the DEVLOG speed test (21 Oct), not a saved run file: the only Intel figure for the same model.</text>
-<text x="40" y="842" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Left out: the three runs done while other programs were using the processor (see their notes in the test-run files).</text></svg>
+<text x="840" y="192" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Short, first use (download included)</text>
+<rect x="840" y="204" width="169.55076923076925" height="34" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="1021.5507692307692" y="230" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="538.4492307692308">196.8 s</text>
+<text x="840" y="258" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Lighthouse page, whole page</text>
+<rect x="840" y="270" width="63.839999999999996" height="34" fill="#B4391F" stroke="#B4391F" stroke-width="2"/>
+<text x="915.84" y="296" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="644.16">74.1 s</text>
+<text x="840" y="360" font-size="24" font-weight="700" fill="#1C1B1A" text-anchor="start" data-fit="720">Intel built-in graphics</text>
+<text x="840" y="392" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Lighthouse, SmolLM2, whole page (before)</text>
+<rect x="840" y="404" width="531.0523076923077" height="34" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="1383.0523076923077" y="430" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="176.94769230769225">616.4 s</text>
+<text x="840" y="458" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Lighthouse, Llama 1B, 21% read (now)</text>
+<rect x="840" y="470" width="107.34769230769231" height="34" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="959.3476923076923" y="496" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="600.6523076923077">124.6 s</text>
+<text x="840" y="524" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Long article, Llama 1B, 50% read (now)</text>
+<rect x="840" y="536" width="89.42769230769231" height="34" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="941.4276923076923" y="562" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="618.5723076923077">103.8 s</text>
+<text x="840" y="590" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="720">Short, first use, Llama 1B (now)</text>
+<rect x="840" y="602" width="172.82461538461538" height="34" fill="#6B665C" stroke="#6B665C" stroke-width="2"/>
+<text x="1024.8246153846153" y="628" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="535.1753846153847">200.6 s</text>
+<text x="40" y="786" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Tokens a second: the decode speed of each job's last request, as the extension records it (rounded).</text>
+<text x="40" y="820" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Intel &quot;now&quot; = Llama 3.2 1B (about 695 MB) with long pages shortened (26 October). &quot;Before&quot; = SmolLM2 360M chosen automatically.</text>
+<text x="40" y="854" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">The NVIDIA runs used the same Llama 3.2 1B, reading the whole page. All runs: hidden Chromium on the developer laptop.</text>
+<text x="40" y="888" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Not measured on the client laptop (Intel Iris Xe, a faster variant of this Intel chip at 15 watts).</text>
+<text x="40" y="922" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="start" data-fit="1520">Left out: runs done while other programs were using the processor (see their notes in the test-run files).</text></svg>

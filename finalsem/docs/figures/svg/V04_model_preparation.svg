@@ -11,7 +11,7 @@
 <text x="350" y="419.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Checked by the offscreen page</text>
 <rect x="60" y="478" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
 <text x="350" y="510.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="548">Choose the model</text>
-<text x="350" y="545.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Llama 3.2 1B, unless a rule applies</text>
+<text x="350" y="545.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Llama 3.2 1B on every chip, unless a rule applies</text>
 <rect x="60" y="604" width="580" height="86" rx="4" ry="4" fill="#FBF8F1" stroke="#B4391F" stroke-width="2.2"/>
 <text x="350" y="636.48" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" data-fit="548">LOCAL_LOAD</text>
 <text x="350" y="671.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="548">Download if not stored, then load into the card</text>
@@ -26,8 +26,8 @@
 <text x="1220" y="419.72" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Stop. The popup says why and disables the button.</text>
 <rect x="900" y="478" width="640" height="112" rx="4" ry="4" fill="#F3EEE2" stroke="#D9D2C3" stroke-width="2.2"/>
 <text x="1220" y="508.96" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">SmolLM2 360M is chosen when</text>
-<text x="1220" y="544.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">integrated graphics (Intel), under 8 GB memory, or a</text>
-<text x="1220" y="573.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">saved fallback</text>
+<text x="1220" y="544.2" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">Settings, Quality: Fast; under 8 GB memory; or a saved</text>
+<text x="1220" y="573.24" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">fallback</text>
 <rect x="900" y="604" width="640" height="236" rx="4" ry="4" fill="#FBF0D9" stroke="#8A5A00" stroke-width="2.2"/>
 <text x="1220" y="638.88" font-size="25" font-weight="700" fill="#1C1B1A" text-anchor="middle" data-fit="608">Error during LOCAL_LOAD</text>
 <text x="1220" y="674.12" font-size="22" font-weight="400" fill="#1C1B1A" text-anchor="middle" data-fit="608">GPU_MEMORY or MODEL_LOAD_FAILED with Llama</text>

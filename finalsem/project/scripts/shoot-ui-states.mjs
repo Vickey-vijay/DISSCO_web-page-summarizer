@@ -351,10 +351,10 @@ const SCENARIOS = [
       await reset(ext, { engineMode: 'mock:intel' }, { cached: false });
       const page = await openFixture(ext, fx, 'article-short.html');
       const { popup } = await popupFor(ext, page);
-      await waitModelLine(popup, /SmolLM2 360M/);
+      await waitModelLine(popup, /Llama 3.2 1B/);
       await popup.waitForFunction(() => !document.getElementById('gpu-note').hidden);
       await twoX(ext, popup);
-      await capture('ui-09', popup, [/Graphics: Intel/, /SmolLM2 360M/]);
+      await capture('ui-09', popup, [/Graphics: Intel/, /Llama 3.2 1B/]);
     },
   },
   {

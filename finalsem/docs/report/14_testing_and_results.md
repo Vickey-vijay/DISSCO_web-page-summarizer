@@ -310,7 +310,7 @@ With the 1 billion parameter model, the clean NVIDIA runs were roughly 17 to 27 
 
 ![Writing speed on the NVIDIA card against the Intel chip](../figures/V08_speed_chart.png)
 
-Reading the figure: the NVIDIA bars come from the clean runs with the large model, 47, 53, 34, 40 and 42 tokens a second. The two Intel bars show SmolLM2 runs from before 26 October, 4 and 5 tokens a second. The dashed bar marks the earlier speed test of about 2 tokens a second. The benchmark of 26 October measured 2.0 for the same model and saved it, so the drawing needs redrawing with the benchmark's figures. The figure leaves out the three runs made under load.
+Reading the figure: the left panel gives writing speed. NVIDIA with Llama 3.2 1B writes 47, 53, 34, 40 and 42 tokens a second. Intel with Llama 3.2 1B now writes 2.0 for the short article, 1.8 for the Lighthouse page and 1.9 for the long article, and the two SmolLM2 bars from before 26 October write 4 and 5. The right panel gives seconds for one summary: 196.8 s and 74.1 s on NVIDIA, 616.4 s before with SmolLM2 on the whole Lighthouse page, and 124.6 s, 103.8 s and 200.6 s now with Llama 3.2 1B. Its notes say that the Intel "now" runs read long pages shortened, that all runs were in hidden Chromium on the developer laptop and not on the client's laptop, and that runs under load are left out.
 
 ### What this means in plain words
 

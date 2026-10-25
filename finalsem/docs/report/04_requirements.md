@@ -57,7 +57,7 @@ Table: Non-functional requirements for Version 2
 
 ![Version 1 and Version 2 compared: engine, key, network, speed and privacy](../figures/V07_v1_vs_v2.png)
 
-Reading the figure: The figure sets Version 1, a cloud model that needs a key and the internet for every summary, against Version 2, a model on the laptop that needs no key and keeps the page text there. The Version 2 times are the clean runs only, so the seven-part article shows 74.1 s and the short article 15.3 s when the model is stored, against 196.8 s on first use. The Version 1 timings appear only as the figure's comparison column.
+Reading the figure: The figure sets Version 1, a cloud model that needs a key and the internet for every summary, against Version 2, a model on the laptop that needs no key and keeps the page text there. Its Version 2 rows are clean runs: 15.3 s for the short article with the model stored and 196.8 s on first use (NVIDIA), 74.1 s for the seven-part article (NVIDIA), and 124.6 s for a long page on built-in Intel graphics, with about a fifth of the Lighthouse page read, against 616.4 s for the whole page before 26 October. The built-in row is marked as not measured in Version 1, and the Version 1 timings are not repeated here.
 
 Table: Requirements that differ from Version 1
 
