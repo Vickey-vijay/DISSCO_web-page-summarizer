@@ -10,6 +10,8 @@
 import { AppError, ERROR_CODES } from './errors.js';
 import { chunkText, normalizeText } from './chunker.js';
 import { mergeAll } from './merger.js';
+import { cleanPageText } from './trim-text.js';
+import { condenseText } from './condense.js';
 
 function throwIfAborted(signal) {
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
@@ -30,12 +32,19 @@ export async function runPipeline({ extract, engine, settings, signal, onProgres
 
   onProgress({ phase: 'extracting' });
   const page = await extract();
-  const text = normalizeText(page.text);
+  // Back matter (References, Notes...) and markers like [12] are not worth reading.
+  const cleaned = cleanPageText(normalizeText(page.text));
+  const text = cleaned.text;
   if (text.length < settings.minTextChars) {
     throw new AppError(ERROR_CODES.TOO_LITTLE_TEXT, `${text.length} readable characters`);
   }
 
-  const chunks = chunkText(text, settings.chunkChars);
+  // On a computer that reads slowly a long page is shortened first. The engine says how much it
+  // should read (its graphics chip is known to it); an engine without an opinion reads everything.
+  const budget = typeof engine.readBudgetChars === 'function' ? await engine.readBudgetChars() : (settings.readBudgetChars ?? 0);
+  const reading = condenseText(text, budget);
+
+  const chunks = chunkText(reading.text, settings.chunkChars);
   const total = chunks.length;
   if (settings.maxChunks && total > settings.maxChunks) {
     throw new AppError(ERROR_CODES.TOO_LONG, `${total} parts needed, the limit is ${settings.maxChunks}`);
@@ -87,6 +96,9 @@ export async function runPipeline({ extract, engine, settings, signal, onProgres
     summary: finalSummary,
     stats: {
       textChars: text.length,
+      readChars: reading.readChars,
+      condensed: reading.condensed,
+      trimmedChars: cleaned.removedChars,
       chunks: total,
       apiCalls: calls,
       mergeLevels,

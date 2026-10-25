@@ -1,0 +1,213 @@
+{
+  "date": "2026-10-25T21:17:55.565Z",
+  "adapter": {
+    "vendor": "intel",
+    "architecture": "gen-12lp",
+    "f16": true,
+    "maxBufferSize": 2147483648
+  },
+  "partChars": 6000,
+  "results": [
+    {
+      "modelId": "SmolLM2-360M-Instruct-q4f16_1-MLC",
+      "loadMs": 2637,
+      "warmupS": 1.1,
+      "prefill": {
+        "wallS": 50.2,
+        "promptTokens": 1444,
+        "completionTokens": 1,
+        "prefillTps": 28.7,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 21.5,
+        "promptTokens": 50,
+        "completionTokens": 100,
+        "prefillTps": 57.1,
+        "decodeTps": 4.8
+      },
+      "realPart": {
+        "wallS": 66.2,
+        "promptTokens": 1444,
+        "completionTokens": 64,
+        "prefillTps": 29.2,
+        "decodeTps": 3.7,
+        "text": "The 18th-century French engineer Augustin Fresnel designed a lens that could gather more light and send it out as a narrow, powerful beam, and the 19th-century Swiss engineer Aime Argand used it to build a light that could be seen from many miles out to sea."
+      },
+      "totalMinutes": 2.4
+    },
+    {
+      "modelId": "SmolLM2-360M-Instruct-q4f32_1-MLC",
+      "loadMs": 33090,
+      "warmupS": 25.2,
+      "prefill": {
+        "wallS": 49.7,
+        "promptTokens": 1444,
+        "completionTokens": 1,
+        "prefillTps": 29,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 30.6,
+        "promptTokens": 50,
+        "completionTokens": 100,
+        "prefillTps": 52.8,
+        "decodeTps": 3.3
+      },
+      "realPart": {
+        "wallS": 96.6,
+        "promptTokens": 1444,
+        "completionTokens": 138,
+        "prefillTps": 32.3,
+        "decodeTps": 2.6,
+        "text": "The 18th-century French engineer Augustin Fresnel designed a lens that could gather more light and send it out as a narrow, powerful beam, and it was the first to use a prism to bend the light. The 19th-century Swiss engineer Aime Argand used a lens with a hollow circular wick to keep the flame from spreading, and it was the first to use a lens with prisms to focus the light. The 18th-century Fren"
+      },
+      "totalMinutes": 3.9
+    },
+    {
+      "modelId": "SmolLM2-135M-Instruct-q0f16-MLC",
+      "loadMs": 46033,
+      "warmupS": 3.5,
+      "prefill": {
+        "wallS": 36,
+        "promptTokens": 1444,
+        "completionTokens": 1,
+        "prefillTps": 40.2,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 7.7,
+        "promptTokens": 50,
+        "completionTokens": 100,
+        "prefillTps": 119.4,
+        "decodeTps": 13.6
+      },
+      "realPart": {
+        "wallS": 43.2,
+        "promptTokens": 1444,
+        "completionTokens": 150,
+        "prefillTps": 59.9,
+        "decodeTps": 7.8,
+        "text": "<<<PAGE TEXT START>>\n\nLighthouses: A Short History of Light on the Coast - The Coastal Review The Coastal Review Home History Engineering Members Join The Coastal Review Members Club today and receive a free tide table. Lighthouses: A Short History of Light on the Coast By Tobias Weir. Updated 2 April 2026. Why the coast needed a light For most of history, the sea was crossed in daylight and in si"
+      },
+      "totalMinutes": 2.3
+    },
+    {
+      "modelId": "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+      "loadMs": 77750,
+      "warmupS": 4.5,
+      "prefill": {
+        "wallS": 59.3,
+        "promptTokens": 1432,
+        "completionTokens": 1,
+        "prefillTps": 24.1,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 29.2,
+        "promptTokens": 40,
+        "completionTokens": 100,
+        "prefillTps": 43,
+        "decodeTps": 3.5
+      },
+      "realPart": {
+        "wallS": 53.9,
+        "promptTokens": 1432,
+        "completionTokens": 26,
+        "prefillTps": 32.3,
+        "decodeTps": 2.6,
+        "text": "Lighthouses were built to provide light for ships, and the first lighthouse was built on the island of Pharos."
+      },
+      "totalMinutes": 3.7
+    },
+    {
+      "modelId": "Qwen2.5-0.5B-Instruct-q4f32_1-MLC",
+      "loadMs": 89471,
+      "warmupS": 3.9,
+      "prefill": {
+        "wallS": 43.2,
+        "promptTokens": 1432,
+        "completionTokens": 1,
+        "prefillTps": 33.1,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 39.4,
+        "promptTokens": 40,
+        "completionTokens": 100,
+        "prefillTps": 39.1,
+        "decodeTps": 2.6
+      },
+      "realPart": {
+        "wallS": 46.8,
+        "promptTokens": 1432,
+        "completionTokens": 16,
+        "prefillTps": 36.3,
+        "decodeTps": 2,
+        "text": "Lighthouses were built to guide ships and keep watch over the coast."
+      },
+      "totalMinutes": 3.7
+    },
+    {
+      "modelId": "gemma3-1b-it-q4f16_1-MLC",
+      "error": "page.evaluate: WindowSizeConfigurationError: Only one of context_window_size and sliding_window_size can be positive. Got: context_window_size: 4096, sliding_window_size: 512",
+      "totalMinutes": 2.9
+    },
+    {
+      "modelId": "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+      "loadMs": 173533,
+      "warmupS": 33.6,
+      "prefill": {
+        "wallS": 91,
+        "promptTokens": 1419,
+        "completionTokens": 1,
+        "prefillTps": 15.6,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 50.7,
+        "promptTokens": 45,
+        "completionTokens": 100,
+        "prefillTps": 19.8,
+        "decodeTps": 2
+      },
+      "realPart": {
+        "wallS": 161.6,
+        "promptTokens": 1419,
+        "completionTokens": 150,
+        "prefillTps": 17.1,
+        "decodeTps": 1.9,
+        "text": "Lighthouse history is a long and complex one. The first lighthouse was built in the third century BC on the island of Pharos in Egypt. Over time, lighthouses were built on land and sea, with different designs and technologies emerging. The first Fresnel lens was invented in the 1820s, and it revolutionized the design of lighthouses.\n\nThe first order Fresnel lens was installed at the Cordouan light"
+      },
+      "totalMinutes": 8.5
+    },
+    {
+      "modelId": "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+      "loadMs": 151059,
+      "warmupS": 30.1,
+      "prefill": {
+        "wallS": 92.4,
+        "promptTokens": 1419,
+        "completionTokens": 1,
+        "prefillTps": 15.4,
+        "decodeTps": null
+      },
+      "decode": {
+        "wallS": 96.6,
+        "promptTokens": 45,
+        "completionTokens": 100,
+        "prefillTps": 16.9,
+        "decodeTps": 1.1
+      },
+      "realPart": {
+        "wallS": 188.2,
+        "promptTokens": 1419,
+        "completionTokens": 102,
+        "prefillTps": 16.1,
+        "decodeTps": 1,
+        "text": "The history of lighthouses dates back to ancient times when sailors used fires on hills to guide ships. The Pharos of Alexandria, built in the 3rd century BC, was the most famous early lighthouse and stood for over a thousand years. The design of lighthouses evolved over time, with the introduction of oil lamps and Fresnel lenses in the 18th and 19th centuries. Today, lighthouses are used for navi"
+      },
+      "totalMinutes": 9.3
+    }
+  ]
+}

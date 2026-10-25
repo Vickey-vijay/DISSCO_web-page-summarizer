@@ -102,13 +102,43 @@ test('no WebGPU stops prepare with NO_WEBGPU before any load', async () => {
   assert.deepEqual(send.sent.map((m) => m.type), ['LOCAL_STATUS']);
 });
 
-test('integrated graphics switches to the small model before loading', async () => {
-  const send = fakePage({ LOCAL_STATUS: (m) => okStatus({ gpu: { vendor: 'intel', architecture: 'gen-12lp', integrated: true }, cached: m.modelId === MODELS.fallback.id }), LOCAL_LOAD: { ok: true } });
+const integratedStatus = (m) => okStatus({ gpu: { vendor: 'intel', architecture: 'gen-12lp', integrated: true }, cached: true, modelId: m.modelId });
+
+test('built-in graphics keep the main model by default, and answers are kept short there', async () => {
+  const send = fakePage({ LOCAL_STATUS: integratedStatus, LOCAL_LOAD: { ok: true }, LOCAL_GENERATE: { ok: true, text: 'A short answer.' } });
   const engine = createLocalEngine({ send, settings: SETTINGS, deviceMemoryGB: 8 });
   await engine.prepare();
+  assert.equal(engine.model.id, MODELS.primary.id);
+  assert.equal(engine.modelSwitchReason, null);
+  await engine.summarizeChunk('some page text', { total: 1 });
+  const gen = send.sent.find((m) => m.type === 'LOCAL_GENERATE');
+  assert.equal(gen.maxTokens, SETTINGS.briefTokensSingle);
+  assert.match(gen.prompt, /3 short sentences/);
+});
+
+test('on a fast graphics card answers are not shortened', async () => {
+  const send = fakePage({ LOCAL_STATUS: okStatus(), LOCAL_LOAD: { ok: true }, LOCAL_GENERATE: { ok: true, text: 'An answer.' } });
+  const engine = createLocalEngine({ send, settings: SETTINGS, deviceMemoryGB: 8 });
+  await engine.prepare();
+  await engine.summarizeChunk('some page text', { total: 1 });
+  assert.equal(send.sent.find((m) => m.type === 'LOCAL_GENERATE').maxTokens, SETTINGS.maxTokensFinal);
+});
+
+test('the Fast quality setting chooses the small model before anything is loaded', async () => {
+  const send = fakePage({ LOCAL_STATUS: integratedStatus, LOCAL_LOAD: { ok: true } });
+  const engine = createLocalEngine({ send, settings: { ...SETTINGS, quality: 'fast' }, deviceMemoryGB: 8 });
+  await engine.prepare();
   assert.equal(engine.model.id, MODELS.fallback.id);
-  assert.equal(engine.modelSwitchReason, 'integrated-graphics');
+  assert.equal(engine.modelSwitchReason, 'quality-fast');
   assert.equal(send.sent.at(-1).modelId, MODELS.fallback.id);
+});
+
+test('an answer that stopped at the length limit ends at its last full stop', async () => {
+  const send = fakePage({ LOCAL_GENERATE: { ok: true, text: 'First sentence is done. Second one is done too. Third was cut off in the mid', finishReason: 'length' } });
+  const engine = createLocalEngine({ send, settings: SETTINGS });
+  assert.equal(await engine.summarizeChunk('t', { total: 1 }), 'First sentence is done. Second one is done too.');
+  const whole = fakePage({ LOCAL_GENERATE: { ok: true, text: 'No full stop here at all', finishReason: 'stop' } });
+  assert.equal(await createLocalEngine({ send: whole, settings: SETTINGS }).summarizeChunk('t', { total: 1 }), 'No full stop here at all');
 });
 
 test('a primary model that runs out of graphics memory is retried once with the small one, and remembered', async () => {

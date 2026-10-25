@@ -31,8 +31,19 @@
       <p id="error-detail" class="detail" hidden></p>
     </section>
 
+    <details id="settings" class="settings">
+      <summary>Settings</summary>
+      <label for="quality">Quality</label>
+      <select id="quality">
+        <option value="better">Better: Llama 3.2 1B (more accurate, slower)</option>
+        <option value="fast">Fast: SmolLM2 360M (quicker, may get facts wrong)</option>
+      </select>
+    </details>
+
     <section id="result" class="result" hidden>
       <p id="result-notice" class="notice" hidden></p>
+      <p id="condense-notice" class="notice" hidden></p>
+      <button id="read-all" type="button" class="textbtn read-all" hidden>Read the whole page (slower)</button>
       <div id="summary" class="summary"></div>
       <p id="stats" class="stats"></p>
     </section>

@@ -29,6 +29,9 @@ const PLANS = {
   intel: { profile: '.model-profile-intel', args: [], online: true, cases: ['short', 'long'] },
   'intel-wikipedia': { profile: '.model-profile-intel', args: [], online: true, cases: ['wikipedia'] },
   'intel-short': { profile: '.model-profile-intel', args: [], online: true, cases: ['short'] },
+  // The default on built-in graphics since 26 October: the main model (Llama 3.2 1B), long pages shortened. The first case includes the download and the warm-up.
+  'intel-better': { profile: '.model-profile-intel-better', args: [], online: true, cases: ['short', 'wikipedia', 'long'] },
+  'intel-fast': { profile: '.model-profile-intel', args: [], online: true, cases: ['short', 'wikipedia'], settings: { quality: 'fast' } },
 };
 const plan = PLANS[mode];
 if (!plan) throw new Error(`unknown mode ${mode}; use ${Object.keys(PLANS).join(', ')}`);
@@ -54,7 +57,7 @@ const ext = await launchExtension({
 const results = [];
 
 async function runCase(c) {
-  await ext.setSettings({});
+  await ext.setSettings(plan.settings ?? {});
   await ext.clearJobs();
   const page = await ext.context.newPage();
   const row = { mode, id: c.id, name: c.name, startedAt: new Date().toISOString() };

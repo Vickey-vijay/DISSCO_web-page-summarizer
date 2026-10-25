@@ -97,6 +97,12 @@ const realEngine = {
   async load({ modelId }) {
     if (engine && loadedId === modelId) return { ok: true, alreadyLoaded: true, loadMs: 0 };
     if (loading) return loading;
+    // A different model was asked for (the quality setting changed): free the loaded one first.
+    if (engine) {
+      await engine.unload().catch(() => {});
+      engine = null;
+      loadedId = null;
+    }
     loading = (async () => {
       const t0 = performance.now();
       try {
@@ -144,6 +150,7 @@ const realEngine = {
       return {
         ok: true,
         text: reply.choices?.[0]?.message?.content ?? '',
+        finishReason: reply.choices?.[0]?.finish_reason ?? null,
         stats: {
           promptTokens: reply.usage?.prompt_tokens ?? null,
           completionTokens: reply.usage?.completion_tokens ?? null,

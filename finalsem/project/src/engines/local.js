@@ -9,7 +9,7 @@ import { AppError, ERROR_CODES, fromWire } from '../core/errors.js';
 import { MODELS } from '../core/config.js';
 import { chooseModel } from '../core/gpu-check.js';
 import { chunkText } from '../core/chunker.js';
-import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, stripPageMarkers } from '../core/prompts.js';
+import { buildChunkPrompt, buildMergePrompt, buildSinglePrompt, endAtSentence, stripPageMarkers } from '../core/prompts.js';
 
 // A part that does not fit the model's window is cut in half and tried again, at most this deep.
 const MAX_HALVING_DEPTH = 3;
@@ -43,7 +43,8 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
       temperature: settings.temperature,
       timeoutMs: settings.generateTimeoutMs,
     });
-    const text = stripPageMarkers(reply.text);
+    let text = stripPageMarkers(reply.text);
+    if (reply.finishReason === 'length') text = endAtSentence(text); // stopped by the length limit: end at a full stop
     if (!text) throw new AppError(ERROR_CODES.EMPTY_ANSWER, 'the model answered with no text');
     engine.lastStats = reply.stats ?? null;
     return text;
@@ -51,32 +52,29 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
 
   const engine = {
     name: 'local',
-    model: chooseModel({ deviceMemoryGB, override: settings.modelOverride }),
+    model: chooseModel({ deviceMemoryGB, override: settings.modelOverride, quality: settings.quality }),
     status: null,
     loadInfo: null,
     lastStats: null,
-    modelSwitchReason: null,
+    modelSwitchReason: settings.quality === 'fast' ? 'quality-fast' : null,
     halvedParts: 0, // how many parts had to be cut in half because they did not fit the window
 
-    /**
-     * Asks the offscreen page about the graphics card and the model. On integrated graphics the
-     * 1B model is far too slow (measured: about 2 tokens a second), so the small one is chosen.
-     */
+    /** Asks the offscreen page about the graphics card and whether the chosen model is stored. */
     async checkStatus() {
-      let status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
-      if (status.gpu?.integrated && engine.model.id === MODELS.primary.id && !settings.modelOverride) {
-        engine.model = MODELS.fallback;
-        engine.modelSwitchReason = 'integrated-graphics';
-        status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
-      }
+      const status = await call({ type: 'LOCAL_STATUS', modelId: engine.model.id });
       engine.status = status;
       return status;
+    },
+
+    /** True on built-in graphics, which write slowly: answers are kept short there. */
+    get brief() {
+      return Boolean(engine.status?.gpu?.integrated);
     },
 
     /** Checks the graphics card, downloads the model if needed, and loads it. Throws AppError. */
     async prepare({ onProgress = () => {} } = {}) {
       onProgress({ phase: 'checking' });
-      const status = await engine.checkStatus();
+      const status = engine.status ?? (await engine.checkStatus()); // already asked when the reading budget was set
       onProgress(status.cached ? { phase: 'loading', percent: 0 } : { phase: 'downloading', percent: 0 });
       try {
         engine.loadInfo = await call({ type: 'LOCAL_LOAD', modelId: engine.model.id });
@@ -94,10 +92,18 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
       return { status: engine.status, loaded: engine.loadInfo };
     },
 
+    /** How many characters of a page this computer should read: less on built-in graphics, which read slowly. */
+    async readBudgetChars() {
+      const status = engine.status ?? (await engine.checkStatus());
+      return status.gpu?.integrated ? settings.readBudgetIntegrated : settings.readBudgetOther;
+    },
+
     async summarizeChunk(text, { title = '', index = 1, total = 1, signal } = {}) {
+      const brief = engine.brief;
       const once = (t, i, n) => {
-        const prompt = n === 1 ? buildSinglePrompt({ title, text: t }) : buildChunkPrompt({ title, text: t, index: i, total: n });
-        return generate(prompt, n === 1 ? settings.maxTokensFinal : settings.maxTokensPart);
+        const prompt = n === 1 ? buildSinglePrompt({ title, text: t, brief }) : buildChunkPrompt({ title, text: t, index: i, total: n, brief });
+        const tokens = n === 1 ? (brief ? settings.briefTokensSingle : settings.maxTokensFinal) : brief ? settings.briefTokensPart : settings.maxTokensPart;
+        return generate(prompt, tokens);
       };
 
       // Dense pages (tables, numbers, references) use more tokens per character than the 6000
@@ -125,7 +131,8 @@ export function createLocalEngine({ send, settings, deviceMemoryGB, onFallback =
     },
 
     async mergeSummaries(parts, { title = '' } = {}) {
-      return generate(buildMergePrompt({ title, parts }), settings.maxTokensFinal);
+      const brief = engine.brief;
+      return generate(buildMergePrompt({ title, parts, brief }), brief ? settings.briefTokensMerge : settings.maxTokensFinal);
     },
   };
   return engine;

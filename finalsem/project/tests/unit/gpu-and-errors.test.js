@@ -37,6 +37,11 @@ test('the primary model is chosen on a normal computer', () => {
   assert.equal(chooseModel({}).id, MODELS.primary.id);
 });
 
+test('the Fast quality setting chooses the smaller model on any machine', () => {
+  assert.equal(chooseModel({ deviceMemoryGB: 16, quality: 'fast' }).id, MODELS.fallback.id);
+  assert.equal(chooseModel({ deviceMemoryGB: 16, quality: 'better' }).id, MODELS.primary.id);
+});
+
 test('a small machine (under 8 GB) or an earlier failure chooses the smaller model', () => {
   assert.equal(chooseModel({ deviceMemoryGB: 4 }).id, MODELS.fallback.id);
   assert.equal(chooseModel({ deviceMemoryGB: 16, override: 'fallback' }).id, MODELS.fallback.id);

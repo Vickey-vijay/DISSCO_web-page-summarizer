@@ -20,9 +20,22 @@ export const DEFAULTS = Object.freeze({
   // Upper limits on the length of an answer: a part summary, and the final summary.
   maxTokensPart: 300,
   maxTokensFinal: 320,
+  // On built-in graphics (2 to 5 tokens a second) answers are shorter: one part, a part of a long
+  // page, and the merge.
+  briefTokensSingle: 130,
+  briefTokensPart: 90,
+  briefTokensMerge: 180,
+  // 'better' = Llama 3.2 1B (accurate, slower on built-in graphics); 'fast' = SmolLM2 360M (about
+  // 2.4 times quicker, but it gets facts wrong more often). Chosen in the popup's Settings.
+  quality: 'better',
   temperature: 0.2,
   // One generation that takes longer than this is stopped and reported.
   generateTimeoutMs: 600000,
+  // How much of a page the model reads, in characters (0 = all of it). On built-in graphics the model
+  // reads only about 26 tokens a second, so a long page is shortened first (see condense.js): 6,000
+  // characters is one part and takes about a minute. The popup offers "Read the whole page".
+  readBudgetIntegrated: 6000,
+  readBudgetOther: 0,
   // The offscreen page holds the model in graphics memory; it is closed after this much idle time.
   idleCloseMs: 5 * 60 * 1000,
   // 'real' runs the model. 'mock' is a test seam: a fake engine with fake download progress.
@@ -39,13 +52,16 @@ export const STORAGE_KEYS = Object.freeze({
   engineMode: 'engineMode',
   idleCloseMs: 'idleCloseMs',
   generateTimeoutMs: 'generateTimeoutMs',
+  quality: 'quality',
+  readBudgetIntegrated: 'readBudgetIntegrated',
+  readBudgetOther: 'readBudgetOther',
 });
 
 /** Merge stored values over the defaults. `storageArea` is chrome.storage.local or a stand-in. */
 export async function loadSettings(storageArea) {
   const stored = await storageArea.get(Object.values(STORAGE_KEYS));
   const settings = { ...DEFAULTS, modelOverride: null };
-  const numeric = { chunkChars: 500, maxChunks: 1, idleCloseMs: 1, generateTimeoutMs: 1 };
+  const numeric = { chunkChars: 500, maxChunks: 1, idleCloseMs: 1, generateTimeoutMs: 1, readBudgetIntegrated: 0, readBudgetOther: 0 };
   for (const [name, min] of Object.entries(numeric)) {
     const value = Number(stored[STORAGE_KEYS[name]]);
     if (Number.isFinite(value) && value >= min) settings[name] = Math.floor(value);
@@ -53,5 +69,6 @@ export async function loadSettings(storageArea) {
   const mode = stored[STORAGE_KEYS.engineMode];
   if (typeof mode === 'string' && mode.startsWith('mock')) settings.engineMode = mode;
   if (stored[STORAGE_KEYS.modelOverride] === 'fallback') settings.modelOverride = 'fallback';
+  if (stored[STORAGE_KEYS.quality] === 'fast' || stored[STORAGE_KEYS.quality] === 'better') settings.quality = stored[STORAGE_KEYS.quality];
   return settings;
 }

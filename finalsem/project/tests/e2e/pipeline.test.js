@@ -339,12 +339,12 @@ test('V08 no 16-bit shader support: the model line says so and the button is dis
   assert.equal(await ext.getJob(tabId), null, 'no job may start on a computer without shader-f16');
 });
 
-test('V09 integrated graphics: the note names Intel, the small model is used, and a summary works', async () => {
+test('V09 integrated graphics: the note names Intel, the main model is kept, and a summary works', async () => {
   await resetScenario({ engineMode: 'mock:intel' });
   const page = await openTarget('article-short.html');
   const { popup } = await popupFor(page);
 
-  await waitForModelLine(popup, /SmolLM2 360M/);
+  await waitForModelLine(popup, /Llama 3\.2 1B/);
   assert.equal(await popup.isVisible('#gpu-note'), true, 'the graphics note must be visible');
   const note = await popup.locator('#gpu-note').innerText();
   assert.match(note, /Intel/, `the graphics note should name Intel, it says: ${note}`);
@@ -354,7 +354,30 @@ test('V09 integrated graphics: the note names Intel, the small model is used, an
   const { outcome, text } = await waitOutcome(popup, 90000);
   await ext.shot(popup, 'V09-intel-done');
   assert.equal(outcome, 'done', `expected a summary, popup said: ${text}`);
+  assert.match(await popup.locator('#stats').innerText(), /Llama 3\.2 1B/);
+});
+
+test('V29 Settings: choosing Fast quality switches to the small model, and the choice is remembered', async () => {
+  await resetScenario({ engineMode: 'mock:intel' }, { cached: true });
+  const page = await openTarget('article-short.html');
+  const { tabId, popup } = await popupFor(page);
+  await waitForModelLine(popup, /Llama 3\.2 1B/);
+  assert.equal(await popup.locator('#settings').evaluate((el) => el.open), false, 'Settings are closed until opened');
+  await popup.click('#settings summary');
+  await popup.selectOption('#quality', 'fast');
+  await waitForModelLine(popup, /SmolLM2 360M/);
+  await ext.shot(popup, 'V29-fast-quality');
+  assert.equal(await storedValue('quality'), 'fast');
+
+  await popup.click('#summarize');
+  const { outcome, text } = await waitOutcome(popup, 90000);
+  assert.equal(outcome, 'done', `expected a summary, popup said: ${text}`);
   assert.match(await popup.locator('#stats').innerText(), /SmolLM2 360M/);
+
+  await popup.close();
+  const again = await ext.openPopup(tabId);
+  await waitForModelLine(again, /SmolLM2 360M/);
+  assert.equal(await again.locator('#quality').inputValue(), 'fast');
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -720,4 +743,33 @@ test('V27 an unexpected failure shows the technical detail under the vague messa
   assert.match(text, /Something went wrong inside the extension/);
   const detail = await popup.locator('#error-detail').innerText();
   assert.match(detail, /Technical detail: mock: something unexpected happened/);
+});
+
+test('V28 built-in graphics read a long page in a shortened form, say so, and the button reads the whole page', async () => {
+  await resetScenario({ engineMode: 'mock:intel', readBudgetIntegrated: 4000, chunkChars: 3000 }, { cached: true });
+  const page = await openTarget('article-long.html');
+  const tabId = await ext.tabIdOf(page);
+  const popup = await ext.openPopup(tabId);
+  await popup.click('#summarize');
+  const first = await waitOutcome(popup, 90000);
+  await ext.shot(popup, 'V28-shortened');
+  assert.equal(first.outcome, 'done', `expected a summary, popup said: ${first.text}`);
+  const notice = await popup.locator('#condense-notice').innerText();
+  assert.match(notice, /This is a long page/);
+  assert.match(notice, /about \d+% of the text/);
+  assert.match(notice, /roughly \d+ minutes?/);
+  assert.equal(await popup.locator('#read-all').isVisible(), true);
+  const firstStats = await popup.locator('#stats').innerText();
+  assert.match(firstStats, /read \d+% of the text/);
+  assert.match(firstStats, /\b2 parts\b/, `4,000 characters are two parts of 3,000: ${firstStats}`);
+
+  await popup.click('#read-all');
+  // the first result is still in storage until the new job writes its record: wait for the new numbers
+  await popup.waitForFunction(() => /\b4 parts\b/.test(document.getElementById('stats').textContent), null, { timeout: 90000, polling: 100 });
+  await ext.shot(popup, 'V28-whole-page');
+  assert.equal(await popup.locator('#read-all').isVisible(), false, 'nothing was left out, so no button');
+  assert.equal(await popup.locator('#condense-notice').isVisible(), false);
+  const secondStats = await popup.locator('#stats').innerText();
+  assert.match(secondStats, /\b4 parts\b/, `10,800 characters are four parts of 3,000: ${secondStats}`);
+  assert.doesNotMatch(secondStats, /read \d+% of the text/);
 });

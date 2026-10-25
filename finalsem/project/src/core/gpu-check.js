@@ -22,8 +22,8 @@ export function evaluateGpu({ hasGpuApi, adapter }) {
  *  - an earlier failure with the primary model (override) sends us to the smaller one
  *  - navigator.deviceMemory is rounded and capped at 8 by Chrome; below 8 means a small machine
  */
-export function chooseModel({ deviceMemoryGB, override } = {}) {
-  if (override === 'fallback') return MODELS.fallback;
+export function chooseModel({ deviceMemoryGB, override, quality } = {}) {
+  if (override === 'fallback' || quality === 'fast') return MODELS.fallback;
   if (typeof deviceMemoryGB === 'number' && deviceMemoryGB < 8) return MODELS.fallback;
   return MODELS.primary;
 }

@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-25T21:34:03.869Z",
+  "mode": "intel-better",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel-better",
+      "id": "short",
+      "name": "Short article (fixture)",
+      "startedAt": "2026-10-25T21:26:36.535Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only).",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Download model and summarize",
+      "wallSeconds": 200.6,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 0.5,
+          "text": "Downloading the model (first time only): 0%"
+        },
+        {
+          "s": 13.7,
+          "text": "Downloading the model (first time only): 7%"
+        },
+        {
+          "s": 26.2,
+          "text": "Downloading the model (first time only): 11%"
+        },
+        {
+          "s": 27.8,
+          "text": "Downloading the model (first time only): 15%"
+        },
+        {
+          "s": 28.2,
+          "text": "Downloading the model (first time only): 18%"
+        },
+        {
+          "s": 42.6,
+          "text": "Downloading the model (first time only): 23%"
+        },
+        {
+          "s": 45.5,
+          "text": "Downloading the model (first time only): 32%"
+        },
+        {
+          "s": 61.6,
+          "text": "Downloading the model (first time only): 36%"
+        },
+        {
+          "s": 65.7,
+          "text": "Downloading the model (first time only): 45%"
+        },
+        {
+          "s": 66.1,
+          "text": "Downloading the model (first time only): 64%"
+        },
+        {
+          "s": 83.9,
+          "text": "Downloading the model (first time only): 67%"
+        },
+        {
+          "s": 85.6,
+          "text": "Downloading the model (first time only): 71%"
+        },
+        {
+          "s": 90.5,
+          "text": "Downloading the model (first time only): 76%"
+        },
+        {
+          "s": 91.3,
+          "text": "Downloading the model (first time only): 80%"
+        },
+        {
+          "s": 98.7,
+          "text": "Downloading the model (first time only): 87%"
+        },
+        {
+          "s": 109.4,
+          "text": "Downloading the model (first time only): 91%"
+        },
+        {
+          "s": 109.8,
+          "text": "Downloading the model (first time only): 95%"
+        },
+        {
+          "s": 118,
+          "text": "Downloading the model (first time only): 100%"
+        },
+        {
+          "s": 118.8,
+          "text": "Loading the model into the graphics card: 26%"
+        },
+        {
+          "s": 119.3,
+          "text": "Loading the model into the graphics card: 41%"
+        },
+        {
+          "s": 119.7,
+          "text": "Loading the model into the graphics card: 55%"
+        },
+        {
+          "s": 120.1,
+          "text": "Loading the model into the graphics card: 65%"
+        },
+        {
+          "s": 120.5,
+          "text": "Loading the model into the graphics card: 80%"
+        },
+        {
+          "s": 120.9,
+          "text": "Loading the model into the graphics card: 89%"
+        },
+        {
+          "s": 121.4,
+          "text": "Loading the model into the graphics card: 100%"
+        },
+        {
+          "s": 121.8,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 149.5,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": false,
+        "decodeTps": 2.008790188789984,
+        "elapsedMs": 200318,
+        "estimateFullSeconds": null,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 148978,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 1711,
+        "textChars": 1711,
+        "trimmedChars": 0
+      },
+      "summary": "A lighthouse lens works by using many thin glass rings and prisms arranged in a circle to bend the light from the lamp at the centre, resulting in a lens that is far lighter than a solid one. The time between flashes is a signature, indicating the location of the lighthouse."
+    },
+    {
+      "mode": "intel-better",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-25T21:30:01.173Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 124.6,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 6.6,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": true,
+        "decodeTps": 1.8243652586049084,
+        "elapsedMs": 124268,
+        "estimateFullSeconds": 692,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 0,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 5968,
+        "textChars": 27964,
+        "trimmedChars": 8788
+      },
+      "summary": "Lighthouses are towers or buildings that emit light from a system of lamps and lenses to serve as beacons for maritime pilots. They were originally used to guide mariners by fires built on hilltops, but have since declined due to maintenance and technological advancements."
+    },
+    {
+      "mode": "intel-better",
+      "id": "long",
+      "name": "Long article (fixture)",
+      "startedAt": "2026-10-25T21:32:11.944Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 103.8,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 3.5,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": true,
+        "decodeTps": 1.851195399591188,
+        "elapsedMs": 103470,
+        "estimateFullSeconds": 303,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 0,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 5302,
+        "textChars": 10532,
+        "trimmedChars": 0
+      },
+      "summary": "Lighthouses were first used for navigation in the 3rd century BC. They were used for over 2,000 years after that. Today, lighthouses are used for navigation and safety, and many have been automated."
+    }
+  ]
+}

@@ -79,6 +79,13 @@ button { font: inherit; cursor: pointer; border-radius: 2px; }
 }
 .textbtn:hover { color: var(--ink); }
 
+.settings { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.settings summary { cursor: pointer; }
+.settings label { display: block; margin: 8px 0 4px; font: 700 11px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; }
+.settings select { width: 100%; padding: 6px 8px; background: #fff; border: 1px solid var(--ink); border-radius: 0; font: 13px var(--sans); color: var(--ink); }
+.read-all { display: block; margin: 8px 0 0; }
+.read-all[hidden] { display: none; }
+
 .fine { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
 
 /* ---- progress ---- */

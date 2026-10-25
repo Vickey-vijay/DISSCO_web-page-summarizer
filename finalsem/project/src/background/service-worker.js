@@ -30,6 +30,19 @@ const controllers = new Map(); // tabId -> {jobId, controller} of the running jo
 const closedTabs = new Set(); // tab ids are never reused within a browser session
 const starting = new Set(); // tabs whose job is being created right now
 
+/**
+ * A rough guess, in seconds, of how long reading the WHOLE page would take, from the speed measured
+ * on this job. Only given when the page was shortened. Measured on the developer laptop's Intel
+ * chip: about 4.15 characters per token, 60 tokens written per part and about 150 for the final summary.
+ */
+function estimateFullSeconds(stats, lastStats, chunkChars) {
+  if (!stats?.condensed || !lastStats?.prefillTps || !lastStats?.decodeTps) return null;
+  const parts = Math.ceil(stats.textChars / chunkChars);
+  const reading = stats.textChars / 4.15 / lastStats.prefillTps;
+  const writing = (parts * 60 + (parts > 1 ? 150 : 0)) / lastStats.decodeTps;
+  return Math.round(reading + writing + 5);
+}
+
 /** Merge a patch into the job record, but only if the record still belongs to this job. */
 function writeJob(tabId, jobId, patch) {
   if (closedTabs.has(tabId)) return Promise.resolve();
@@ -49,8 +62,10 @@ function writeJob(tabId, jobId, patch) {
   return next;
 }
 
-async function makeEngine() {
+async function makeEngine({ full = false } = {}) {
   const settings = await loadSettings(chrome.storage.local);
+  // "Read the whole page": no shortening, whatever the graphics chip.
+  if (full) Object.assign(settings, { readBudgetIntegrated: 0, readBudgetOther: 0 });
   const engine = createLocalEngine({
     send: (message) => manager.send(message),
     settings,
@@ -60,10 +75,10 @@ async function makeEngine() {
   return { settings, engine };
 }
 
-async function runJob(tabId, jobId, signal) {
+async function runJob(tabId, jobId, signal, { full = false } = {}) {
   const stopListening = manager.onProgress((p) => void writeJob(tabId, jobId, { phase: p.phase, percent: p.percent, detail: p.text ?? null, notice: null }));
   try {
-    const { settings, engine } = await makeEngine();
+    const { settings, engine } = await makeEngine({ full });
 
     const result = await runPipeline({
       extract: () => extractFromTab(tabId),
@@ -89,6 +104,7 @@ async function runJob(tabId, jobId, signal) {
         loadMs: engine.loadInfo?.loadMs ?? null,
         decodeTps: engine.lastStats?.decodeTps ?? null,
         halvedParts: engine.halvedParts,
+        estimateFullSeconds: estimateFullSeconds(result.stats, engine.lastStats, settings.chunkChars),
       },
       error: null,
     });
@@ -107,7 +123,7 @@ async function runJob(tabId, jobId, signal) {
   }
 }
 
-async function startJob(tabId) {
+async function startJob(tabId, { full = false } = {}) {
   if (starting.has(tabId)) return { ok: false, reason: 'already_running' };
   starting.add(tabId);
   try {
@@ -145,11 +161,30 @@ async function startJob(tabId) {
         updatedAt: Date.now(),
       },
     });
-    void runJob(tabId, jobId, controller.signal); // not awaited: the popup gets its answer at once
+    void runJob(tabId, jobId, controller.signal, { full }); // not awaited: the popup gets its answer at once
     return { ok: true };
   } finally {
     starting.delete(tabId);
   }
+}
+
+/**
+ * Loads and warms up the model (when it is already stored) while the popup is open and nothing is
+ * running, so the first answer does not have to wait for the 30 to 40 seconds of warm-up. Does nothing
+ * if the model is not stored (a download only starts when the person presses the button).
+ */
+let preloading = null;
+function preloadModel() {
+  if (preloading || controllers.size > 0) return;
+  preloading = (async () => {
+    const { engine } = await makeEngine();
+    const status = await engine.checkStatus();
+    if (status.cached) await engine.prepare({});
+  })()
+    .catch((err) => console.log(LOG, 'preload skipped', describeError(err).code))
+    .finally(() => {
+      preloading = null;
+    });
 }
 
 /** What the popup shows before any job: graphics card, model, is it downloaded, how big. */
@@ -172,10 +207,15 @@ async function getModelState() {
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'START_SUMMARY' && Number.isInteger(message.tabId)) {
-    startJob(message.tabId)
+    startJob(message.tabId, { full: message.full === true })
       .then(sendResponse)
       .catch((err) => sendResponse({ ok: false, reason: toAppError(err).code }));
     return true; // keep the channel open for the async response
+  }
+  if (message?.type === 'PRELOAD_MODEL') {
+    preloadModel();
+    sendResponse({ ok: true });
+    return false;
   }
   if (message?.type === 'GET_MODEL_STATE') {
     getModelState().then(sendResponse);

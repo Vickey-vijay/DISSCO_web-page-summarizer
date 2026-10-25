@@ -40,3 +40,23 @@ Most browser tests use a pretend model (`?mock=<mode>`) so they are fast, free a
 ## D6. Version 1 stays untouched
 
 Version 2 lives in `finalsem/`. Nothing under `midsem/` was edited during the Version 2 build, so the mid-semester submission stays as it was. Shared parts (chunker, merger, pipeline, extraction) were copied, not linked, so each version can be run by itself from its own folder.
+
+## D7. Speed on the client's laptop: read less, keep the accurate model (asked on 26 October 2026)
+
+**Why it came up.** The client's laptop has only built-in graphics (Intel Iris Xe, see [CLIENT_LAPTOP.md](CLIENT_LAPTOP.md)). On the developer laptop's Intel chip a long Wikipedia page took about 10 minutes, and the owner asked for it to be as fast as possible, with a bigger model accepted if it fits.
+
+**What was measured** (`docs/test-runs/bench-models.md`, `scripts/bench-models.mjs`): on built-in graphics the model reads only 15 to 40 tokens a second whatever its size, and about 80 percent of the time of one part is reading. Llama 3.2 1B reads at 15.6 and writes at 2 tokens a second (162 s for one realistic part); SmolLM2 360M reads at 26 to 29 and writes at 4.7 (66 s). The 4-bit versions with 32-bit math (q4f32) were no faster at reading and slower at writing. The smaller models were less accurate; Llama 1B was the only one whose summary of the same part had no invented details.
+
+**The question put to Opus** (a second, stronger model, as a written brief with the numbers above) and its answer:
+
+| # | Question | Answer | What was done |
+|---|---|---|---|
+| 1 | Default model on built-in graphics | Llama 3.2 1B (accurate, 2.4 times slower per part). Do not show a model choice on the main screen; put "Quality: Better / Fast" under Settings. | Done. The popup has a closed "Settings" section with that choice. The automatic switch to SmolLM2 on built-in graphics (D3) is removed: SmolLM2 is now used on built-in graphics only when the person chooses Fast (or after a memory failure, as before). |
+| 2 | How much of a page to read on built-in graphics | Keep 6,000 characters (exactly one part, so no merge request). Aim for about 2 minutes warm and 3 minutes with the first-answer warm-up. | Done (`readBudgetIntegrated` 6000, `src/core/condense.js`). |
+| 3 | Shorter answers | Yes: 3 sentences for a single part (130 tokens), 2 per part (90), 4 to 5 for the merge (180), and end every cut-off answer at its last full stop. | Done for built-in graphics only (a fast card keeps the richer format). |
+| 4 | A different runtime (Transformers.js / ONNX Runtime Web) | Not now. First run the same benchmark in a visible Chrome window on mains power, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, try one page with Transformers.js, half a day at most, and switch only if reading is at least 2 times faster. | **Not done.** Everything measured so far ran in a hidden Chromium. The visible-window run needs a window on screen and was not made. |
+| 5 | Biggest risk | None of the numbers is from the client's chip or a real Chrome window; Llama could be slower than expected or fail to load. First action: run the extension on the client's laptop with a timing log for both models on the same page, which also downloads the 695 MB model in advance. | Open: see [MANUAL_SMOKE_TEST.md](MANUAL_SMOKE_TEST.md). |
+
+**Also built, from the same advice:** the model is loaded and warmed up while the popup is open (when it is already stored), so the first answer does not wait 30 to 40 seconds; back matter and markers are cut before reading (`src/core/trim-text.js`); the popup says when a page was shortened and offers "Read the whole page (slower)" with a rough time estimate.
+
+**Result on the developer laptop's Intel chip** (`docs/test-runs/v2-local-intel-better.md`): the Wikipedia "Lighthouse" page 124.6 s (before: 616 s with the small model), the long fixture article 103.8 s, the first use including the 695 MB download and the warm-up 200.6 s. The popup stated that 21 percent of the Lighthouse text was read and that reading all of it would take roughly 12 minutes. The summaries were accurate on all three pages. The client's laptop has a faster variant of this chip, but it is a 15-watt processor, so its real speed is still to be measured.

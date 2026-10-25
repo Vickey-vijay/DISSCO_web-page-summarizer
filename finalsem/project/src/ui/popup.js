@@ -19,6 +19,9 @@ const els = {
   progressBar: $('progress-bar'),
   notice: $('notice'),
   resultNotice: $('result-notice'),
+  condenseNotice: $('condense-notice'),
+  readAll: $('read-all'),
+  quality: $('quality'),
   error: $('error'),
   errorText: $('error-text'),
   errorDetail: $('error-detail'),
@@ -94,6 +97,15 @@ function switchNotice(reason) {
   return null;
 }
 
+/** Warm the model up while the person reads the popup, so the first answer does not wait for it. */
+let preloadedFor = null;
+function preloadIfPossible(state) {
+  if (!state?.ok || !state.cached || modelBlocked || preloadedFor === state.model.id) return;
+  if (/^(chrome|chrome-extension|about|edge|view-source|file|devtools):/i.test(tab?.url ?? '')) return; // nothing to summarize there
+  preloadedFor = state.model.id;
+  void chrome.runtime.sendMessage({ type: 'PRELOAD_MODEL' }).catch(() => {});
+}
+
 async function loadModelState() {
   let state = null;
   try {
@@ -102,6 +114,7 @@ async function loadModelState() {
     /* handled in renderModelState */
   }
   renderModelState(state);
+  preloadIfPossible(state);
 }
 
 // ---- rendering ---------------------------------------------------------------------------------
@@ -146,12 +159,25 @@ function progressLabel(job) {
   }
 }
 
+/** The sentence shown when a long page was shortened before reading (built-in graphics read slowly). */
+export function shortenedNotice(stats) {
+  if (!stats?.condensed || !stats.textChars) return null;
+  const percent = Math.max(1, Math.round((stats.readChars / stats.textChars) * 100));
+  let text = `This is a long page. To keep it quick on this computer, the opening of each section was read: about ${percent}% of the text.`;
+  if (stats.estimateFullSeconds) {
+    const minutes = Math.max(1, Math.round(stats.estimateFullSeconds / 60));
+    text += ` Reading all of it would take roughly ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`;
+  }
+  return text;
+}
+
 function formatStats(stats) {
   if (!stats) return '';
   const seconds = (stats.elapsedMs / 1000).toFixed(1);
   const parts = stats.chunks === 1 ? '1 part' : `${stats.chunks} parts`;
   const calls = stats.apiCalls === 1 ? '1 request' : `${stats.apiCalls} requests`;
-  return `${parts} · ${calls} · ${seconds} s · ${stats.model ?? 'local model'}`;
+  const read = stats.condensed && stats.textChars ? ` · read ${Math.max(1, Math.round((stats.readChars / stats.textChars) * 100))}% of the text` : '';
+  return `${parts} · ${calls} · ${seconds} s · ${stats.model ?? 'local model'}${read}`;
 }
 
 function render(job) {
@@ -167,6 +193,8 @@ function render(job) {
 
   show(els.notice, false);
   show(els.resultNotice, false);
+  show(els.condenseNotice, false);
+  show(els.readAll, false);
   show(els.errorDetail, false);
   if (stale) {
     els.errorText.textContent = 'The summary was interrupted. Press Summarize to try again.';
@@ -204,6 +232,12 @@ function render(job) {
       els.resultNotice.textContent = why;
       show(els.resultNotice, true);
     }
+    const shortened = shortenedNotice(live.stats);
+    if (shortened) {
+      els.condenseNotice.textContent = shortened;
+      show(els.condenseNotice, true);
+      show(els.readAll, true);
+    }
     refreshModelLineOnce(live); // the model is downloaded now: refresh the line and the button
   }
 }
@@ -221,13 +255,13 @@ async function init() {
     show(els.title, true);
   }
 
-  els.button.addEventListener('click', async () => {
+  async function startSummary({ full = false } = {}) {
     els.button.disabled = true;
     show(els.error, false);
     show(els.result, false);
     let reply = null;
     try {
-      reply = await chrome.runtime.sendMessage({ type: 'START_SUMMARY', tabId: tab.id });
+      reply = await chrome.runtime.sendMessage({ type: 'START_SUMMARY', tabId: tab.id, full });
     } catch {
       /* handled below */
     }
@@ -241,7 +275,21 @@ async function init() {
     els.errorText.textContent = 'Could not start the summary. Try again.';
     show(els.error, true);
     els.button.disabled = false;
+  }
+
+  // Settings: quality (which model). Stored in this browser; the model line follows the choice.
+  try {
+    els.quality.value = (await chrome.storage.local.get('quality')).quality === 'fast' ? 'fast' : 'better';
+  } catch {
+    /* the select keeps its default */
+  }
+  els.quality.addEventListener('change', async () => {
+    await chrome.storage.local.set({ quality: els.quality.value });
+    await loadModelState();
   });
+
+  els.button.addEventListener('click', () => void startSummary());
+  els.readAll.addEventListener('click', () => void startSummary({ full: true }));
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'session' && changes[jobKey()]) render(changes[jobKey()].newValue);
