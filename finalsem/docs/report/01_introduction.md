@@ -27,7 +27,7 @@ The first version chose the cloud route on purpose. A local model needed a capab
 
 ![Version 1 and Version 2 compared: the cloud engine against the engine on the laptop](../figures/V07_v1_vs_v2.png)
 
-Reading the figure: a table with one row per measure, and two columns. Version 1 (cloud, Gemini) needs a free key pasted into the popup, needs the internet for every summary, and sends the page text to Google over HTTPS. Version 2 needs no key, needs the internet once to download the model (about 695 MB, or about 204 MB for SmolLM2), and keeps the page text on the laptop. The timing rows show 1.7 seconds for the short article in Version 1, measured with the live service, and 15.3 seconds for the short article in Version 2 with the model stored, or 196.8 seconds on first use with the download included. The seven-part row shows 17.8 seconds for Version 1 and 74.1 seconds for Version 2. The free-tier row shows 15 requests a minute for the default cloud model, and no service quota for Version 2. The summary-quality row says that neither version was measured.
+Reading the figure: a table with one row per measure, and two columns. Version 1 (cloud, Gemini) needs a free key pasted into the popup, needs the internet for every summary, and sends the page text to Google over HTTPS. Version 2 needs no key, needs the internet once to download the model (about 695 MB, or about 204 MB for SmolLM2), and keeps the page text on the laptop. The timing rows show 1.7 seconds for the short article in Version 1, measured with the live service, and 15.3 seconds for the short article in Version 2 with the model stored, or 196.8 seconds on first use with the download included. The seven-part row shows 17.8 seconds for Version 1 and 74.1 seconds for Version 2. The free-tier row shows 15 requests a minute for the default cloud model, and no service quota for Version 2. The summary-quality row says that neither version was measured. The model row still says SmolLM2 on Intel graphics. That row predates the change of 26 October, when Llama 3.2 1B became the default on every chip.
 
 ## What Version 2 changes
 
@@ -35,7 +35,7 @@ Version 2 is in the folder `finalsem/`. It keeps everything around the summarizi
 
 The new parts are these.
 
-- A small language model runs inside Chrome, on the graphics card. The default is Llama 3.2 1B. A smaller model, SmolLM2 360M, is used on a computer that has a weak built-in graphics chip or too little memory.
+- A language model runs inside Chrome, on the graphics card. The default is Llama 3.2 1B on every chip. A smaller model, SmolLM2 360M, is used only when the reader chooses the faster setting, after a memory failure, or on a computer that reports less than 8 GB of memory.
 - The WebLLM library loads the model and runs it. It is copied into the project as one file, so the project needs no build step.
 - The model is downloaded once, with a progress bar, and stored in the browser's IndexedDB storage. Later summaries use the stored copy.
 - At start, the extension checks that Chrome can use the graphics card for the model. If it cannot, the popup says why in plain words.
@@ -59,7 +59,8 @@ Table: Project objectives and the state of Version 2
 | 4 | Choose a small model of about 1 to 3 billion parameters after testing it. | Partly. Llama 3.2 1B and SmolLM2 360M were chosen and measured. Other models in the library's list were set aside for the reasons in `DECISIONS.md`, D1. None of them was run. |
 | 5 | Make summaries work with no network. | Delivered for one computer and two pages, with outside websites blocked. The client's laptop is not tested. |
 | 6 | Compare the cloud engine and the local engine on speed, summary quality and memory use. | Partly. Speed was measured for both. Memory use and summary quality were not compared side by side. |
-| 7 | Confirm the client laptop's system, memory and graphics card, because they set the model size. | Open. The details were requested and have not come back. |
+| 7 | Confirm the client laptop's system, memory and graphics card, because they set the model size. | Details received (`finalsem/docs/CLIENT_LAPTOP.md`): built-in Intel Iris Xe graphics only, 16 GB, Chrome 156. Not yet run on that laptop. |
+| 8 | Make a long page quick enough on built-in graphics, the only graphics the client's laptop has. | Partly. A benchmark on the developer laptop's Intel chip led to a shortened read of long pages: the Wikipedia article on lighthouses went from about 10 minutes to 124.6 seconds. Not yet measured on the client's laptop. |
 
 ## Scope
 
@@ -67,12 +68,13 @@ Table: Project objectives and the state of Version 2
 
 - The local engine, with the model download, the cache in IndexedDB and the load into the graphics card.
 - The graphics card check, with the messages for missing WebGPU and missing 16-bit math.
-- The switch to the smaller model on a weak built-in chip, with a one-line note in the popup.
+- A Settings choice, "Quality: Fast", that uses the smaller model, and a one-line note on built-in graphics.
+- Speed work for built-in graphics: a benchmark of the models on the Intel chip, removal of back matter and citation marks before reading, a shortened read of long pages with a "Read the whole page" button, shorter answers on built-in graphics, and preloading of a stored model.
 - A fallback to the smaller model after a memory failure, remembered for later, with a notice in the popup when the smaller model wrote the summary.
 - Halving a part that the model's window cannot take at once, and a plain refusal when a half is still too long.
 - The offscreen page that holds the model and its messages, and the job that runs in the background.
 - Setup and run scripts for Windows (`setup.bat`, `run.bat`), a computer check (`scripts/check-computer.ps1`) and an opt-in script that asks Windows to run Chrome on the separate graphics card.
-- Tests: 76 unit tests, 29 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
+- Tests: 93 unit tests, 31 browser scenarios that use a pretend model, 15 Windows script checks, and real-model runs on the NVIDIA chip and on the built-in Intel chip.
 
 ### What is not built or not verified
 
@@ -85,7 +87,7 @@ Table: Project objectives and the state of Version 2
 
 ## Test machines
 
-The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is not known yet, so the report describes what the developer laptop does and says so wherever a number depends on it.
+The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is an HP Laptop 15 with a 13th Gen Intel Core i7-1355U, 16 GB of memory, Intel Iris Xe graphics built into the processor (no separate card) and Chrome 156. Its facts were read from the client's photos (`finalsem/docs/CLIENT_LAPTOP.md`). The extension has not been run on that laptop or in a visible Chrome window, so the report describes what the developer laptop does and says so wherever a number depends on it.
 
 ## How to read this report
 
@@ -95,4 +97,4 @@ Each technical section ends with a short paragraph headed "What this means in pl
 
 ### What this means in plain words
 
-Version 1 works, but it needs a key, a service quota and a network connection, and it sends the page text to Google. Version 2 keeps the same reading, splitting and merging steps and runs the summary on the laptop. It is slower on a weak chip, its first use is long, and its summaries are written by a much smaller model. The rest of the report explains each of these points with the measured numbers.
+Version 1 works, but it needs a key, a service quota and a network connection, and it sends the page text to Google. Version 2 keeps the same reading, splitting and merging steps and runs the summary on the laptop. On built-in graphics, which is the client's only option, it is slow: reading a long page is the expensive part, and the first use is long. The extension therefore reads less of a long page and says so. The rest of the report explains each of these points with the measured numbers.

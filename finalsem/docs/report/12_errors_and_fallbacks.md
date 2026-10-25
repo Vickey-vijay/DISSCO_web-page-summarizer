@@ -17,7 +17,7 @@ Table: Errors that come from the model, from `src/core/errors.js` and `src/offsc
 | `MODEL_LOAD_FAILED` | Loading fails for another reason | The model could not be started. Press the button to try again. | While loading the primary model, retries once with the small model. Otherwise the job ends. | Press again. |
 | `TIMEOUT` | One answer takes longer than 10 minutes (it was 180 seconds until 24 October 2026) | The model took too long to answer. Try again, or use a shorter page. | The answer is interrupted, and the job ends with its finished parts dropped. | Try again, or use a shorter page. |
 | `CONTEXT_TOO_LONG` | WebLLM refuses a prompt that does not fit the 4,096-token window. A dense part can use more tokens per character than the 6,000-character limit assumes. | A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | The part is cut in half at a paragraph or sentence break, and each half is summarized, up to three levels deep. The message appears only if the cutting fails too, or if the text is under 600 characters. | Try a shorter page. |
-| `EMPTY_ANSWER` | The model returns only spaces | The model returned no summary for this page. | The job ends. | Press again. |
+| `EMPTY_ANSWER` | The model returns only spaces, or only a repeated safety sentence and an empty "Summary:" label (seen with SmolLM2 on a Wikipedia page) | The model returned no summary for this page. | The job ends. | Press again. |
 
 Table: Errors from the page and the job, from `src/core/errors.js`, `pipeline.js` and `extract-tab.js`
 
@@ -102,9 +102,9 @@ The window message was the gap behind a vague error in the owner's real Chrome o
 
 ## The fallback to the small model
 
-The extension has three routes to the smaller model, SmolLM2 360M. The first two are decided before anything loads, and the third only after a failed load.
+The extension has three routes to the smaller model, SmolLM2 360M. The main model, Llama 3.2 1B, is the default everywhere, including on built-in graphics. Before 26 October the extension also switched to SmolLM2 by itself when the hidden page reported a built-in Intel chip. That automatic switch is removed. The first two routes are decided before anything loads, and the third only after a failed load.
 
-1. Integrated graphics. The hidden page reports a built-in Intel chip, and the engine switches to SmolLM2 on this check. Nothing is saved, so the check decides again each time.
+1. Quality: Fast. The reader chooses SmolLM2 under Settings. The choice is stored, the model line follows it, and the stats record `modelSwitchReason` as `quality-fast`. Nothing is saved as a fallback, and no notice appears, because the reader chose it.
 2. Small machines. `chooseModel` picks the small model when the browser reports less than 8 GB of memory. Chrome caps that report at 8, so only machines reporting less than 8 are affected. The rule has not been seen on real low-memory hardware: [to be measured].
 3. A failed load. If the primary model fails to load with `GPU_MEMORY` or `MODEL_LOAD_FAILED`, the engine retries once with SmolLM2. This is the only route that saves a choice, and the only route that can show the notice.
 
@@ -128,7 +128,7 @@ The extension has three routes to the smaller model, SmolLM2 360M. The first two
 
 The choice is written to `chrome.storage.local` by `onFallback` before the small model is tried. So a saved choice survives even if the small model then fails too. No code path clears it. Every later job, on every page, starts with SmolLM2 until the extension's stored settings are cleared. This is an open limit, not a fixed one. Other errors never retry: a download failure, a missing WebGPU, a missing shader feature, a timeout, and an out-of-memory error during an answer all stop the job.
 
-When the small model writes a finished summary, the popup shows a notice in ochre above it: "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The popup builds the notice from the stats of the finished job, so the job record's notice field stays empty. No notice appears for the integrated-graphics route, which has its own note. Before the fix, a fallback summary carried no notice, and the job record had a notice field that was never drawn.
+When the small model writes a finished summary, the popup shows a notice in ochre above it: "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The popup builds the notice from the stats of the finished job, so the job record's notice field stays empty. No notice appears for Quality: Fast, which the reader chose. Before the fix, a fallback summary carried no notice, and the job record had a notice field that was never drawn.
 
 The browser tests show both sides. Scenario V10 makes the primary model run out of memory: the summary still works on SmolLM2, the notice is shown, and the next popup shows the saved choice. Scenario V11 makes every model run out of memory: the reader sees the memory message, the choice is still saved, and the button is enabled again. The re-shot screenshot `ui-12-fallback-after-out-of-memory.png` shows the notice above a SmolLM2 summary. The re-shot `ui-13-out-of-memory-all.png` shows the memory message. Its model line now names SmolLM2 and says it is not downloaded. Before the fix, the model line stayed on the main model after both had failed.
 
@@ -155,7 +155,7 @@ Each answer has ten minutes. Until 24 October 2026 the limit was 180 seconds, an
 
 The job then stops. The parts already finished are discarded, because a summary is only saved when every part and the merge are done. The reader sees the timeout message and can press again. No automated test covers the TIMEOUT path. The pretend model has no timeout, and the logic lives in the real engine. The unit test checks only that a `TIMEOUT` code passes through unchanged. Whether `interruptGenerate` stops the earlier answer completely is not tested: [to be measured].
 
-An empty answer is a different case. The engine trims the text, and if nothing is left it reports `EMPTY_ANSWER`. The pretend model mode `empty` shows the message in scenario V13. Nothing is saved, and the reader can press again.
+An empty answer is a different case. The engine trims the text, and if nothing is left it reports `EMPTY_ANSWER`. A second case is a repeated safety sentence. The small model sometimes answers with the safety sentence of its prompt and an empty "Summary:" label. `stripPageMarkers` now removes both, so such an answer becomes `EMPTY_ANSWER`. Before 26 October the saved Fast answer for the Lighthouse page was exactly that text and was shown as a summary (`docs/test-runs/v2-local-intel-fast.md`). The pretend model mode `empty` shows the message in scenario V13. Nothing is saved, and the reader can press again.
 
 **What this means in plain words.** A slow answer is stopped at ten minutes, and the whole summary is dropped with it. An empty answer is reported as an empty answer, not as a success.
 
@@ -227,7 +227,7 @@ A computer without WebGPU or without the 16-bit feature is blocked from the star
 
 ## Which errors were forced, and which were real
 
-Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 29 browser scenarios (the smoke run, V01 to V27 and V18b) all pass, with 76 unit tests.
+Almost every error above was forced with the pretend model. The offscreen page accepts a `mock` mode in its address, and each mode produces one failure on purpose. The 31 browser scenarios (the smoke run, V01 to V29 and V18b) all pass, with 93 unit tests and 15 script checks.
 
 - `nowebgpu` gives `NO_WEBGPU` (scenario V07), and `nof16` gives `NO_SHADER_F16` (scenario V08).
 - `oom` gives `GPU_MEMORY` on the primary model only (scenario V10), and `oomall` gives it on every model (scenario V11).

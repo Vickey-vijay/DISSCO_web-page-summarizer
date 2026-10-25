@@ -2,7 +2,7 @@
 
 ## What this part does and why it exists
 
-The first time a reader presses the button, the model has to arrive on the laptop. The 1B model is about 695 MB of weights, and it also needs a graphics library and a tokenizer. The download and the load take most of the waiting. After that the model stays in the browser, so later summaries start in seconds. The offscreen page asks WebLLM to download and load the model, and the service worker writes the progress into the job record that the popup reads. The only outside traffic is that first download. Chapter 5 walks through the first use step by step, and chapter 3 explains the model file and where it is kept.
+The first time a reader presses the button, the model has to arrive on the laptop. The main model, Llama 3.2 1B, is about 695 MB of weights on every chip, including the built-in graphics the client has, and it also needs a graphics library and a tokenizer. The download and the load take most of the waiting. After that the model stays in the browser, so later summaries start in seconds. The offscreen page asks WebLLM to download and load the model, and the service worker writes the progress into the job record that the popup reads. The only outside traffic is that first download. Chapter 5 walks through the first use step by step, and chapter 3 explains the model file and where it is kept.
 
 ## The first-use phases
 
@@ -61,6 +61,18 @@ The function fetches `ndarray-cache.json` and adds up the byte counts of its rec
 
 **What this means in plain words.** The size shown is the total of the weight files, read from the model's own list, without the small library and tokenizer files.
 
+## First use on the built-in Intel chip
+
+On the developer laptop's built-in Intel chip, which is the only graphics path the client has, the first use also downloads the 695 MB model. The short article took 200.6 seconds in `v2-local-intel-better.md`. The load step, which includes the download, took 149 seconds (148,978 ms), and the warm-up about 28 seconds. The download ran from 0.5 to 118 seconds, the load finished at 121.4 seconds, the warm-up ran from 121.8 to 149.5 seconds, and the summary took about 51 seconds. Before 26 October the built-in chip downloaded the 204 MB SmolLM2 model instead (`v2-local-intel.md`).
+
+**What this means in plain words.** The first use on the built-in chip is the same kind of wait as on the NVIDIA chip, with the bigger download. It happens once.
+
+## Preloading while the popup is open
+
+When the popup opens on an ordinary page and the chosen model is already stored, the popup sends `PRELOAD_MODEL` to the service worker. The service worker then loads and warms the model, so the first answer does not wait for a warm-up of about 28 to 35 seconds on the Intel chip. The preload never downloads. It loads only a model that is already stored, and it does nothing while a job is running. The popup sends it once for each model while the popup is open. Chapter 9 explains the message.
+
+**What this means in plain words.** Opening the popup starts the load early, so the wait for the first answer is shorter. The preload fetches nothing from the internet.
+
 ## Storage in IndexedDB, and the stored check
 
 The model is kept in IndexedDB, because WebLLM's default store, Cache Storage, failed inside the offscreen page. The first try stopped with `UnknownError: Failed to execute 'open' on 'CacheStorage'`, while IndexedDB had about 10.7 GB of quota (DEVLOG, 2026-10-21, "V2 spike: model cache"). The setting is one line.
@@ -70,7 +82,7 @@ The model is kept in IndexedDB, because WebLLM's default store, Cache Storage, f
 const APP_CONFIG = { ...prebuiltAppConfig, cacheBackend: 'indexeddb' };
 ```
 
-The stored check looks at the weights only, in the scope `webllm/model`. The graphics library is kept in a separate scope, `webllm/wasm`. Both are in IndexedDB, so a load with no network succeeds, which is what the offline runs show. If the check throws, the model counts as not stored and the popup offers the download again. The test runs keep the browser profile in a fixed folder (`.model-profile` in `scripts/local-run.mjs`). Chapter 9 explains the manifest permissions behind the download, including `unlimitedStorage`.
+The stored check looks at the weights only, in the scope `webllm/model`. The graphics library is kept in a separate scope, `webllm/wasm`. Both are in IndexedDB, so a load with no network succeeds, which is what the offline runs show. If the check throws, the model counts as not stored and the popup offers the download again. The test runs keep the browser profile in a fixed folder (`.model-profile` in `scripts/local-run.mjs`). Chapter 9 explains the manifest permissions behind the download, including `unlimitedStorage`. When the Quality setting changes, the offscreen page unloads the model it has loaded before it loads the other one. Only the loaded copy is freed, and the stored files stay.
 
 Figure: what is stored, where, and for how long.
 
@@ -90,7 +102,7 @@ After the load, the page writes one token before it reports success, so the slow
         await engine.chat.completions.create({ messages: [{ role: 'user', content: 'Say ok.' }], max_tokens: 1, temperature: 0 });
 ```
 
-The first answer on a graphics card compiles the programs the model runs. The popup shows "Warming up the model (first time can take about 30 seconds)...", with an empty bar. The code comment and the message say "first time only", but the code runs the warm-up on every load into a fresh offscreen page. The timings are about 30.5 seconds on the cold NVIDIA run, about 39.4 seconds on the Intel run, about 0.5 seconds on the clean offline run and about 0.4 seconds on the after-fix offline run. The offline runs use the same profile as the cold run, and the reason for the short offline warm-up is [to be measured].
+The first answer on a graphics card compiles the programs the model runs. The popup shows "Warming up the model (first time can take about 30 seconds)...", with an empty bar. The code comment and the message say "first time only", but the code runs the warm-up on every load into a fresh offscreen page. The timings are about 30.5 seconds on the cold NVIDIA run, about 39.4 seconds on the Intel run with SmolLM2 as the default (before 26 October), about 28 seconds on the Intel run with Llama 3.2 1B, about 0.5 seconds on the clean offline run and about 0.4 seconds on the after-fix offline run. The offline runs use the same profile as the cold run, and the reason for the short offline warm-up is [to be measured].
 
 **What this means in plain words.** The extension runs one tiny answer right after loading. The short warm-ups later are measured, and their cause is not.
 
@@ -107,7 +119,7 @@ Table: The two clean offline runs, before and after the label fix (same laptop, 
 
 The after-fix load took longer, 11.6 seconds against 6.9 seconds. The run's own note says differences of this size are normal on this laptop, and the cause is not measured here. The clean runs give 34 to 53 tokens a second, each value for the last request of its job. The 65 tokens a second is above that range, and the file does not explain it. The summary-step times are for reference only, because the answers differ in length. Real-model runs made before 24 October used a stale service worker script, because the persistent test profile kept an old copy of it. The test script now deletes that copy before each run, and the downloaded model is not touched. Every real run cited in this chapter was made before that change.
 
-The Intel first use (SmolLM2, clean run) took 199.2 seconds: a download from 0.9 to 81.2 seconds for about 204 MB, a warm-up of about 39.4 seconds, and writing at 4 to 5 tokens a second. The NVIDIA first use run while other programs were using the processor took 207 seconds, with a warm-up of about 56 seconds. That run is labelled as disturbed in the test-run folder.
+The Intel first use with SmolLM2 as the default (clean run, before 26 October) took 199.2 seconds: a download from 0.9 to 81.2 seconds for about 204 MB, a warm-up of about 39.4 seconds, and writing at 4 to 5 tokens a second. The NVIDIA first use run while other programs were using the processor took 207 seconds, with a warm-up of about 56 seconds. That run is labelled as disturbed in the test-run folder.
 
 Figure: first use and later use as two sequences.
 
@@ -183,7 +195,7 @@ Chapter 15 tells the stories behind this part: the model cache that refused to o
 
 ## How it was tested
 
-The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 76 tests, and the browser suite has 29. The real-model runs are the clean cold NVIDIA run, the two clean offline runs and the clean Intel run.
+The browser test V01 runs the whole first use. It checks that the percentages never go down, that a warm-up appears, that the summary arrives, and that the model is then shown as downloaded. V02 checks the order of the job phases, V12 a failed download, V15 a closed popup, V16 a finished job that persists, V20 a stopped service worker, and V22 a closed tab. The unit tests include "prepare reports checking, then downloading when the model is not cached, then loads it" and "prepare reports loading, not downloading, when the model is already cached". The unit suite has 93 tests, and the browser suite has 31. The real-model runs are the clean cold NVIDIA run, the two clean offline runs, the Intel run with SmolLM2 and the Intel run with Llama 3.2 1B (`v2-local-intel-better.md`).
 
 ## Limitations
 
@@ -195,12 +207,12 @@ The browser test V01 runs the whole first use. It checks that the percentages ne
 - The offline runs do not log requests, and they cover only the short and long fixtures.
 - The after-fix offline load took 11.6 seconds against 6.9 seconds, and the cause is not measured.
 - The warm-up label still says "first time only" in the code, while the code runs the warm-up on every load.
-- The client's laptop has not been tested, so every time here is from the developer laptop.
+- The client's laptop details are known from its photos, but the extension has not been run on it or in a visible Chrome window. Every time here is from the developer laptop, in hidden Chromium.
 
 ## Questions this chapter answers
 
 **How long does the first use take?**
-On the developer laptop with the NVIDIA chip, the clean cold run took 196.8 seconds for a short article. The download took 158.3 seconds, the load 3.8 seconds, the warm-up 30.5 seconds and the summary 3.7 seconds. The client's laptop has not been measured.
+On the developer laptop's built-in Intel chip, which is the client's only path, the first use with the 695 MB model took 200.6 seconds for a short article. The load, including the download, took 149 seconds, and the warm-up about 28 seconds. On the NVIDIA chip the clean cold run took 196.8 seconds, with a download of 158.3 seconds, a load of 3.8 seconds, a warm-up of 30.5 seconds and a summary of 3.7 seconds. The client's laptop has not been measured.
 
 **Why is a later use fast?**
 The model and its library are stored in IndexedDB, so the load reads them from the browser instead of the network. The clean offline run loaded in 6.9 seconds and finished the short article in 15.3 seconds. The after-fix offline run loaded in 11.6 seconds and finished in 17.7 seconds. Both warm-ups were under a second.

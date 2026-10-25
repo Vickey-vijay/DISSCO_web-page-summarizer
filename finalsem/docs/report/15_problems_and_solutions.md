@@ -2,7 +2,7 @@
 
 This chapter tells the problems met while building Version 2. The sources are kept narrow on purpose. The stories come from the rows of the development log dated 21 October 2026, which are the Version 2 rows, and from the first browser test run, `docs/test-runs/run-1.md`. The rows dated 20 October 2026 belong to Version 1 and are not repeated here.
 
-Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the failure in the real Chrome on 24 October, and problem 13 is the set of faults in the test setup that run 1 found.
+Each problem is told in the same order: what was seen, the cause, the fix, and then what it means in plain words. The fixes described are the ones in the code now. Where the record says a cause was not proved, this chapter says so. Problems 8 to 11 were found while the report was being written, by reading real summaries, by the screenshot run, and by reading the code. Problem 12 is the failure in the real Chrome on 24 October, problem 13 is the ten-minute page of 26 October, problem 14 is the echoed safety sentence of 26 October, and problem 15 is the set of faults in the test setup that run 1 found.
 
 ## The model cache refused to open
 
@@ -54,7 +54,7 @@ A broken script looks like a broken environment. Check the syntax first, and rem
         return { ok: true, loadMs: Math.round(performance.now() - t0) };
 ```
 
-On built-in graphics the extension switches to the small model on its own and shows a note. The opt-in `setup.bat --gpu` offers the Windows setting that asks for the separate card (chapter 13).
+At that time, on built-in graphics, the extension switched to the small model on its own and showed a note. That automatic switch was removed on 26 October (problem 13). The opt-in `setup.bat --gpu` offers the Windows setting that asks for the separate card (chapter 13).
 
 ### What this means in plain words
 
@@ -130,11 +130,11 @@ Once a fault is found and fixed, look for the same pattern wherever the code now
 
 **Cause.** The built-in chip writes text slowly. The record shows 4 to 5 tokens a second with the small model SmolLM2, and about 2 tokens a second with the 1 billion parameter model in the earlier speed test.
 
-**Fix.** The development log records no code change for this run. The automatic switch to the small model was already in place and keeps the chip usable, though not fast. The popup says that a separate graphics card is much faster. `setup.bat --gpu`, or the Windows Graphics setting, moves Chrome to the separate card.
+**Fix.** The development log records no code change for this run. The automatic switch to the small model was in place at the time and kept the chip usable, though not fast. That switch was removed on 26 October (problem 13). The popup says that a separate graphics card is much faster. `setup.bat --gpu`, or the Windows Graphics setting, moves Chrome to the separate card.
 
 ### What this means in plain words
 
-A weak chip is not an error. The extension gives a note and uses a smaller model, instead of refusing to run.
+A weak chip is not an error. At the time, the extension gave a note and used a smaller model instead of refusing to run. Since 26 October the default model is the same on every chip, and a weak chip is handled by reading less of the page.
 
 ## The "Downloading" line for a stored model
 
@@ -210,7 +210,7 @@ function switchNotice(reason) {
 }
 ```
 
-The notice does not appear for the integrated-graphics case, because that case already has the graphics note. The picture below shows the notice in the popup, and it is a pretend-model capture.
+The notice does not appear for the Fast choice, because the reader picked that model in Settings. The picture below shows the notice in the popup, and it is a pretend-model capture.
 
 ![Popup after the small model wrote the summary, with the notice (pretend model)](../screenshots/ui-12-fallback-after-out-of-memory.png)
 
@@ -285,6 +285,32 @@ A second finding came from the same episode. A persistent browser profile kept a
 ### What this means in plain words
 
 A vague message is a bug report with nothing in it, so the cause has to be shown to the reader. A long, dense page can fail on the slowest chip, so the parts that do not fit are now shortened and the answer is given more time. The lesson is to test long, dense pages on the slowest chip, not only on the fixtures, because the skipped recommendation to halve and retry came back as the first real-Chrome failure.
+
+## Ten minutes for a page (26 October 2026)
+
+**What was measured.** A benchmark on the developer laptop's Intel chip (`scripts/bench-models.mjs`, `docs/test-runs/bench-models.md`) found that the time goes into reading, not writing. The model reads only 15 to 40 tokens a second on this chip, whatever its size, and reading takes about 80 percent of the time of one part. The 7-part Lighthouse page took 616 seconds with SmolLM2, about ten minutes. The owner said that was far too long, asked for it to be made as fast as possible, and accepted a bigger model if it fits.
+
+**What was decided.** The question went to a second, stronger model (Opus) as a written brief with the numbers. The answer, recorded in `docs/DECISIONS.md` (D7), was to read less rather than to change the chip: keep 6,000 characters as one part, keep the answers short, and keep the accurate Llama 3.2 1B model. It also advised measuring in a visible window on mains power before trying another runtime. That measurement has not been made (chapter 16).
+
+**What was built.** Back matter, such as See also, References and Bibliography, and markers such as [12] are cut before reading (`src/core/trim-text.js`). On the Lighthouse page this removed 8,788 of 36,752 characters, 24 percent. On built-in graphics a long page is shortened to about 6,000 characters before reading (`src/core/condense.js`): the opening in full, then the first sentences of the paragraphs, spread over the page. The result is one part, so there is no merge request. The popup says that the page was shortened, gives the share that was read, and offers "Read the whole page (slower)" with a time estimate. Answers are shorter on built-in graphics. The main model is the default on every chip. SmolLM2 is used only when the reader picks Fast in Settings, after a memory or load failure, or on a computer with under 8 GB of memory. The model is loaded and warmed up while the popup is open, when it is already stored.
+
+**Result.** On the developer laptop's Intel chip the Lighthouse page took 124.6 seconds, against 616 seconds before. The model read 5,968 of the 27,964 characters left after cutting, about 21 percent. The popup estimated 692 seconds to read all of it. The long fixture article took 103.8 seconds. The three summaries are recorded as accurate and fluent.
+
+### What this means in plain words
+
+On a slow chip the lever is how much text is read, not which model. An accurate slow model with a shorter input beat a fast model that invents facts.
+
+## A safety sentence in the answer (26 October 2026)
+
+**What was seen.** On the Intel chip, with SmolLM2 in the Fast setting, the Wikipedia Lighthouse run reported a summary. The saved text was only the prompt's own safety sentence, which says that the text between the page markers is web page content, followed by an empty "Summary:" label. The run still said "summary" in its outcome.
+
+**Cause.** The small model copied the instruction that protects the model from the page. Nothing treated that copied text as a failed answer.
+
+**Fix.** `stripPageMarkers` in `src/core/prompts.js` now also removes a repeated copy of the prompt's safety sentence and an empty "Summary:" label. If nothing is left, the answer is reported as EMPTY_ANSWER, and the reader sees "The model returned no summary for this page." The saved run was made before this fix.
+
+### What this means in plain words
+
+A protection for the model can leak into the output, and an answer that is only that protection is not a summary. A finished job is not the same as a useful answer, so the check has to look at the words, not only the outcome.
 
 ## Three faults in the test setup
 

@@ -51,23 +51,26 @@ The service worker keeps no reference to the page. Before each request, it asks 
 
 ## The messages, and what each direction carries
 
-Five message types pass between the service worker and the page. Three are requests that get a reply, and two go from the page to the service worker with no reply.
+Five message types pass between the service worker and the page. Three are requests that get a reply, and two go from the page to the service worker with no reply. The popup sends one more message, `PRELOAD_MODEL`, to the service worker, and the table lists it too.
 
-Table: The five message types between the service worker and the offscreen page
+Table: The message types between the popup, the service worker and the offscreen page
 
 | Message | Direction | Payload | Reply | When it is sent |
 |---|---|---|---|---|
 | `LOCAL_STATUS` | Service worker to page | `modelId` | `gpu`, `cached`, `downloadMB`, `deviceMemoryGB`, `model`, or an error | Before each job, and for the popup's model line |
 | `LOCAL_LOAD` | Service worker to page | `modelId` | `loadMs`, or `alreadyLoaded`, or an error | Once per job, after the check |
-| `LOCAL_GENERATE` | Service worker to page | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `text` and `stats`, or an error | Once per part, and once per merge step |
+| `LOCAL_GENERATE` | Service worker to page | `prompt`, `maxTokens`, `temperature`, `timeoutMs` | `text`, `finishReason` and `stats`, or an error | Once per part, and once per merge step |
 | `MODEL_PROGRESS` | Page to service worker | `phase`, `percent`, `text` | None | During a download or load |
 | `KEEPALIVE` | Page to service worker | None | None | Every 10 seconds while the page is busy; the service worker also refreshes the running job records |
+| `PRELOAD_MODEL` | Popup to service worker | None | `{ok: true}`, at once | When the popup opens on an ordinary page and the model is stored. The service worker loads the model and never downloads |
 
 Figure: the message protocol between the two pages.
 
 ![The message protocol between the service worker and the offscreen page: the three requests with replies, the progress message and the keepalive, with the idle close at the end](../figures/V05_offscreen_messages.png)
 
 Reading the figure: the service worker is on the left and the offscreen page on the right. Arrows to the right carry `LOCAL_STATUS`, `LOCAL_LOAD` and `LOCAL_GENERATE`, and the replies return to the left. Arrows to the left carry `MODEL_PROGRESS` and `KEEPALIVE`, which have no reply. The "Idle close" box says that each message restarts a five-minute timer, that the timer runs with `idleCloseMs = 300000`, and that the page is closed when it runs out, which frees its graphics memory while the model files stay in IndexedDB. The "Rules" box says that every message carries the `offscreen` target, that answers are made one at a time in the order asked, and that `KEEPALIVE` is sent only while a request runs. The code matches the rules. Its timer wording differs slightly from the box: the timer is cleared when a message starts, and the countdown starts only when the last message finishes (see the idle close section).
+
+The generate reply also carries `finishReason`, the reason the model stopped. When it is `'length'`, the model stopped at the answer-length limit, and the engine cuts the answer back to its last full stop (`endAtSentence`).
 
 The first direction is a request with a reply. The `call()` function in `local.js` sends each request, and it turns a missing reply into an error.
 
@@ -142,7 +145,7 @@ The graphics card does one job at a time, so the service worker lets only one ge
 
 The chain continues even when one generation fails, because the second argument to `then` runs the next step in both cases. The unit test "answers are generated one at a time, in the order asked" sends three requests together and checks that they start and end in order, with no overlap.
 
-Only generation is queued. `LOCAL_STATUS` and `LOCAL_LOAD` are not. The page guards the load itself: a second load returns the first load's promise while one is running, and a load of a model that is already loaded returns at once. The status request only reads, so overlap is harmless. Two tabs that summarize at once therefore share the card, one part at a time.
+Only generation is queued. `LOCAL_STATUS` and `LOCAL_LOAD` are not. The page guards the load itself: a second load returns the first load's promise while one is running, and a load of a model that is already loaded returns at once. Asking for a different model unloads the loaded one first, for example after the Quality setting changes, so only one model is held at a time. The status request only reads, so overlap is harmless. Two tabs that summarize at once therefore share the card, one part at a time.
 
 **What this means in plain words.** Generation runs in a queue, so the card never works on two parts at once. Loading has its own guard inside the page.
 
@@ -374,7 +377,7 @@ The unit tests in `tests/unit/local-engine.test.js` cover the manager. They chec
 
 The browser tests in `tests/e2e/pipeline.test.js` cover the same path with the real extension. V15 closes the popup in the middle of a job and reopens it. V20 stops the service worker in the middle of a job. V22 closes the tab during a job. V23 closes the page after the idle time, with `idleCloseMs` set to 400 ms, and then checks that the next summary still works. V24 checks that nothing opens except the popup window: no tab and no options page.
 
-The whole suite has 76 unit tests and 29 browser tests, all passing, and 15 Windows script checks (B1 to B10c). Scenario V26 checks that KEEPALIVE keeps a 16-second pretend answer from showing as interrupted, and V27 checks the technical detail line.
+The whole suite has 93 unit tests and 31 browser tests, all passing, and 15 Windows script checks (B1 to B10c). Scenario V26 checks that KEEPALIVE keeps a 16-second pretend answer from showing as interrupted, and V27 checks the technical detail line.
 
 **What this means in plain words.** The unit tests check the manager's rules, and the browser tests check the same rules through the whole extension. The in-flight rule has only the unit test.
 

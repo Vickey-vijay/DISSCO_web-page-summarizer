@@ -33,7 +33,7 @@ The download size comes from the model's own file list, read by `estimateDownloa
 
 A number stored at full 16-bit precision takes two bytes. One billion of them would take about 2 GB. The stored model is about three times smaller than that, because the numbers are kept in fewer bits. Chapter 3 explains how that is done and what it costs.
 
-The size of the model sets two things: how much graphics memory it needs and how fast it writes. On a laptop with a weak chip, both matter. The project therefore uses the smaller model on such a laptop.
+The size of the model sets two things: how much graphics memory it needs and how fast it writes. On a laptop with a weak chip, both matter. The project keeps the 1B model as the default on every chip and offers the smaller model as a faster choice.
 
 **What this means in plain words.** Parameters are the stored numbers that make the model work. A model with more of them can hold more of what it learned, but it needs more memory and more time to run. The 1B model needs about 695 MB to download, and WebLLM lists it at 879 MB of graphics memory.
 
@@ -88,7 +88,8 @@ Table: Speeds of the Llama 3.2 1B model and the smaller model, by measurement
 | Writing (decode) | NVIDIA RTX 3050, Llama 3.2 1B | about 63 tokens a second | same earlier speed test |
 | Writing, saved clean runs (last request of each job) | NVIDIA RTX 3050, Llama 3.2 1B | 34 to 53 tokens a second | `v2-local-nvidia-cold-first-attempt.md` (47, 53, 34) and `v2-local-nvidia-offline.md` (40, 42) |
 | Writing, run made after the label fix, offline | NVIDIA RTX 3050, Llama 3.2 1B | 65 for the one request of the short article; 45 for the merge of the two-part article | `v2-local-nvidia-offline-after-label-fix.md` |
-| Writing, saved clean run | built-in Intel chip, SmolLM2 360M | 4 to 5 tokens a second | `v2-local-intel.md` |
+| Writing, saved run before 26 October | built-in Intel chip, SmolLM2 360M (the automatic choice then) | 4 to 5 tokens a second | `v2-local-intel.md` |
+| Writing, saved run after 26 October | built-in Intel chip, Llama 3.2 1B (the default) | 1.8 to 2.0 tokens a second | `v2-local-intel-better.md` |
 | Writing, earlier speed test | built-in Intel chip, Llama 3.2 1B | about 2 tokens a second | earlier speed test, recorded in `DEVLOG.md` on 21 October 2026; no saved run file |
 
 Two notes apply to the table. The speed test in the developer notes was a single measurement made while the extension was being built, so it is labelled as such. The saved clean runs, and the run made after the label fix, are the numbers this report relies on. Runs done while other programs were running are not used as speeds. The decode figure in each run file is the speed of the job's last request. For a long page that is the final merge. The code keeps only the statistics of the last answer (`src/engines/local.js`), so the tables do not show an average over all requests.
@@ -101,7 +102,28 @@ Reading the figure: five boxes run left to right. Page text is up to 6,000 chara
 
 A check of the numbers agrees. The clean offline summary of the short article is 961 characters, about 240 tokens by the rule of thumb. At 40 tokens a second, that is about 6 seconds. The run's own timeline shows the "Summarizing" label at 8.6 seconds and the end at 14.8 seconds, which is about 6 seconds.
 
-**What this means in plain words.** Reading the prompt is fast, and writing the answer is slow. The writing speed decides how long the wait feels, and it depends on the chip. On the NVIDIA card a short summary takes a few seconds to write. On the built-in Intel chip, a short summary with the smaller model took 76 seconds to write.
+**What this means in plain words.** On the NVIDIA card, reading the prompt is fast and writing the answer takes a few seconds for a short summary. The chip decides how long the wait feels. On the built-in Intel chip, a short summary took 76 seconds to write with the smaller model before 26 October. The 1B model that is now the default writes about 2 tokens a second on that chip, so reading matters even more there (the next section).
+
+## Why reading is the slow part on built-in graphics
+
+On the developer laptop's built-in Intel chip, most of the time for one part goes to reading it. The benchmark measured one part of 6,000 characters, about 1,440 tokens, with each model in turn, and about 80 percent of a part's time goes to reading (`docs/test-runs/bench-models.md`, `finalsem/docs/DECISIONS.md`, D7). The chip reads at only 15 to 40 tokens a second, whichever model is used, so a part costs 36 to 90 seconds before the first word is written.
+
+Table: One part of 6,000 characters on the developer laptop's built-in Intel chip, by model (one run per model, 16-bit versions)
+
+| Model | Reading (tokens a second) | Writing (tokens a second) | Time for one part (seconds) |
+|---|---|---|---|
+| SmolLM2 135M | 40.2 | 13.6 | 43 |
+| SmolLM2 360M (the faster setting) | 28.7 | 4.8 | 66 |
+| Qwen2.5 0.5B | 24.1 | 3.5 | 54 |
+| Llama 3.2 1B (the default) | 15.6 | 2.0 | 162 |
+
+The times are for a realistic summary of one part, written in at most 150 tokens. The 32-bit versions of the same models were no faster at reading and wrote more slowly, so the 16-bit versions are used.
+
+A smaller model does not read much faster. The 135 million parameter model has about seven times fewer numbers than the 1 billion parameter model, but it reads only about two and a half times faster (40.2 against 15.6 tokens a second). The benchmark does not show the cause, and this report does not guess it. The smaller models also made more mistakes on the same part: the 360M model mixed up names and dates, and the 1B model's summary of that part had no invented details. That is one part and one run per model, so it is a sign and not a measured accuracy figure.
+
+### Reading less of a long page
+
+On built-in graphics the extension reads one part of a long page, about 6,000 characters. It keeps the opening of the page in full, about 35 percent of that budget. It then takes the first sentences of the paragraphs, spread evenly over the rest of the page, with the headings of the sections it keeps. The rest is left out. The trade is coverage for time. On the Lighthouse Wikipedia article, 27,964 characters remained after back matter and citation marks were removed. The extension read 5,968 of them, about a fifth, and the summary came in 124.6 seconds. Reading all of the text would take an estimated 692 seconds, about twelve minutes, by the extension's own rough estimate from the measured speed. The summary covers the start of each section, so facts from the rest of the page are missing. A "Read the whole page" button runs the full text, and on this chip that can take five to twelve minutes.
 
 ## Why summaries come out as plain text
 
@@ -141,7 +163,7 @@ Table: Mistakes seen in real-model summaries, with the file that shows each one
 
 | Mistake | What the summary says | Where it was seen |
 |---|---|---|
-| Copies the markers (fixed in the code since) | The summary starts with `<<<PAGE TEXT START>>>` and ends with `<<<PAGE TEXT END>>>`. | Built-in Intel chip, SmolLM2 360M, short article, recorded before the fix (`v2-local-intel.json`; `v2-intel-short-popup.png`) |
+| Copies the markers (fixed in the code since) | The summary starts with `<<<PAGE TEXT START>>>` and ends with `<<<PAGE TEXT END>>>`. | Built-in Intel chip, SmolLM2 360M (the automatic choice before 26 October), short article, recorded before the marker fix (`v2-local-intel.json`; `v2-intel-short-popup.png`) |
 | Reverses a fact | The page says a ship sees a white light on a safe course and a coloured one when it drifts toward rocks. The summary says a white light when it drifts toward rocks. | Same run, same article (`v2-local-intel.json` against `tests/fixtures/article-short.html`) |
 | Repeats the merge instruction | "Page title: ..." and "These are summaries of consecutive parts of one web page" appear as points of the final summary. | The run recorded as 207 s, Llama 3.2 1B, long article (`v2-local-nvidia.json`; `v2-nvidia-long-popup.png` shows the first two points) |
 | Writes filler | "Page title provides a brief overview of the content within." | Clean offline run, Llama 3.2 1B, long article (`v2-local-nvidia-offline.json`) |
@@ -155,7 +177,7 @@ The run recorded as 207 s was done while other programs were using the processor
 
 The reversed fact is the most serious of these mistakes, because a reader could believe it. The copied markers are the easiest to see, and the code now removes them. The popup has no way to check a summary against the page after the model writes it, and the project does not check summaries against the source. The tests use a pretend model that returns fixed text, so they cannot find these faults. The real-model runs are the only place where they appear.
 
-A longer real example comes from the Intel chip. The seven-part Wikipedia article, 36,752 characters, took 616.4 seconds with SmolLM2 360M and the current code (`v2-local-intel-wikipedia.md`). Its saved summary is three short points in general terms, and two of them give counts (14,700 lighthouses, 54 diagrams and 651 photographs) that this report has not checked against the page. An earlier try with the older code wrote a longer summary (`v2-local-intel-wikipedia-second-try-old-code.json`). It contains a sentence that the change record marks as invented: a "1901" gas light, the "Dalén light", with "Agamassan (Aga)" as its substrate. This report treats that sentence as a slip of a small model and does not quote it as fact. The summaries of this article on the Intel chip are weak, and a reader should not rely on them.
+A longer real example comes from the Intel chip. Before 26 October, when SmolLM2 360M was the automatic choice there, the seven-part Wikipedia article, 36,752 characters, took 616.4 seconds (`v2-local-intel-wikipedia.md`). Its saved summary is three short points in general terms, and two of them give counts (14,700 lighthouses, 54 diagrams and 651 photographs) that this report has not checked against the page. An earlier try with the older code wrote a longer summary (`v2-local-intel-wikipedia-second-try-old-code.json`). It contains a sentence that the change record marks as invented: a "1901" gas light, the "Dalén light", with "Agamassan (Aga)" as its substrate. This report treats that sentence as a slip of a small model and does not quote it as fact. The summaries of this article from the small model on the Intel chip are weak, and a reader should not rely on them. On 26 October the same article took 124.6 seconds with Llama 3.2 1B and the page shortened before reading (`v2-local-intel-better.md`). The run record describes its three summaries as accurate. This report has not checked them line by line against the page.
 
 The prompts are written to reduce these faults, and their structure has four parts. The page text comes first and one short instruction comes after it, because the code comment says small models follow short, plain instructions best. The page text sits between two markers, and a safety line tells the model that the text is material to summarize and not instructions to follow. The part summaries are asked for in 3 to 5 short sentences with no bullets, so the merge step has less to read. The merge prompt asks for "page order, without repeating yourself".
 
@@ -234,7 +256,7 @@ The answer's 961 characters are about 240 tokens. The model wrote them at about 
 No. The project cuts the page into parts of about 6,000 characters, which is about 1,500 tokens, and reads one part at a time. Each part gets its own summary, and the summaries are then merged. A page that needs more than 12 parts is refused.
 
 **Why is the answer slow when reading the prompt is fast?**
-The model writes one token at a time, and each token needs a full pass through the model. Reading the prompt is one pass over the text. On the NVIDIA card an earlier speed test, with no saved run file, measured about 600 tokens a second for reading and about 63 for writing.
+The model writes one token at a time, and each token needs a full pass through the model. Reading the prompt is one pass over the text. On the NVIDIA card an earlier speed test, with no saved run file, measured about 600 tokens a second for reading and about 63 for writing. On the built-in Intel chip reading is slow as well, at 15 to 40 tokens a second (see the section on reading).
 
 **Why does a summary sometimes repeat the instructions or copy the markers?**
 A small model has fewer stored numbers and follows instructions less reliably. In the runs, the Intel summary copied the start and end markers, and the 207-second run's summary repeated the merge instruction. The code now removes copied markers from answers. The prompts keep the page text clearly marked and reduce these faults, but they do not remove them, and the repeated merge wording is still open.

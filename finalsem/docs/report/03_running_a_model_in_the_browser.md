@@ -29,7 +29,7 @@ export const MODELS = Object.freeze({
 });
 ```
 
-The primary model is used unless one of three things happens. The first is that Chrome reports less than 8 GB of memory. Chrome caps its report at 8, so the developer laptop, with 15.7 GB, is not switched by this rule, and the rule has not been seen on real low-memory hardware. The second is that the graphics chip is the one built into the processor. The extension recognises Intel only by name, so a built-in AMD or Apple chip would count as a full card. The third is that the primary model fails to start. The engine then retries once with the smaller model and saves that choice. The extension never clears the saved choice, so later summaries stay on the smaller model until the stored settings are cleared.
+The primary model is used on every chip. The smaller model is used in three cases. The first is that the reader chooses "Quality: Fast" under Settings, which is marked as `quality-fast` in the stats. The second is that the primary model fails to start with a memory or load error. The engine then retries once with the smaller model and saves that choice. The extension never clears the saved choice itself, so later summaries stay on the smaller model until the stored settings are cleared. The third is that Chrome reports less than 8 GB of memory. Chrome caps its report at 8, so the developer laptop, with 15.7 GB, is not switched by this rule, and the rule has not been seen on real low-memory hardware. Built-in graphics no longer changes the model. The extension still recognises Intel by name to show the graphics note, and only Intel, so a built-in AMD or Apple chip would get no note.
 
 When the smaller model wrote a summary after the main model failed, the popup shows a notice in the result block.
 
@@ -37,13 +37,13 @@ When the smaller model wrote a summary after the main model failed, the popup sh
 
 Reading the screenshot: this is a pretend-model capture, so the three points are fixed test text. The notice reads "The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed." The model line reads "Model: SmolLM2 360M. Downloaded, runs on this computer." Chapter 7 gives the full rules and chapter 12 the failures.
 
-**What this means in plain words.** The extension picks the smaller model when the laptop reports little memory, when only the built-in chip is there, or when the bigger model will not start. It tells the reader when the smaller model wrote a summary. The saved choice stays until the stored settings are cleared.
+**What this means in plain words.** The 1B model is the default on every chip. The smaller model is a choice for speed, a fallback after a failure, or the choice for a computer that reports little memory. The popup says when the smaller model wrote a summary, and the saved fallback stays until the stored settings are cleared.
 
 ## The graphics card, WebGPU and shader-f16
 
 Each step of the model is many multiplications of long lists of numbers. A graphics card has many small calculating units that work on parts of one job together, so it runs the model far faster than a processor. The extension has no path that runs the model on the processor.
 
-WebGPU is the browser's way for a web page to ask the card to do calculations. The project requires Chrome 116 or newer (`README.md`). A shader is a small program that runs on the card. The shader-f16 feature lets those programs use 16-bit floating-point numbers, and the configuration comment says both models need it (`src/core/config.js`). The card must also hold the model: 879 MB of graphics memory for the 1B model and 376 MB for SmolLM2. The developer laptop's NVIDIA RTX 3050 has 6 GB of its own memory (`finalsem/docs/DECISIONS.md`, D1).
+WebGPU is the browser's way for a web page to ask the card to do calculations. The project requires Chrome 116 or newer (`README.md`). A shader is a small program that runs on the card. The shader-f16 feature lets those programs use 16-bit floating-point numbers, and the configuration comment says both models need it (`src/core/config.js`). The card must also hold the model: 879 MB of graphics memory for the 1B model and 376 MB for SmolLM2. The developer laptop's NVIDIA RTX 3050 has 6 GB of its own memory (`finalsem/docs/DECISIONS.md`, D1). On the client's laptop the Iris Xe chip shares the 16 GB of main memory (`finalsem/docs/CLIENT_LAPTOP.md`).
 
 If WebGPU or shader-f16 is missing, the popup shows a plain message and disables the button. Scenarios V07 and V08 check both cases with the pretend model. Chapter 7 covers the check.
 
@@ -88,19 +88,19 @@ A wording fault appeared in the timelines of the clean offline run, recorded bef
 
 ## The first use and the warm-up
 
-The first use is slow because the model is downloaded, copied into the card's memory, and the card prepares its programs before the first answer. Chapter 8 gives the stages. The table gives the stage times from the two clean first-use runs. Both started with no stored model.
+The first use is slow because the model is downloaded, copied into the card's memory, and the card prepares its programs before the first answer. Chapter 8 gives the stages. The table gives the stage times for the same model, Llama 3.2 1B, on each chip. Both runs started with no stored model.
 
-Table: The first use in the two clean runs, in seconds after the button was pressed
+Table: The first use with Llama 3.2 1B on each chip, in seconds after the button was pressed
 
-| Step | NVIDIA RTX 3050, Llama 3.2 1B (`v2-local-nvidia-cold-first-attempt.md`) | Built-in Intel chip, SmolLM2 360M (`v2-local-intel.md`) |
+| Step | NVIDIA RTX 3050 (`v2-local-nvidia-cold-first-attempt.md`) | Built-in Intel chip (`v2-local-intel-better.md`) |
 |---|---|---|
-| Download, 0% to 100% | 0.5 to 158 (about 695 MB) | 0.9 to 81.2 (about 204 MB) |
-| Load into the card | 158.8 to 162.2 (3.4) | 81.6 to 83.3 (1.7) |
-| Warm-up (one short answer) | 162.6 to 193.1 (30.5) | 83.7 to 123.1 (39.4) |
-| Writing the summary | 193.1 to 196.8 (3.7) | 123.1 to 199.2 (76.1) |
-| Total | 196.8 | 199.2 |
+| Download, 0% to 100% | 0.5 to 158 (about 695 MB) | 0.5 to 118.0 (about 695 MB) |
+| Load into the card | 158.8 to 162.2 (3.4) | 118.8 to 121.4 (2.6) |
+| Warm-up (one short answer) | 162.6 to 193.1 (30.5) | 121.8 to 149.5 (27.7) |
+| Writing the summary | 193.1 to 196.8 (3.7) | 149.5 to 200.6 (51.1) |
+| Total | 196.8 | 200.6 |
 
-The warm-up sends one answer of one token, to the question "Say ok." (`src/offscreen/offscreen.js`). Its purpose is to compile the card's programs, so the first real summary does not look frozen. The developer notes say the first answer takes about 30 seconds (`DEVLOG.md`). The clean NVIDIA run matches that figure. The run recorded as 207 seconds, done while other programs were running, took 56 seconds, and its timing is not used as a clean figure. Later offline warm-ups took 0.5 seconds in the clean run and 0.4 seconds after the label fix. The cause of the difference was not investigated.
+The warm-up sends one answer of one token, to the question "Say ok." (`src/offscreen/offscreen.js`). Its purpose is to compile the card's programs, so the first real summary does not look frozen. The developer notes say the first answer takes about 30 seconds (`DEVLOG.md`). The clean NVIDIA run (30.5 seconds) and the Intel run (27.7 seconds) both match that figure. Since 26 October the popup also starts loading a stored model as soon as it opens, so the warm-up is often over before the first press. The run recorded as 207 seconds, done while other programs were running, took 56 seconds, and its timing is not used as a clean figure. Later offline warm-ups took 0.5 seconds in the clean run and 0.4 seconds after the label fix. The cause of the difference was not investigated.
 
 ![Pretend model: the popup during the warm-up](../screenshots/ui-04-warming.png)
 
@@ -108,7 +108,7 @@ Reading the screenshot: a pretend-model capture. The progress line reads "Warmin
 
 Two limits apply to this step. Closing the tab during a download does not stop the download, because the preparation step ignores the abort signal. The model line is not refreshed while a download or warm-up is running (chapter 11).
 
-**What this means in plain words.** The first use waits for the download, the copy into the card and a warm-up of about half a minute on the NVIDIA card or about forty seconds on the Intel chip. Later uses skip the download.
+**What this means in plain words.** The first use waits for the download, the copy into the card and a warm-up of about half a minute, on either chip. Later uses skip the download.
 
 ## The second use, with no internet
 
@@ -130,27 +130,21 @@ These tests ran on one computer, with two pages, in a hidden browser. They did n
 
 **What this means in plain words.** After the first download, the summary runs from the stored model on the laptop. The internet is not needed for later summaries, which was shown on the developer laptop with outside websites blocked.
 
-## Laptops with two graphics chips
+## One chip on the client's laptop, two on the developer laptop
 
-The developer laptop has two graphics chips. The Intel chip is built into the processor, and the NVIDIA RTX 3050 is a separate card (`DECISIONS.md`, D1). Chrome decides which chip a page uses. The page's request for the high-performance card is only a hint. On this laptop Chrome used the built-in Intel chip by default. Starting Chrome with the test flag `--force_high_performance_gpu` made it use the NVIDIA card. A speed test recorded in the developer notes gave about 2 tokens a second on the Intel chip and about 63 on the NVIDIA card with the 1B model. That test was not saved as a run file.
+The client's laptop has one graphics chip, the Intel Iris Xe built into its processor, and no separate card (`finalsem/docs/CLIENT_LAPTOP.md`). The built-in path is therefore the path the client will use. The setup switch `setup.bat --gpu` has nothing to change there.
 
-The saved runs use different models on each chip, so they are not a like-for-like comparison. On the built-in chip the extension picks SmolLM2 360M, and the clean run wrote at 4 to 5 tokens a second (`v2-local-intel.md`). On the NVIDIA card the clean runs wrote at 34 to 53 tokens a second with Llama 3.2 1B. Chapter 7 sets out the comparison.
+The developer laptop has two chips. Chrome decides which one a page uses, and the page's request for the high-performance card is only a hint. Chrome used the built-in Intel chip by default. The test flag `--force_high_performance_gpu` made it use the NVIDIA RTX 3050, but that flag belongs to the project's test script, not to a user. The optional setup switch, by hand or with `setup.bat --gpu`, exists only for that laptop (`DECISIONS.md`, D4). Its undo command is `powershell -File scripts\set-chrome-gpu.ps1 -Remove`. The switch has been tested only against a test registry key.
 
-The seven-part Wikipedia article shows the difference in time. With the current code the built-in chip took 616.4 seconds, a little over ten minutes, with SmolLM2 writing at 4.1 tokens a second (`v2-local-intel-wikipedia.md`). An earlier try with the older code took 704.5 seconds, so the same chip varies from one try to the next. The NVIDIA card took 74.1 seconds for the same article in a clean run, with the model already downloaded (`v2-local-nvidia-cold-first-attempt.md`). A single run on the Intel chip is therefore not a fixed figure, and its summary of this article is weak (chapter 2).
+On the built-in Intel chip the 1B model is the default. The run record of 26 October gives the figures (`v2-local-intel-better.md`). A short article took 200.6 seconds on first use, including the download. The Wikipedia article on lighthouses took 124.6 seconds, because the extension read 5,968 of its 27,964 characters, about a fifth. The long fixture article took 103.8 seconds, with about half of its text read. The model wrote at 1.8 to 2.0 tokens a second. The record describes the three summaries as accurate. This report has not checked them line by line.
 
-The extension detects the built-in chip by vendor and architecture. The Intel chip here reports the architecture `gen-12lp`, and the rule matches the "gen" part (`src/offscreen/offscreen.js`). The popup then shows a note that answers can be slow.
+The faster setting, Quality: Fast, uses SmolLM2 360M (`v2-local-intel-fast.md`). It took 39.5 seconds for the short article with the model already stored, and 64.7 seconds for the Lighthouse article, writing at about 4 tokens a second. The Lighthouse answer in that run failed: it repeated the prompt's safety sentence and an empty "Summary:" label. The run was made before the fix that reports such an answer as an error, so Fast is an optional choice and not the default.
 
-![Pretend model: the popup with the note for built-in graphics](../screenshots/ui-09-intel-note.png)
+Runs made before 26 October used SmolLM2 as the automatic choice on the Intel chip, and they are labelled that way. The whole Lighthouse article took 616.4 seconds in one run and 704.5 seconds in a second try with the older code (`v2-local-intel-wikipedia.md`). The short article took 199.2 seconds on first use (`v2-local-intel.md`). On the NVIDIA card, with Llama 3.2 1B and the model already downloaded, the same Lighthouse article took 74.1 seconds in a clean run (`v2-local-nvidia-cold-first-attempt.md`). That is a different chip and setup, so it is not a fair test of the client's laptop.
 
-Reading the screenshot: a pretend-model capture. The note reads "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The model line shows "about 300 MB", which is the pretend model's fixed number. The real SmolLM2 download was about 204 MB.
+The extension recognises the built-in chip by its vendor and architecture, and shows the note that answers can be slow (`src/offscreen/offscreen.js`). It no longer changes the model.
 
-A user can move Chrome to the separate card in two ways. By hand, in Windows Settings under System, Display and Graphics, Chrome is set to High performance (`README.md`). Or with the optional `setup.bat --gpu`, which writes one per-user value, `GpuPreference=2`, for Chrome (`scripts/set-chrome-gpu.ps1`). The switch is never run by default. If the script fails, setup says the graphics setting was not changed and carries on. The undo command is `powershell -File scripts\set-chrome-gpu.ps1 -Remove`, which needs no Chrome path. The switch was tested only against a test registry key, not yet against a real Chrome on the client's laptop (`DECISIONS.md`, D4).
-
-![A laptop with two graphics chips: Chrome's default built-in chip, and the NVIDIA card reached by the Windows setting or setup.bat --gpu](../figures/V17_two_graphics_chips.png)
-
-Reading the figure: from Chrome, the default path leads to the Intel built-in graphics, marked as measured at 4 to 5 tokens a second with SmolLM2 360M and 199.2 seconds for the short article on first use. The dashed path, through the Windows setting or `setup.bat --gpu`, leads to the NVIDIA RTX 3050, marked at 34 to 53 tokens a second with Llama 3.2 1B and 15.3 seconds for the stored short article offline. The box below lists the two ways. Its undo line still shows the older `-ChromePath` argument, which the script no longer needs. The footer says the flag `--force_high_performance_gpu` is used only by the test script.
-
-**What this means in plain words.** The built-in chip is far slower at writing, so the extension uses the smaller model there and says so. On the developer laptop the separate card ran the larger model much faster once Chrome was set to use it. The setting can be made by hand or by the opt-in switch.
+**What this means in plain words.** The client's laptop has one chip, so the built-in path matters most. The extension uses the 1B model there by default, and the reader can pick the faster, less accurate SmolLM2 model in Settings. The SmolLM2 numbers from before 26 October are a record of the old automatic choice.
 
 ### Questions this chapter answers
 
@@ -158,13 +152,13 @@ Reading the figure: from Chrome, the default path leads to the Intel built-in gr
 On the graphics card, through WebGPU. The extension has no path that runs the model on the processor. A computer without a usable card, or without shader-f16, is refused with a plain message.
 
 **Why does the first summary take minutes, and the later ones seconds?**
-The first summary must download the model, copy it into the card's memory and warm up the card. On the NVIDIA card the download, the load and the warm-up took about 190 seconds in the clean run. Once the model is stored, later summaries load it from the browser's storage, and the warm-up took half a second or less in the offline runs.
+The first summary must download the model, copy it into the card's memory and warm up the card. On the NVIDIA card the download, the load and the warm-up took about 190 seconds in the clean run. Once the model is stored, later summaries load it from the browser's storage, and the warm-up took half a second or less in the offline runs. On the built-in Intel chip the first use with the 1B model took 200.6 seconds, including the 695 MB download.
 
 **Where is the model kept, and can it be deleted?**
 The model files are kept in IndexedDB, in the browser's storage for the extension. The loaded copy lives in the card's memory and is freed when the offscreen page closes after five idle minutes. Removing the extension's data removes the stored files.
 
-**Why does Chrome sometimes use the weak chip?**
-Chrome decides which chip a page uses. On the developer laptop it chose the built-in Intel chip by default, although the code asked for the high-performance one. The reader can move Chrome to the separate card by hand or with the opt-in switch, which is never run by default. The extension also detects the built-in chip and uses the smaller model there.
+**Does the client's laptop need the separate-card setting?**
+No. It has one graphics chip, so there is no separate card to choose. On the developer laptop Chrome used the built-in chip by default, and the opt-in switch moved it to the NVIDIA card. The extension does not force either choice, and it keeps the 1B model on the built-in chip.
 
 **Does the extension work offline?**
 Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in the visible Chrome window.

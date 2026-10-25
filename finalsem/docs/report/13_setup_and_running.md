@@ -25,13 +25,25 @@ Table: The four steps and the file that handles each
 | 1. Setup | Client runs `setup.bat` once | Finds Chrome, checks its version and the project files, checks the computer, and writes a marker file that `run.bat` reads |
 | 2. Run | Client runs `run.bat` | Copies the folder path to the clipboard, opens Chrome's extensions page and a sample article, and prints four steps |
 | 3. Load | Client follows the four steps in Chrome | Turns on Developer mode, loads the folder and pins the extension. Chrome does this part, not a script |
-| 4. Summarize | Client presses the button in the popup | The first time, the model downloads and loads. After that the button says "Summarize this page" |
+| 4. Summarize | Client presses the button in the popup | The first time, the main model (about 695 MB) downloads and loads. After that the button says "Summarize this page" |
 
 Steps 1 and 2 are scripted. Step 3 is manual, for a reason explained in the `run.bat` section. Step 4 is the normal use of the product.
 
 ### What this means in plain words
 
 The client double-clicks two files and makes a few clicks in Chrome. The scripts check everything they can before the browser is opened.
+
+## The client's laptop
+
+The client's laptop was described from three photos of its screen, which are not stored in the repository. The facts are in `docs/CLIENT_LAPTOP.md`. It is an HP 15 laptop with a 13th Gen Intel Core i7-1355U processor, 16 GB of memory, and Intel Iris Xe graphics built into the processor. It has no separate graphics card. Windows reports 363 GB free on the system drive. Chrome is version 156, and `chrome://gpu` lists WebGPU as hardware accelerated.
+
+Three things follow for setup. The built-in graphics path is the main path for this client, not an edge case. On the facts in the photos, the setup checks would pass: Chrome is newer than 116, the memory and free disk space are far above what the checks ask for, and WebGPU is hardware accelerated. `setup.bat --gpu` has nothing to switch on, because there is only one graphics chip. The photos do not show whether the chip offers the 16-bit shader feature (`shader-f16`). The developer laptop's Intel chip of the same generation does, and chapter 16 lists this as open.
+
+The first use downloads the main model, about 695 MB, then loads and warms it up. On the developer laptop's Intel chip, the warm-up on the first answer took about 28 to 37 seconds. The extension has not been run on the client's laptop, or in a visible Chrome window, so these are expectations and not measurements (chapter 14).
+
+### What this means in plain words
+
+On this client's laptop the built-in chip is the only chip, so the first download and the first warm-up are the costs the client will meet first. The setup has room for both.
 
 ## The folder the client works in
 
@@ -71,7 +83,7 @@ Table: Options accepted by setup.bat
 |---|---|
 | none | Runs steps 1 to 4. Step 5, the developer tools, is skipped. |
 | `--dev` | Also installs the developer test tools. Needs Node.js 20 or newer. |
-| `--gpu` | After the computer check, asks Windows to run Chrome on the separate graphics card. Opt-in, see the graphics section. |
+| `--gpu` | After the computer check, asks Windows to run Chrome on the separate graphics card. Opt-in, see the graphics section. On the client's laptop, which has one graphics chip, it has nothing to switch on. |
 | `--reset` | Deletes `node_modules` and the marker file, then sets up again from the start. |
 
 The environment setting `SETUP_NOPAUSE=1` skips the final pause. The automated Windows checks use it.
@@ -160,7 +172,7 @@ No automated test covers this step on the client's Chrome. A test on Chromium do
 
 ## check-computer.ps1: what it reports and the 3 GB rule
 
-`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it warns that the small model is used and can be slow.
+`check-computer.ps1` prints the Windows edition and build, the processor, the memory, each graphics chip with the memory Windows reports for it, and the free space on the system drive. It then gives advice. With both a separate card and a built-in chip, it suggests `setup.bat --gpu`. With only the built-in chip, it prints a note that says Version 2 will use the small model and can be slow. That note is out of date. The main model is now the default on built-in graphics, and the small model is used only when the reader chooses Fast. The script still needs its wording changed.
 
 Only one rule can stop setup here: free disk space. The script exits with code 1 when the free space is below `MinFreeGB`, which defaults to 3.
 
@@ -188,7 +200,7 @@ The computer check reads Windows facts. It stops setup only when the disk is nea
 
 ## The graphics switch (setup.bat --gpu)
 
-Some laptops have two graphics chips, and Chrome may use the weaker, built-in one. On this laptop the built-in chip wrote about 2 tokens a second with the 1 billion parameter model in an earlier speed test (chapter 14), while the separate NVIDIA card wrote between 34 and 53 tokens a second in the clean saved runs. The client can change Chrome's choice in the Windows settings by hand, or the developer can run `setup.bat --gpu`.
+Some laptops have two graphics chips, and Chrome may use the weaker, built-in one. On this laptop the built-in chip wrote about 2 tokens a second with the 1 billion parameter model in an earlier speed test (chapter 14), while the separate NVIDIA card wrote between 34 and 53 tokens a second in the clean saved runs. The client can change Chrome's choice in the Windows settings by hand, or the developer can run `setup.bat --gpu`. The client's own laptop has one chip, so neither applies there (see the client's laptop section).
 
 `setup.bat --gpu` runs `scripts\set-chrome-gpu.ps1`, which writes one value for the current Windows user. The value sits under `HKCU\Software\Microsoft\DirectX\UserGpuPreferences`. Its name is the full path of `chrome.exe`, and its value is `GpuPreference=2;`, which is the Windows code for "high performance". It needs no administrator rights, and it changes nothing for other users.
 
@@ -217,7 +229,7 @@ The measured NVIDIA runs in chapter 14 did not use this registry value. They use
 
 ![Two graphics chips and the choice Chrome makes](../figures/V17_two_graphics_chips.png)
 
-Reading the figure: Chrome's default on this laptop is the Intel chip built into the processor, where the clean run measured 4 to 5 tokens a second with SmolLM2 and a short article took 199.2 s on first use. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the NVIDIA RTX 3050, where the clean runs measured 34 to 53 tokens a second with the 1 billion parameter model, and a stored short article took 15.3 s offline. The lower box gives the two ways, says that the `setup.bat --gpu` route was tested only against a test registry key, and gives the undo command with `-ChromePath` and `-Remove`. Either form works, because the script finds Chrome itself. A note at the bottom says that the `--force_high_performance_gpu` flag is used only by the test script to start its browser.
+Reading the figure: the drawing shows the Intel chip built into the processor as the default path, where the clean run measured 4 to 5 tokens a second with SmolLM2 and a short article took 199.2 s on first use. Those numbers are from runs before 26 October. Since then the main model, Llama 3.2 1B, is the default on this chip, so the drawing needs redrawing. The Windows Graphics setting, or `setup.bat --gpu`, points Chrome to the NVIDIA RTX 3050, where the clean runs measured 34 to 53 tokens a second with the 1 billion parameter model, and a stored short article took 15.3 s offline. The lower box gives the two ways, says that the `setup.bat --gpu` route was tested only against a test registry key, and gives the undo command as `-Remove`, which works because the script finds Chrome itself. A note at the bottom says that the `--force_high_performance_gpu` flag is used only by the test script to start its browser.
 
 ### What this means in plain words
 

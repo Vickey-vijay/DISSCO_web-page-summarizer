@@ -75,7 +75,7 @@ Date: [Insert]
 
 </div>
 
-Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Version 1 and replaces its cloud model with a small language model that runs inside the browser, on the computer's own graphics card. The reader presses one button on any web page. The extension reads the main text, cuts long text into parts of about 6,000 characters, asks the model for a summary of each part and merges the parts into one summary. No key or account is needed, and the page text does not leave the computer. The model, Llama 3.2 1B in a 4-bit form of about 695 MB, is downloaded once, stored in the browser's IndexedDB and used afterwards with no internet. A computer with a weak built-in graphics chip uses the smaller SmolLM2 360M model and shows a note. On an NVIDIA RTX 3050 a short article took 196.8 seconds on first use and 15.3 seconds with outside websites blocked. On the built-in Intel chip the smaller model took 199.2 seconds on first use. The report explains the model, the browser work, and the choices, faults and limits found on the way.
+Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Version 1 and replaces its cloud model with a small language model that runs inside the browser, on the computer's own graphics card. The reader presses one button on any web page. The extension reads the main text, cuts long text into parts of about 6,000 characters, and merges the part summaries into one summary. No key or account is needed, and the page text does not leave the computer. The model, Llama 3.2 1B in a 4-bit form of about 695 MB, is downloaded once, stored in the browser's IndexedDB and used afterwards with no internet. The client's laptop has only built-in graphics, so this is the path it will use. On the developer laptop's built-in Intel chip, a long article is shortened before it is read, and the Wikipedia article on lighthouses now takes about two minutes, against about ten before. On an NVIDIA RTX 3050 a short article took 196.8 seconds on first use and 15.3 seconds with outside websites blocked. The report explains the model, the browser work, and the choices, faults and limits found on the way.
 
 <div style="page-break-after: always"></div>
 
@@ -89,20 +89,21 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 **Local engine**
 
-- The summary is made by the Llama 3.2 1B model through the WebLLM library, in a hidden offscreen page and a web worker. The smaller SmolLM2 360M model is used on a weak built-in chip or on a computer with less memory (`finalsem/docs/DECISIONS.md`).
+- The summary is made by the Llama 3.2 1B model through the WebLLM library, in a hidden offscreen page and a web worker. The default is the same on every chip. The smaller SmolLM2 360M model is used only when the reader chooses Quality: Fast, after a memory or load failure, or on a computer that reports less than 8 GB of memory (`finalsem/docs/DECISIONS.md`, D7).
+- Speed work for built-in graphics (26 October): a benchmark of seven model versions on the Intel chip, removal of back matter and citation marks before reading, a shortened read of long pages, shorter answers on built-in graphics, and preloading of a stored model while the popup is open.
 - The model is downloaded once, with a progress bar, and stored in IndexedDB. Later summaries run with no internet.
 - The WebGPU and 16-bit math checks run at startup and show plain messages when a computer cannot run the model.
 
 **Testing**
 
-- Unit tests: 76 pass. Browser tests: 29 scenarios with a pretend model pass. Windows script checks: 15 (`finalsem/docs/test-runs/run-1.md`).
+- Unit tests: 93 pass. Browser tests: 31 scenarios with a pretend model pass. Windows script checks: 15 (`finalsem/docs/test-runs/run-1.md`).
 - Real-model runs on the NVIDIA card and on the built-in Intel chip are recorded in `finalsem/docs/test-runs/`. Two faults in the extension were found by the browser tests and fixed.
 - A code-reading review after the first real-model runs led to further fixes. Copied page markers are removed from answers, a stored model is no longer labelled as downloading, the offscreen page is not closed while a message is running, and a job counts as dead after five minutes without an update.
 
 **Remaining Tasks:**
 
-- The client's laptop has not been checked. Its operating system, memory and graphics card are still unknown.
-- The optional `setup.bat --gpu` switch has not been tried in a real Chrome installation.
+- The client's laptop details are known (`finalsem/docs/CLIENT_LAPTOP.md`: built-in Intel Iris Xe graphics, 16 GB, Chrome 156). The extension has not yet been run on that laptop, or in a visible Chrome window.
+- The optional `setup.bat --gpu` switch has not been tried in a real Chrome installation. It has no use on the client's laptop, which has one graphics chip.
 - A full manual check in the visible Chrome window is still to be done. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 - No side-by-side comparison of summary quality between Version 1 and Version 2 is recorded in the repository.
 

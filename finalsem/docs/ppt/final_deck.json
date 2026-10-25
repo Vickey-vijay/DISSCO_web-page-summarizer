@@ -53,7 +53,7 @@
         [
           "Model",
           "gemini-3.5-flash-lite, run by Google",
-          "Llama 3.2 1B on the graphics card (SmolLM2 360M on Intel)"
+          "Llama 3.2 1B on this laptop's graphics (SmolLM2 360M as a Fast choice)"
         ],
         [
           "API key",
@@ -78,7 +78,7 @@
         [
           "Speed",
           "Measured in the mid-semester deck",
-          "15.3 s to 17.7 s for a short article, model stored"
+          "A long page in about 2 minutes on built-in Intel graphics (124.6 s measured); a short page in 15 to 18 s on NVIDIA"
         ]
       ],
       "col_widths": [
@@ -87,7 +87,7 @@
         4.6
       ],
       "caption": "Summary quality was not measured in either version. Version 1 timings are in the mid-semester deck.",
-      "notes": "This table shows what changed between the two versions. Version 1 needed a Google key and sent each part of the page to Google. Version 2 downloads the model once, and then works without a key and without the internet. The speed row gives the measured times for this laptop, and I say which run each one comes from."
+      "notes": "This table sets Version 2 next to Version 1. The model now lives on the laptop, so there is no key and no cloud. The page text stays on the laptop, and the only internet use is the one-time download of about 695 megabytes. Speed depends on the graphics chip. The client's laptop has only built-in Intel graphics, so I measured that case: a long Wikipedia page takes about two minutes. I did not measure summary quality in either version with a score, so I only say what I saw in the saved summaries."
     },
     {
       "layout": "two_column",
@@ -360,8 +360,12 @@
           "Refuses before any job. A red line explains why, and the button is disabled."
         ],
         [
-          "Integrated (Intel) graphics",
-          "Picks SmolLM2 360M by itself and shows a note: answers can be slow."
+          "Built-in (Intel) graphics, like the client's",
+          "Keeps the main model, shows a note that answers can be slow, and reads at most 6,000 characters of a long page."
+        ],
+        [
+          "Settings, Quality: Fast",
+          "Uses SmolLM2 360M: about 2 times quicker, but summaries are often muddled or wrong."
         ],
         [
           "Under 8 GB of memory (rule)",
@@ -369,86 +373,74 @@
         ],
         [
           "Main model runs out of graphics memory",
-          "Tries SmolLM2 360M once. The summary carries a notice that it may be less detailed."
-        ],
-        [
-          "A fallback choice is made",
-          "It stays on SmolLM2 360M until the stored settings are cleared."
+          "Tries SmolLM2 360M once. The summary carries a notice that it may be less detailed, and the choice is kept."
         ]
       ],
       "col_widths": [
         4.8,
         7.0
       ],
-      "caption": "The extension makes these choices, not the reader. The main model is about 695 MB; SmolLM2 360M is about 204 MB.",
-      "notes": "The extension checks the computer before it starts. Without WebGPU or the 16-bit math feature, it refuses with a plain message instead of failing quietly. On an integrated chip it chooses the smaller model and shows a note. If the main model runs out of graphics memory, the small model tries the job, and the popup says so. That choice is saved, so it stays until the stored settings are cleared."
+      "caption": "The extension makes these choices, except Quality, which the reader sets. The main model is about 695 MB; SmolLM2 360M is about 204 MB.",
+      "notes": "The extension checks the graphics card before anything else. Without WebGPU or the 16-bit math feature it refuses and says why. On built-in graphics, like the client's laptop, it keeps the accurate main model and instead reads less of a long page. The reader can choose Fast in Settings, which uses the small model, but I measured that its summaries are often wrong. A memory failure also sends the extension to the small model, and that choice stays until the stored settings are cleared."
     },
     {
       "layout": "two_column",
-      "title": "Two graphics chips: the default is slow",
+      "title": "Built-in graphics: reading is the slow part",
       "left_title": "Intel built-in graphics",
       "left": [
-        "SmolLM2 360M: 4 to 5 tokens a second in a saved clean run.",
-        "The 1B model wrote about 2 tokens a second in a speed test.",
-        "Short article, first use: 199.2 s, including an 81 s download.",
-        "Chrome used this chip by default on this laptop."
+        "Llama 3.2 1B: reads 15.6 and writes 2 tokens a second.",
+        "SmolLM2 360M: reads 26 to 29 and writes 4.7.",
+        "Reading is about 80% of the time of one part.",
+        "The client's laptop has this kind of chip (Iris Xe)."
       ],
       "right_title": "NVIDIA RTX 3050, 6 GB",
       "right": [
-        "Llama 3.2 1B: 34 to 53 tokens a second in clean runs.",
-        "Short article, model stored: 15.3 s before the label fix, 17.7 s after it.",
-        "The Windows Graphics setting or setup.bat --gpu (opt-in) moves Chrome to it.",
-        "setup.bat --gpu was tested only against a throw-away registry key."
+        "Llama 3.2 1B: writes 34 to 53 tokens a second in clean runs.",
+        "Reads about 600 tokens a second (speed test, not a saved run).",
+        "Short article, model stored: 15.3 s before the label fix, 17.7 s after.",
+        "The developer laptop has both chips; the client's has only the Intel one."
       ],
-      "notes": "Many laptops have a weak graphics chip built into the processor and a stronger separate card. On this laptop Chrome used the Intel chip by default, so the extension chose the smaller model and showed a note. With the NVIDIA card, the 1B model wrote 34 to 53 tokens a second in the clean runs. The setting that moves Chrome to the card is opt-in, and it has been tested only against a throw-away registry key."
+      "notes": "I measured how fast each small model reads and writes on the built-in Intel chip. Reading is the slow part: the chip reads only 15 to 40 tokens a second, whatever the model size, and a normal part of 6,000 characters is about 1,440 tokens. That is why one part takes a minute or more, and why a smaller model does not help much. The separate NVIDIA card reads about 40 times faster. The developer laptop has both chips, but the client's laptop has only the Intel one, so the Intel numbers are the ones that matter for the client. All of these numbers are from a hidden test browser on the developer laptop, not from the client's laptop."
     },
     {
       "layout": "table",
-      "title": "Long pages are cut into parts",
+      "title": "Long pages: read less on slow chips",
       "header": [
-        "Popup line, Lighthouse article (clean run)",
-        "At (s)"
+        "Wikipedia Lighthouse page, built-in Intel graphics",
+        "Value"
       ],
       "rows": [
         [
-          "Summarizing part 1 of 7...",
-          "3.2"
+          "Text the extension reads from the page",
+          "36,752 characters"
         ],
         [
-          "Summarizing part 2 of 7...",
-          "7.8"
+          "After cutting Notes, Bibliography and [12] markers",
+          "27,964 characters (8,788 cut)"
         ],
         [
-          "Summarizing part 3 of 7...",
-          "17.0"
+          "Before: SmolLM2, whole page, 7 parts",
+          "616.4 s"
         ],
         [
-          "Summarizing part 4 of 7...",
-          "22.5"
+          "Now: Llama 3.2 1B, opening plus first sentences, 1 part",
+          "5,968 characters read (21%), 124.6 s"
         ],
         [
-          "Summarizing part 5 of 7...",
-          "30.1"
+          "Popup's guess for reading the whole page",
+          "about 12 minutes (692 s)"
         ],
         [
-          "Summarizing part 6 of 7...",
-          "38.1"
-        ],
-        [
-          "Summarizing part 7 of 7...",
-          "54.7"
-        ],
-        [
-          "Combining 7 summaries...",
-          "60.2"
+          "Same page on NVIDIA, whole page, 7 parts",
+          "74.1 s"
         ]
       ],
       "col_widths": [
-        9.6,
-        2.2
+        7.6,
+        4.2
       ],
-      "caption": "Finished at 74.1 s with the model stored. Parts up to 6,000 characters; a page over 12 parts is refused.",
-      "notes": "Long pages are cut into parts of at most 6,000 characters, which is about 1,500 tokens. Each part gets its own summary, and then one request merges the part summaries. This is the clean run of a Lighthouse article in seven parts. It finished at 74.1 seconds, with the model already stored and loaded."
+      "caption": "Built-in graphics read a part of 6,000 characters in about a minute, so the extension reads less. A button reads the whole page.",
+      "notes": "A long page costs time in proportion to the text the model must read. On the Wikipedia Lighthouse page, a quarter of the text is notes and bibliography, so that is cut first. On built-in graphics the extension then keeps the opening in full and the first sentences of the paragraphs, spread over the page, which is about 6,000 characters or one part. The popup says how much was read, and a button reads the whole page if the person wants it. This took the Lighthouse page from 616 seconds to 125 seconds, and the summary was accurate. The cost is coverage: the summary rests on about a fifth of the text."
     },
     {
       "layout": "pair",
@@ -553,7 +545,7 @@
         [
           "setup.bat --gpu",
           "Opt-in only. Writes one per-user Windows value so Chrome uses the separate card. Undo: set-chrome-gpu.ps1 -Remove.",
-          "Only on two-chip laptops, if asked"
+          "Only on two-chip laptops. Nothing to do on the client's laptop."
         ]
       ],
       "col_widths": [
@@ -562,18 +554,18 @@
         2.6
       ],
       "caption": "Chrome 137 and later cannot load an extension from a flag. The user clicks Load unpacked and selects the folder.",
-      "notes": "The client uses four scripts. setup.bat checks Chrome and the files, and it ends with SETUP COMPLETE or SETUP FAILED. run.bat opens the extensions page, and the client clicks Load unpacked by hand. check-computer.ps1 reports the laptop's memory, graphics chips and free space. The setup.bat --gpu option changes a Windows setting, so it runs only when the client asks for it."
+      "notes": "The client uses four scripts. setup.bat checks Chrome and the files, and it ends with SETUP COMPLETE or SETUP FAILED. run.bat opens the extensions page, and the client clicks Load unpacked by hand. check-computer.ps1 reports the laptop's memory, graphics chips and free space. The setup.bat --gpu option changes a Windows setting, so it runs only when the client asks for it. The client's laptop has one graphics chip, so the graphics switch is not needed there. The first use downloads about 695 megabytes."
     },
     {
       "layout": "stats",
       "title": "How it was tested",
       "stats": [
         {
-          "value": "76",
+          "value": "93",
           "label": "unit tests, with no browser and no network"
         },
         {
-          "value": "29",
+          "value": "31",
           "label": "browser scenarios, all passing"
         },
         {
@@ -586,7 +578,7 @@
         }
       ],
       "caption": "Most browser tests use a pretend model, so failures such as no WebGPU can be forced on purpose. The real model was run separately.",
-      "notes": "The tests run at three levels. There are 76 unit tests, which check the small rules without a browser or a network. There are 29 browser scenarios, which run in a hidden Chromium with a pretend model, and they all pass. The 15 Windows script checks test the batch files and the PowerShell scripts. The four clean real-model run files are the only numbers I quote for speed."
+      "notes": "The tests run at three levels. There are 93 unit tests, which check the small rules without a browser or a network. There are 31 browser scenarios, which run in a hidden Chromium with a pretend model, and they all pass. The 15 Windows script checks test the batch files and the PowerShell scripts. The four clean real-model run files are the only numbers I quote for speed."
     },
     {
       "layout": "table",
@@ -594,7 +586,7 @@
       "header": [
         "Case",
         "Total (s)",
-        "Tokens a second"
+        "Tokens a second (writing)"
       ],
       "rows": [
         [
@@ -603,53 +595,48 @@
           "47"
         ],
         [
-          "Two-part article, first use (NVIDIA)",
-          "15.9",
-          "53"
-        ],
-        [
-          "Seven-part Lighthouse article (NVIDIA)",
+          "Seven-part Lighthouse article, whole page (NVIDIA)",
           "74.1",
           "34"
         ],
         [
-          "Short article, offline, before label fix",
-          "15.3",
-          "40"
-        ],
-        [
-          "Two-part article, offline, before label fix",
-          "16.5",
-          "42"
-        ],
-        [
-          "Short article, offline, after label fix",
+          "Short article, offline, after label fix (NVIDIA)",
           "17.7",
           "65"
         ],
         [
-          "Two-part article, offline, after label fix",
-          "16.0",
-          "45"
-        ],
-        [
-          "Short article, Intel, SmolLM2 360M, first use",
-          "199.2",
+          "Lighthouse, whole page, SmolLM2 (Intel, before the speed work)",
+          "616.4",
           "4"
         ],
         [
-          "Two-part article, Intel, SmolLM2 360M",
-          "149.1",
-          "5"
+          "Short article, first use, Llama 3.2 1B (Intel, now)",
+          "200.6",
+          "2"
+        ],
+        [
+          "Lighthouse, shortened to 21%, Llama 3.2 1B (Intel, now)",
+          "124.6",
+          "1.8"
+        ],
+        [
+          "Long fixture article, shortened to 50% (Intel, now)",
+          "103.8",
+          "1.9"
+        ],
+        [
+          "Lighthouse, Fast quality, SmolLM2 (Intel; the summary failed)",
+          "64.7",
+          "4"
         ]
       ],
       "col_widths": [
-        7.0,
-        2.0,
+        7.2,
+        1.8,
         2.8
       ],
-      "caption": "Disturbed runs (other programs running) are excluded: first use 207 s, Lighthouse 101.6 s, short 13.4 s, two-part 32.2 s.",
-      "notes": "These are the clean runs only. Each run file says at the top whether other programs were running, and these runs have no such note. The after-label-fix runs show 65 and 45 tokens a second, which is above the 34 to 53 range of the earlier clean runs, so I show both. The Intel run file has no such note, so I treat it as clean. Runs made while other programs were running are left out, because they are slower for a reason that has nothing to do with the code."
+      "caption": "All from a hidden test browser on the developer laptop. Not yet measured on the client's laptop. Disturbed runs are left out.",
+      "notes": "These are the clean runs. The first three rows are the NVIDIA card. The fourth row is the old Intel result, before the speed work: ten minutes for the Lighthouse page. The next three rows are the Intel chip with the new defaults: the accurate main model, long pages shortened, and short answers. The Lighthouse page now takes about two minutes. The last row is the Fast setting. It is quicker, but its Lighthouse summary only repeated the prompt, which is why Fast is not the default. None of these numbers comes from the client's laptop. I expect about two minutes there, and I will measure it."
     },
     {
       "layout": "table",
@@ -661,7 +648,7 @@
       "rows": [
         [
           "Chrome used the weak Intel chip: about 2 tokens a second, a 36 s first answer",
-          "Forced the high-performance card in the test setup, added a warm-up step, and an automatic smaller model with a note on Intel."
+          "A warm-up step and an on-screen note on Intel. The speed work in the last row later replaced the automatic smaller model."
         ],
         [
           "WebLLM's model cache failed inside the offscreen page (CacheStorage error)",
@@ -678,38 +665,42 @@
         [
           "Real Chrome, long Wikipedia page, Intel chip: a vague error with no reason",
           "A part too long for the model is cut in half and retried. The answer limit is 10 minutes. The popup now shows a technical detail line."
+        ],
+        [
+          "Ten minutes for a long page on built-in graphics (the client's chip)",
+          "Measured: reading is the cost. Read less of a long page, keep the accurate model: 616 s down to 125 s."
         ]
       ],
       "col_widths": [
         5.0,
         6.8
       ],
-      "caption": "Found and fixed on 21 and 24 October 2026. Each one is written in the development log.",
-      "notes": "I met four real problems on 21 October, and each one is written in the development log. The first was the graphics chip: Chrome picked the weak Intel chip, so the first answers were very slow. The second was the model cache, which failed inside the hidden page until I switched the storage. The third was silent: the small model wrote summaries with no sign on screen. The fourth was a wrong Downloading line on a model that was already stored. The fifth problem came from the real Chrome on 24 October. On the long Wikipedia page the popup only said that something went wrong inside the extension. I repeated it in a hidden browser and found two weak spots: one answer on the Intel chip took longer than the three-minute limit, and a part that did not fit the model's window was reported as a vague error. Now such a part is cut in half and tried again, the answer limit is ten minutes, and the popup shows a technical detail line."
+      "caption": "Found and fixed on 21, 24 and 26 October 2026. Each one is written in the development log.",
+      "notes": "I met four real problems on 21 October, and each one is written in the development log. The first was the graphics chip: Chrome picked the weak Intel chip, so the first answers were very slow. The second was the model cache, which failed inside the hidden page until I switched the storage. The third was silent: the small model wrote summaries with no sign on screen. The fourth was a wrong Downloading line on a model that was already stored. The fifth problem came from the real Chrome on 24 October. On the long Wikipedia page the popup only said that something went wrong inside the extension. I repeated it in a hidden browser and found two weak spots: one answer on the Intel chip took longer than the three-minute limit, and a part that did not fit the model's window was reported as a vague error. Now such a part is cut in half and tried again, the answer limit is ten minutes, and the popup shows a technical detail line. The sixth problem came from the client's laptop details. It has only built-in graphics, and a long page took about ten minutes there. I measured where the time went and found it was reading, not writing. I asked a stronger model for advice, and then built the shorter reading. The Lighthouse page went from 616 seconds to 125 seconds."
     },
     {
       "layout": "bullets",
       "title": "What is not done or not verified",
       "bullets": [
-        "Client's laptop: not tested yet. Chip, memory and free disk are unknown.",
-        "setup.bat --gpu: tested only on a test registry key, not on real Chrome.",
-        "Visible Chrome: one real page on 24 October, no full click-through yet.",
-        "English only. Other languages were not tried.",
-        "Small-model slips. A 7-part page takes about 10 minutes on the Intel chip.",
+        "Client's laptop: details known (Iris Xe, 16 GB, Chrome 156), but never run there.",
+        "Speed numbers are from a hidden browser on the developer laptop; a visible window may differ.",
+        "setup.bat --gpu: tested only on a test registry key; not needed on the client's laptop.",
+        "A shortened summary covers about a fifth of a long page; the whole page takes 5 to 12 minutes.",
+        "English only. Small-model slips. Another engine (Transformers.js) was not tried.",
         "Cutting a long part in half is tested with the pretend model only."
       ],
-      "notes": "Some things are not finished, and I want to be exact about them. The client's laptop has not been tested, so its numbers are not known yet. The setting that moves Chrome to the card was tested only against a throw-away registry key. Every browser test and real run used a hidden Chromium, so I have not clicked through the daily Chrome window. The model is meant for English text, and it makes small slips. Two more limits. On the Intel chip the seven-part Lighthouse article took 616 seconds, about ten minutes, and the summary was poor. The step that cuts a too-long part in half is covered by unit tests and the pretend model, because no real part overflowed the window on that day."
+      "notes": "Some things are not finished, and I want to be exact about them. The client's laptop details are known, but I have not run the extension on it, so its real speed is not measured. All my speed numbers come from a hidden test browser on the developer laptop, and a visible window might be faster or slower. A shortened summary rests on about a fifth of a long page, and reading the whole page takes five to twelve minutes on this kind of chip. The model is small and made for English. I did not try a different engine, because a stronger model advised me to measure in a visible window first. Cutting a too-long part in half is covered by unit tests and the pretend model, because no real part overflowed the window."
     },
     {
       "layout": "bullets",
       "title": "Demo plan: what I will show, in order",
       "bullets": [
         "Show the card loaded from chrome://extensions. There is no key and no cloud box.",
-        "Summarize the Lighthouse article with the model stored: 74.1 s in seven parts (clean run).",
+        "Open the Lighthouse article, summarize: about 2 minutes on built-in graphics (124.6 s measured), with the shortened-page notice.",
         "Close the popup, wait five seconds, and reopen it. The job is still there.",
-        "Turn off Wi-Fi and summarize a short article. Say which run: 17.7 s after the label fix, or 15.3 s before it.",
+        "Turn off Wi-Fi and summarize a short article. Say which run: 17.7 s after the label fix, 15.3 s before it.",
         "Open chrome://version and a near-empty page to show the two refusals.",
-        "Do not show the first download live: it took 158.3 s. Label any screenshot from a disturbed run."
+        "Do not show the first download live: it takes minutes. Do not press Read the whole page in front of an audience."
       ],
       "notes": "The demo follows the steps in the knowledge-transfer document. I start from the extensions page, so the audience sees that no key is needed. Then I summarize the Lighthouse article, and after that I turn off the network for a short article. I also show two refusals, so the audience sees that the code stops early."
     },

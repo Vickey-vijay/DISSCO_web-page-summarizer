@@ -2,7 +2,7 @@
 
 The popup is the only screen the reader sees. It opens from the toolbar, is 380 pixels wide, and holds one button, a line about the model, and the result. It contains no logic for summarizing. It asks the service worker to start a job, reads the job record from Chrome's session storage, and draws what it finds (`src/ui/popup.js`). This chapter lists what the popup shows in each state, explains why nothing opens in a new tab, and describes the look that `src/ui/ui.css` gives it. Where the code changed after a review, the chapter describes the code as it is now. The earlier behaviour is kept only as "what was seen before the fix".
 
-The popup holds eight parts, in this order from top to bottom (`src/ui/popup.html`). Each one is shown or hidden with its `hidden` attribute.
+The popup holds nine parts, in this order from top to bottom (`src/ui/popup.html`). Each one is shown or hidden with its `hidden` attribute.
 
 Table: The parts of the popup
 
@@ -15,7 +15,8 @@ Table: The parts of the popup
 | Graphics note | Only on integrated graphics | The note about the built-in Intel chip |
 | Progress block | While a job runs | A label and a thin bar |
 | Error block | After a failure, or for an interrupted job | The plain message for the error code, and for two vague codes a technical detail line |
-| Result block | After a finished job | A notice when the small model wrote the summary, then the summary and a stats line |
+| Settings | Always, closed until opened | The Quality choice: Better or Fast |
+| Result block | After a finished job | A notice when the small model wrote the summary, a notice and a button when the page was shortened, then the summary and a stats line |
 
 **What this means in plain words.** The reader sees one button and one line about the model. Below them appears whichever of progress, error or result applies now.
 
@@ -72,9 +73,11 @@ The warm-up follows. The hidden page sends one short request, so that the graphi
 
 ![Real model: the warm-up on the NVIDIA card, from the run recorded as v2-local-nvidia (done while other programs were running)](../screenshots/v2-nvidia-short-warming.png)
 
-![Real model: the warm-up on the Intel chip with the small model, clean Intel run. The warm-up takes about 40 seconds there.](../screenshots/v2-intel-short-warming.png)
+![Real model, recorded before 26 October with SmolLM2 chosen by itself: the warm-up on the Intel chip, clean Intel run. The warm-up takes about 40 seconds there.](../screenshots/v2-intel-short-warming.png)
 
 The warm-up in the clean offline run lasted about half a second, against about 30 seconds in the clean first attempt on the same card. The repeat after the label fix lasted about 0.4 seconds, and the repository does not explain the difference. The warm-up runs each time the model is loaded into a new hidden page, which happens after the five-minute idle close. The warm-up after an idle close has not been measured: [to be measured].
+
+When the popup opens on an ordinary page and the chosen model is already stored, it asks the service worker to load and warm the model in the background (`PRELOAD_MODEL`). This never downloads anything, and it is skipped while a job is running, so the first answer does not wait for the load.
 
 A stored model still goes through loading, and the popup now says so. Before the fix, the clean offline run showed "Downloading the model (first time only): 0%" for about 0.8 seconds during the load of a model that was already stored (DEVLOG, 21 October, "V2 popup wording"). The cause was `mapInitProgress`, which treated any progress text containing "fetch" as a download. WebLLM also says "Start to fetch params" when it loads from the browser's own storage. The code now checks `hasModelInCache` before loading and passes the result to `mapInitProgress`. A stored model is always "loading". The repeat of the offline run after the fix shows no such line.
 
@@ -92,7 +95,7 @@ The merge follows, with the label "Combining N summaries..." and an indeterminat
 
 ### The result
 
-The result block holds the summary and a stats line, for example "1 part · 1 request · 17.5 s · Llama 3.2 1B". The stats count requests, which are the part answers plus any merge. The field behind the number is still named `apiCalls`, a name kept from Version 1.
+The result block holds the summary and a stats line, for example "1 part · 1 request · 17.5 s · Llama 3.2 1B". The stats count requests, which are the part answers plus any merge. On a shortened page the stats line also says "read N% of the text", for example "read 21% of the text". The field behind the number is still named `apiCalls`, a name kept from Version 1.
 
 The summary sits in a box 360 pixels high that scrolls, so a long list needs scrolling to reach its last points. The pretend result shows the numbered points and the stats line.
 
@@ -112,15 +115,27 @@ After every job ends, success or error, the popup asks for the model state once 
 
 The model line is still not refreshed while a download or a warm-up is running. This is an open limit.
 
-![Real model: the Intel result for the two-part article, where the model line says Downloaded (clean Intel run)](../screenshots/v2-intel-long-popup.png)
+![Real model, recorded before 26 October with SmolLM2 chosen by itself: the Intel result for the two-part article, where the model line says Downloaded (clean Intel run)](../screenshots/v2-intel-long-popup.png)
+
+### Settings
+
+Below the error block sits a closed section called Settings (a `details` element, `#settings`). It holds one choice, Quality, a select (`#quality`) with two options. The option texts are exactly "Better: Llama 3.2 1B (more accurate, slower)" and "Fast: SmolLM2 360M (about 2 times quicker, but summaries are often muddled or wrong)". The choice is stored in this browser as `quality`. Changing it refreshes the model line, so the line names the chosen model. Scenario V29 opens the section, selects Fast, and checks that the model line names SmolLM2 and that a summary's stats name SmolLM2. It also checks that the choice is still there after the popup is reopened. No picture of this section is in `docs/screenshots`; the scenario saves one when it runs.
+
+**What this means in plain words.** The reader picks the model in one place, and the popup names the choice in the model line and the stats.
+
+### A shortened long page
+
+On built-in graphics a long page is read in a shortened form, and the result says so. The notice in `#condense-notice` reads "This is a long page. To keep it quick on this computer, the opening of each section was read: about N% of the text." When the estimate is known, it adds "Reading all of it would take roughly M minutes." Below it a link-style button, "Read the whole page (slower)" (`#read-all`), starts the same page again with no shortening. The stats line gains "read N% of the text". The notice and the button appear only after a shortened summary, and the button disappears when the whole page was read. Scenario V28 checks the notice, the percentage, the minutes, the button, and that the whole-page job reports four parts for the page that gives two parts when shortened. No picture of these states is in `docs/screenshots`.
+
+**What this means in plain words.** A long page is shortened on built-in graphics, the popup says how much was read, and the reader can choose to read all of it.
 
 ### The integrated graphics note
 
-On a computer whose graphics chip is built into the processor, the model line names the small model, and a note appears under it: "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The note has an ochre bar, which is a different colour from the red progress and error bars. It appears before the download.
+On a computer whose graphics chip is built into the processor, the model line names the main model, Llama 3.2 1B, and a note appears under it. Before 26 October the same computer chose SmolLM2 by itself, and the pictures in this section that show SmolLM2 on Intel graphics predate that change. The note itself: "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster." The note has an ochre bar, which is a different colour from the red progress and error bars. It appears before the download.
 
-![Pretend model: the Intel note under the model line (the pretend model reports 300 MB for the small model)](../screenshots/ui-09-intel-note.png)
+![Pretend model, recorded before 26 October: the Intel note under the model line, when built-in graphics chose SmolLM2 by itself (the pretend model reports 300 MB)](../screenshots/ui-09-intel-note.png)
 
-![Real model: the Intel note during the first download of the small model, about 204 MB (clean Intel run)](../screenshots/v2-intel-short-downloading.png)
+![Real model, recorded before 26 October: the Intel note during the first download of SmolLM2, about 204 MB, which built-in graphics chose by itself at that time (clean Intel run)](../screenshots/v2-intel-short-downloading.png)
 
 The vendor name is capitalized because WebGPU reports it in lower case. A browser test caught the lower-case name, and `vendorName()` now maps it.
 
@@ -214,7 +229,7 @@ One problem is still open. The model line is not refreshed while a download or w
 
 ## Limitations
 
-The popup has a fixed width, and its summary is a scrolling box, so long answers need scrolling. There is no dark mode. The model line can be out of date while a job is running. Colour contrast and screen-reader behaviour have not been measured. The screenshots come from one laptop, not from the client's computer, and the pictures of the first use were recorded before some fixes.
+The popup has a fixed width, and its summary is a scrolling box, so long answers need scrolling. There is no dark mode. The model line can be out of date while a job is running. Colour contrast and screen-reader behaviour have not been measured. The screenshots come from one laptop, not from the client's computer, and the pictures of the first use were recorded before some fixes. The Settings section and the shortened-page notice (26 October) have no pictures in `docs/screenshots`, and the older pictures predate both.
 
 ### Questions this chapter answers
 
@@ -228,7 +243,7 @@ The tool was built to live in the popup. Version 2 has no options page, and the 
 Yes. The job runs in the service worker and writes its progress to session storage. Reopening the popup reads the same record and shows the same progress.
 
 **How does the reader know the small model wrote the summary?**
-A notice in ochre sits above the summary when the main model failed to load with a memory error or a load failure. It does not appear for the integrated-graphics switch, which has its own note.
+A notice in ochre sits above the summary when the main model failed to load with a memory error or a load failure. It does not appear when the reader chose Fast under Settings, because the reader made that choice. Before 26 October it also did not appear for the switch to SmolLM2 on built-in graphics, which was automatic then and is not automatic now.
 
 **What does the popup still show poorly?**
 The model line is not refreshed while a download or warm-up is running, and the warm-up label says "first time" on each new hidden page. The summary box also hides its last points until the reader scrolls.

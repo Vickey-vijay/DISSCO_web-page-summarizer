@@ -1,8 +1,8 @@
 # How to run the extension and give the demo (Version 2)
 
-*Purpose: this chapter takes you from a clean Windows computer to a working local summary, gives the demo script and the offline demo, lists the messages you may see with what to do, and shows how to run the tests and check the client's laptop.*
+*Purpose: this chapter takes you from a clean Windows computer to a working local summary, covers the client's laptop and its known specs, gives the demo script (including what to say about a shortened long page), the timing run in a visible Chrome, the offline demo, the messages you may see with what to do, and how to run the tests.*
 
-Do the steps yourself at least twice before the viva. Do the first model download at least a day before you need it, because it takes about three minutes on the developer's connection.
+Do the first model download at least a day before the demo, because it downloads about 695 MB and takes minutes. The developer's Intel chip took 118 s for the download alone, and 200.6 s for the whole first use of the short fixture.
 
 ## What you need
 
@@ -10,175 +10,177 @@ Do the steps yourself at least twice before the viva. Do the first model downloa
 |---|---|---|
 | Windows | Windows 10 or 11 | `scripts\check-computer.ps1` prints the version |
 | Chrome | Google Chrome 116 or newer | `setup.bat` reads the version |
-| Graphics | A graphics chip that WebGPU can use, with `shader-f16` | `chrome://gpu` shows WebGPU; the popup says the card lacks 16-bit math if the feature is missing |
-| Memory | Under 8 GB of memory uses the smaller model by rule | `check-computer.ps1` prints the memory |
+| Graphics | A chip that WebGPU can use, with `shader-f16` | `chrome://gpu` shows WebGPU. The popup says the card lacks 16-bit math if the feature is missing |
+| Memory | Under 8 GB uses the smaller model by rule | `check-computer.ps1` prints the memory |
 | Disk | About 3 GB free (the model is about 695 MB) | `check-computer.ps1` prints the free space on drive C and warns below 3 GB |
 | Internet | Only for the first model download | The popup's model line says "Downloaded" when it is done |
 
-The developer's laptop is an Acer Aspire Lite with an Intel i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and an NVIDIA RTX 3050 with 6 GB. The clean real-model timings in this pack come from that laptop.
+Built-in graphics is the normal case now. The extension uses the main model, Llama 3.2 1B, on every chip, and it keeps answers short and shortens long pages on built-in graphics.
+
+## The client's laptop
+
+The client sent photos of the laptop. The facts below are read from the photos (`finalsem/docs/CLIENT_LAPTOP.md`).
+
+| Item | Value |
+|---|---|
+| Model | HP Laptop 15 |
+| Processor | Intel Core i7-1355U, 15-watt, with 2 fast cores and 8 efficient cores |
+| Memory | 16 GB (15.7 GB usable) |
+| Graphics | Intel Iris Xe, built into the processor. No separate card. The "128 MB" is reserved memory that shares the main memory |
+| Disk | 477 GB, Windows (C:) with 363 GB free |
+| Chrome | 156.0.8078.48 |
+| WebGPU | Hardware accelerated |
+
+Three things are not known. The photos do not show whether the Iris Xe chip has the `shader-f16` feature. If it does not, the popup shows the NO_SHADER_F16 message and Version 2 cannot run there. The speed of this chip has not been measured on that laptop, and the processor is a 15-watt part whose sustained speed is not known. And the extension has not been run on that laptop, nor in a visible Chrome window. The developer's Intel chip is of the same generation (Gen 12), and its numbers are the nearest guide, not a promise. `setup.bat --gpu` has nothing to switch on there, because the laptop has one graphics chip.
 
 ## Step by step on a fresh computer
 
-1. **Get the project.** Clone or copy the whole folder. The README names the repository. Do not copy only some files.
-2. **Check the computer (optional, recommended).** Open PowerShell in `finalsem\project` and run `powershell -File scripts\check-computer.ps1`. It prints the Windows version, the processor, the memory, the graphics chips and the free space, and says what to change.
-3. **Run setup.** Double-click `setup.bat`. It looks for Chrome, checks the version, runs `scripts\check-extension.ps1` and `scripts\check-computer.ps1`, and ends with "SETUP COMPLETE." and "Next step: double-click run.bat". If it says "SETUP FAILED.", the window says what is missing, and the details are in `setup.log`.
-4. **Run the launcher.** Double-click `run.bat`. It checks the setup record, copies the folder path to the clipboard, opens `chrome://extensions`, and prints four steps.
+1. **Get the project.** Clone or copy the whole folder. Do not copy only some files.
+2. **Check the computer (recommended).** Open PowerShell in `finalsem\project` and run `powershell -File scripts\check-computer.ps1`.
+3. **Run setup.** Double-click `setup.bat`. It checks the Chrome version and the files, and ends with "SETUP COMPLETE." and "Next step: double-click run.bat". If it says "SETUP FAILED.", the window says what is missing, and the details are in `setup.log`.
+4. **Run the launcher.** Double-click `run.bat`. It copies the folder path to the clipboard, opens `chrome://extensions`, and prints four steps.
 5. **Load the extension.** Turn on Developer mode, click Load unpacked, press Ctrl+V to paste the path, and click Select Folder. Pin Page Summarizer from the puzzle-piece menu.
-5a. **Reload after any update.** When you pull new code, click the reload arrow on the Page Summarizer card on `chrome://extensions` before you test. Until you do, Chrome keeps running the code it loaded before, so the new behaviour does not appear.
-6. **Check the graphics card.** Open `chrome://gpu`. The line WebGPU should say "Hardware accelerated". If the computer has two chips, see the next section.
-7. **Make the first summary.** Open an article and click the icon. The popup says "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only)." and the button says "Download model and summarize". Press it. On the developer's laptop the first run took about 197 s. Later, the button says "Summarize this page".
+6. **Reload after any update.** When you pull new code, click the reload arrow on the Page Summarizer card on `chrome://extensions` before you test. Until you do, Chrome keeps running the code it loaded before, so the new behaviour does not appear.
+7. **Check the graphics card.** Open `chrome://gpu`. WebGPU should say "Hardware accelerated".
+8. **Make the first summary.** Open an article and click the icon. The popup says "Model: Llama 3.2 1B. Not downloaded yet (about 695 MB, first use only)." Press "Download model and summarize" and wait. Later, the button says "Summarize this page".
 
 ![Screenshot, pretend model: the popup before the first download, with the button "Download model and summarize" and the model line "Not downloaded yet"](../screenshots/ui-01-not-downloaded.png)
 
-Caption: pretend model, not the real one. The popup is the first-use state. The model line's "about 664 MB" is the fake model's number. The real popup reports about 695 MB for Llama 3.2 1B.
+Caption: pretend model, not the real one. This is the first-use state. The model line's "about 664 MB" is the fake model's number. The real popup reports about 695 MB for Llama 3.2 1B.
 
-### If the computer has two graphics chips
+### Quality: Better or Fast
 
-Chrome often uses the built-in chip on a laptop with two. The extension then switches to the smaller model on its own, and the popup shows the note "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster."
+The popup has a closed Settings section with one choice, Quality. "Better: Llama 3.2 1B (more accurate, slower)" is the default. "Fast: SmolLM2 360M (about 2 times quicker, but summaries are often muddled or wrong)" is the other. The choice is stored in this browser. The model line follows it. Fast is kept as a visible choice, not a default, because its summaries were often wrong. The Fast Lighthouse run in the saved records, made before a fix, gave an answer that was only the prompt's own safety sentence. A fix now reports that as "The model returned no summary for this page."
 
-![A laptop with two graphics chips: the built-in chip is the default and slow, and the Windows setting or setup.bat --gpu moves Chrome to the NVIDIA card](../figures/V17_two_graphics_chips.png)
+### Preloading
 
-Reading the figure: Chrome starts on the built-in Intel chip by default on this laptop, where SmolLM2 writes 4 to 5 tokens a second and a short article took 199.2 s on first use. The Windows setting or `setup.bat --gpu` moves it to the NVIDIA RTX 3050, where the saved clean runs wrote 34 to 53 tokens a second. The footnote says that the flag used in the test setup is not what a user gets.
+When the popup opens on a normal web page and the model is already stored, the popup asks the service worker to load and warm the model. This costs nothing on the page and never downloads anything. The warm-up, about 28 to 37 seconds on the developer's Intel chip, then happens while you read the popup, not after you press the button. If the first download has not happened yet, nothing is preloaded.
 
-To make Chrome use the stronger chip, do one of these.
+### Two graphics chips (the developer's laptop only)
 
-- Run `setup.bat --gpu`. The script writes one value under `HKEY_CURRENT_USER` that affects only this Windows user. It is never run by default. If the script cannot change the setting, setup prints "The graphics setting was NOT changed" and carries on.
-- Or do it by hand: Windows Settings, System, Display, Graphics, add Chrome, Options, High performance.
-
-Then restart Chrome and check `chrome://gpu` again. To undo the script, run `powershell -File scripts\set-chrome-gpu.ps1 -Remove`. The script finds Chrome itself, so the plain command works.
+Some laptops have a built-in chip and a separate card, and Chrome may pick the built-in one. On the developer's NVIDIA laptop, `setup.bat --gpu` or the Windows Graphics setting (Settings, System, Display, Graphics, add Chrome, Options, High performance) makes Chrome use the card, which wrote 34 to 53 tokens a second with Llama 3.2 1B in the saved runs. Undo with `powershell -File scripts\set-chrome-gpu.ps1 -Remove`, which finds Chrome by itself. The client's laptop has one chip, so none of this applies there.
 
 ## The viva demo
 
-Run this once in the order shown, with the model already downloaded and an article open. The timings are from the saved clean runs. Your times will differ.
+Run this with the model downloaded, on the developer's laptop, with the chip it was measured on. The timings are from saved runs. Your times will differ.
 
 | Step | What to open or press | What to say |
 |---|---|---|
-| 1 | `chrome://extensions` with the card loaded | "Chrome loads this folder as an extension. There is no key to paste, and nothing is sent to a cloud service." |
-| 2 | An article, then the icon | "The popup says the model is downloaded and runs on this computer. The button now says Summarize this page." |
-| 3 | Press the button | "The popup only asks the service worker to start. The progress lines show the parts as they are done. The Lighthouse article took 74.1 s on the clean run, in seven parts." |
-| 4 | Click on the article so the popup closes, wait five seconds, then open the icon again | "The job keeps running in the background. The popup reads the same stored record, so the progress is still there." |
-| 5 | Point at the line under the summary | "It shows the parts, the requests, the seconds and the model. That is the evidence the popup can give." |
-| 6 | Turn off Wi-Fi, then summarize a short article | "The summary is made from the copy on this computer. On the developer's NVIDIA card the short article took 15.3 s with the outside websites blocked." |
+| 1 | `chrome://extensions` with the card loaded | "Chrome loads this folder. There is no key, and nothing is sent to a cloud service." |
+| 2 | An article, then the icon | "The model line says the model is downloaded. The button says Summarize this page. The model is preloaded while the popup is open." |
+| 3 | The Wikipedia Lighthouse article, then press the button | "The page is cut to its opening and the first sentences of each section, about one part. The popup says how much was read. On this chip it took 124.6 s with the model loaded, in one part." |
+| 4 | Point at the notice above the summary | "This is a long page. The notice says about a fifth of the text was read, and that reading all of it would take roughly 12 minutes. The button 'Read the whole page (slower)' does that." |
+| 5 | Click the button only if there is time | "This reads the whole page. It is the slow choice, and the popup says so first." |
+| 6 | Close the popup, reopen it, and point at the stats line | "The job kept running, and the stats line shows the parts, the requests, the seconds, the model and how much was read." |
 | 7 | `chrome://version`, then press Summarize | "Chrome does not let extensions read its own pages, so the job stops before any model step. The code is RESTRICTED_PAGE." |
 | 8 | A page with only a sentence or two | "Under 200 characters of readable text, so the model is not called. The code is TOO_LITTLE_TEXT." |
 
-Four cautions. First, the popup for the Lighthouse article in the saved screenshot says 101.2 s, because that run was made while other programs were using the processor. If you show that screenshot, say so. Second, do not show the first download on stage unless you have time to wait. The download took 158.3 s on the developer's connection. Third, the 15.3 s offline figure was measured before a label fix. A repeat after the fix took 17.7 s, so say which run you quote. Fourth, do not demo the Wikipedia article on the Intel chip. With the current code it took 616.4 s, about 10 minutes, and its summaries are not reliable. Use the short article for that laptop.
-
-![Screenshot, pretend model: the popup while the model is being prepared, with the grey button and the text "Warming up the model (first time can take about 30 seconds)..."](../screenshots/ui-04-warming.png)
-
-Caption: pretend model, not the real one. This is the state to describe during the first use, while the popup shows the warm-up. The text is the real popup's wording. The pretend model keeps the text for only a moment, so the picture was taken with the popup's script paused. The real warm-up takes about 30 s on first use.
-
-The Lighthouse summary from the real model is shown below, with the stats line, for step 5.
-
 ![Screenshot, real model, NVIDIA card, Lighthouse article: the finished summary with the stats line "7 parts · 8 requests · 101.2 s · Llama 3.2 1B"](../screenshots/v2-nvidia-wikipedia-popup.png)
 
-Caption: real model, NVIDIA card, Wikipedia Lighthouse article, from a run done while other programs were using the processor. The popup shows the title "Lighthouse - Wikipedia", the model line "Model: Llama 3.2 1B. Downloaded, runs on this computer.", the numbered points, and the stats line.
+Caption: real model, NVIDIA card, the Wikipedia Lighthouse article, from a run before 26 October, made while other programs were using the processor. Use it only to show the stats line, and say that the same article on the built-in chip now takes about two minutes.
+
+Cautions. Do not demo the first download on stage. Do not quote the 616 s or 704 s runs as current; they used the SmolLM2 default before 26 October. Do not quote the 15.3 s offline figure as a current measurement of the built-in chip; it was made on the NVIDIA card before a label fix. The Lighthouse summary on built-in graphics is short and checked for accuracy, but its text is not the same as the whole article's.
+
+## The timing run in a visible Chrome (on mains power)
+
+No timing has yet been made in a visible Chrome window on mains power, which was the first step an outside adviser (Opus) recommended on 26 October. The run below is what to do, and what to write down, for both the developer's laptop and the client's.
+
+1. Plug the laptop into mains power. Close other programs, and keep the same window open.
+2. Open Chrome in the normal window (not the test browser). Load the folder, and reload it if the code changed.
+3. Confirm the model line says "Downloaded, runs on this computer". If not, do the first download and wait.
+4. Open the Lighthouse article. Open the popup and wait about one minute, so the preload warm-up finishes.
+5. Press "Summarize this page". When the summary appears, write down the stats line.
+6. Close the popup, wait one minute, open it again on the same page, and press Summarize. Write down the stats line.
+7. Repeat once more. You now have three summaries in a row, with their times.
+8. Repeat steps 4 to 7 with Settings > Quality set to Fast. Use the same page. Write the times and say which summary was accurate.
+
+Keep the three times and the chip name, the power state and the Chrome version in one place. Those are the numbers the viva should quote for the client's laptop. Until they exist, say `[to be measured]`. The target from the adviser was about 2 minutes warm, and about 3 minutes with the first-answer warm-up.
 
 ## The offline demo
-
-The offline claim is proven in two ways. The repository has measured runs with the outside websites blocked, and you can show the same thing by hand.
 
 1. Make sure the model is downloaded. The popup must say "Downloaded, runs on this computer."
 2. Turn off Wi-Fi or unplug the network cable.
 3. Open an article and press "Summarize this page".
-4. Note the time and the line under the summary. The developer's laptop took 15.3 s for the short article and 16.5 s for the two-part article, in the run before the label fix. The run after the fix took 17.7 s and 16 s.
+4. Note the time and the line under the summary. The saved offline run on the NVIDIA card before a label fix took 15.3 s for the short article.
 5. Turn the network back on.
 
-The repository's measured runs block the outside websites with the Chromium flag `--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"`. The flag keeps the local test server reachable. It is the way `scripts/local-run.mjs nvidia-offline` runs. It is not the same as a laptop with no network, so say which you did.
+The saved offline runs block the outside websites with the Chromium flag `--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"`, which keeps the local test server reachable. That is not the same as a laptop with no network, so say which you did.
 
 ## If something goes wrong
 
-Every message below comes from `src/core/errors.js`, from the popup, or from the setup scripts. The code in capitals is what the job record stores. The popup shows the message, and the technical detail goes to the console.
+Every message below comes from `src/core/errors.js`, from the popup, or from the setup scripts. The code in capitals is what the job record stores.
 
 | What you see | Code | What it means | What to do |
 |---|---|---|---|
-| Chrome cannot use your graphics card for the model (WebGPU is not available). Open chrome://gpu to check. | NO_WEBGPU | Chrome has no WebGPU for this page | Open `chrome://gpu`, check WebGPU, and use the separate card (see above) |
-| Your graphics card does not support the 16-bit math this model needs, so this computer cannot run Version 2. | NO_SHADER_F16 | The card lacks the `shader-f16` feature | Nothing in this version fixes it. Say so, and show Version 1 if the client needs a summary |
-| The graphics card ran out of memory. Close other heavy tabs or programs and try again. | GPU_MEMORY | The graphics card ran out of memory, and the smaller model also failed, or the smaller model was the one that failed | Close other tabs and try again. If the main model was the one that failed, the extension has already tried the smaller model once |
+| Chrome cannot use your graphics card for the model (WebGPU is not available). Open chrome://gpu to check. | NO_WEBGPU | Chrome has no WebGPU for this page | Open `chrome://gpu` and check WebGPU |
+| Your graphics card does not support the 16-bit math this model needs, so this computer cannot run Version 2. | NO_SHADER_F16 | The card lacks the `shader-f16` feature | Nothing in this version fixes it. Say so |
+| The graphics card ran out of memory. Close other heavy tabs or programs and try again. | GPU_MEMORY | The card ran out of memory, and the smaller model also failed, or the smaller model was the one that failed | Close other tabs and try again |
 | The model download stopped. Check your internet connection and press the button again. What was already downloaded is kept. | MODEL_DOWNLOAD_FAILED | The download failed | Reconnect and press the button again |
-| The model could not be started. Press the button to try again. | MODEL_LOAD_FAILED | The model did not load | Press again. If the main model was the one that failed, the extension had already tried the smaller model once |
-| The model took too long to answer. Try again, or use a shorter page. | TIMEOUT | No answer within 10 minutes (`generateTimeoutMs`, 600,000 ms) | Wait, or use a shorter page. On the Intel chip a long article can take that long |
-| The model returned no summary for this page. | EMPTY_ANSWER | The answer was empty | Press again, or try another page |
-| This page has too little readable text to summarize. | TOO_LITTLE_TEXT | Under 200 characters | Use a page with more text |
-| This page is too long for the local model on this computer. Try a shorter page. | TOO_LONG | More than 12 parts | Use a shorter page |
-| A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | CONTEXT_TOO_LONG | WebLLM refused a part that does not fit the 4,096-token window, and the halving steps did not fix it | Use a shorter page. Dense pages (tables, numbers, references) use more tokens per character |
+| The model could not be started. Press the button to try again. | MODEL_LOAD_FAILED | The model did not load | Press again. The extension had already tried the smaller model once if the main model was the one that failed |
+| The model took too long to answer. Try again, or use a shorter page. | TIMEOUT | No answer within 10 minutes (`generateTimeoutMs`) | Wait, or use a shorter page |
+| The model returned no summary for this page. | EMPTY_ANSWER | The answer was empty, or only the prompt's own wording | Press again, or try another page |
+| This page has too little readable text to summarize. | TOO_LITTLE_TEXT | Under 200 characters after cleanup | Use a page with more text |
+| This page is too long for the local model on this computer. Try a shorter page. | TOO_LONG | More than 12 parts (not on built-in graphics, where the page is shortened first) | Use a shorter page |
+| A part of this page is too long for the model to read at once, even after it was cut in half. Try a shorter page. | CONTEXT_TOO_LONG | A part still did not fit the window after halving | Use a shorter page |
 | Chrome does not allow extensions to read this page. | RESTRICTED_PAGE | Chrome's own page, a local file or the Web Store | Use a normal web page |
 | Could not read the text of this page. | EXTRACT_FAILED | The page reader could not run | Reload the page and try again |
-| Something went wrong inside the extension. Try again. | SERVICE_ERROR | An unexpected failure, such as the offscreen page not answering | Read the "Technical detail" line under the message. For more, use the console (below) |
+| Something went wrong inside the extension. Try again. | SERVICE_ERROR | An unexpected failure | Read the "Technical detail" line. For more, use the console (below) |
 | The summary was interrupted. Press Summarize to try again. | INTERRUPTED | Chrome stopped the worker, or the job had no update for 5 minutes | Press Summarize again |
-| The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed. | (notice) | A finished summary was written by SmolLM2 after a memory or load failure | Explain it. This is shown above the summary, not as an error |
-| Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster. | (note) | The built-in chip was found and the smaller model is used | Explain it, and offer the separate card |
+| The main model did not fit in the graphics card, so the smaller model wrote this summary. It may be less detailed. | (notice) | A summary written by SmolLM2 after a memory or load failure | Explain it. It is shown above the summary |
+| This is a long page. To keep it quick on this computer, the opening of each section was read: about N% of the text. | (notice) | The page was shortened before reading, on built-in graphics | Explain it. The button reads the whole page |
 
-When the popup shows a vague message (SERVICE_ERROR, or MODEL_LOAD_FAILED), the popup also shows a "Technical detail: ..." line with the first 240 characters of the cause. That is the first thing to read, and it is enough for a bug report. For more, open `chrome://extensions`, find Page Summarizer, click the "service worker" link, and read the Console tab. The line that starts with `[PageSummarizer] failed` gives the code and the full detail. In the 24 October real-Chrome failure the popup showed only the vague message. The detail was added to the popup after that, and so this line was not there then.
+Vague messages. When the popup shows SERVICE_ERROR or MODEL_LOAD_FAILED, it also shows a "Technical detail: ..." line with the first 240 characters of the cause. That is the first thing to read, and it is enough for a bug report. For more, open `chrome://extensions`, find Page Summarizer, click the "service worker" link, and read the Console tab. The line that starts with `[PageSummarizer] failed` gives the code and the full detail.
 
-The code CANCELLED is not shown to the user. It marks a job stopped because the page changed or the tab closed.
-
-After GPU_MEMORY, the model line may show the smaller model's status rather than the main model's. The picture below is from the pretend model, with both models set to run out of memory. Its model line now shows the smaller model.
-
-![Screenshot, pretend model: the popup after every model ran out of memory, with the error text and the model line showing the smaller model](../screenshots/ui-13-out-of-memory-all.png)
-
-Caption: pretend model, not the real one. The popup shows "The graphics card ran out of memory. Close other heavy tabs or programs and try again." The model line reads "Model: SmolLM2 360M. Not downloaded yet (about 300 MB, first use only)." The 300 MB is the fake's number.
+The code CANCELLED is not shown to the user.
 
 Setup and launcher messages are these.
 
 - **"SETUP COMPLETE."** followed by "Next step: double-click run.bat". Setup finished.
-- **"SETUP FAILED."**. Setup stopped. The window says what failed and how to fix it. The details are in `setup.log`.
-- **"The graphics setting was NOT changed (see the message above). Setup goes on..."** from `setup.bat --gpu`. The Windows setting did not change. The extension still works, only more slowly.
-- **"Setup has not been completed yet. Please double-click setup.bat first..."** from `run.bat`. Run `setup.bat` first.
-- **"manifest.json is missing from this folder..."** from `run.bat`. Copy the whole folder again.
+- **"SETUP FAILED."**. Setup stopped. The details are in `setup.log`.
+- **"The graphics setting was NOT changed (see the message above). Setup goes on..."** from `setup.bat --gpu`.
+- **"Setup has not been completed yet. Please double-click setup.bat first..."** from `run.bat`.
 - **"Not enough free disk space"** from `check-computer.ps1`. Free at least 3 GB.
 
 ## How to run the tests
 
-The test setup is the set of scripts and checks in the project. `setup.bat --dev` installs Playwright and its browser, and it needs Node.js 20 or newer. Run these in `finalsem\project`.
+Setup with `setup.bat --dev` installs Playwright and its browser, and it needs Node.js 20 or newer. Run these in `finalsem\project`.
 
 | Command | What it does | What you should see |
 |---|---|---|
-| `npm test` | Runs the unit tests in Node. No browser, no network | 76 tests across six files, all passing |
-| `npm run test:e2e` | Runs the browser scenarios in hidden Chromium with the pretend model | 29 scenarios (smoke, V01 to V27, V18b), all passing |
-| `node scripts/local-run.mjs nvidia` | Real model on the NVIDIA card: a cold start, then repeats. Downloads about 660 MB once | Writes `docs/test-runs/v2-local-nvidia` files. Slow, so run it on purpose |
-| `node scripts/local-run.mjs nvidia-offline` | Real model with the outside websites blocked | Writes `v2-local-nvidia-offline` files |
-| `node scripts/local-run.mjs intel` | Real model on the built-in Intel chip | Writes `v2-local-intel` files. Slow |
-| `node scripts/local-run.mjs intel-wikipedia` | Real model on the Intel chip, the long Wikipedia article (7 parts) | Writes `v2-local-intel-wikipedia` files. Takes about 10 minutes |
-| `node scripts/local-run.mjs intel-short` | Real model on the Intel chip, the short article | Writes the short Intel run files |
-| `node scripts/secret-scan.mjs` | Checks the repository for the Version 1 key before a push | Exit code 1 if a key is found |
+| `npm test` | Runs the unit tests in Node. No browser, no network | 93 tests across eight files, all passing |
+| `npm run test:e2e` | Runs the browser scenarios in hidden Chromium with the pretend model | 31 scenarios (smoke, V01 to V29, V18b), all passing |
 | `powershell -File tests\bat\test-bat-scripts.ps1` | Checks the setup and launcher scripts | 15 checks (B1 to B10c), all passing |
+| `node scripts/bench-models.mjs` | Measures reading and writing speed for each model on the chip (downloads several models; slow) | Writes `docs/test-runs/bench-models.json` and `.md` |
+| `node scripts/dump-page-text.mjs <url>` | Prints the text the extension would read from a page | Use it to check what is cut before reading |
+| `node scripts/local-run.mjs intel-better` | Real model on built-in graphics: the short fixture, the Lighthouse page and the long fixture | Writes `v2-local-intel-better` files. Slow |
+| `node scripts/local-run.mjs intel-fast` | The same cases with Quality: Fast | Writes `v2-local-intel-fast` files |
+| `node scripts/local-run.mjs nvidia` | Real model on the NVIDIA card, a cold start then repeats. Downloads about 660 MB once | Writes `v2-local-nvidia` files |
+| `node scripts/secret-scan.mjs` | Checks the repository for the Version 1 key before a push | Exit code 1 if a key is found |
 
-The browser scenarios run hidden. Set `HEADED=1` to watch them. Each scenario uses the pretend model, selected with `?mock=<mode>` on the offscreen page, so the tests do not need a graphics card. There are twelve modes: `ok`, `nowebgpu`, `nof16`, `intel`, `oom`, `oomall`, `downloadfail`, `empty`, `html`, `slow`, `longprompt` and `crash`.
+The browser scenarios run hidden. Set `HEADED=1` to watch them. Each scenario uses the pretend model, selected with `?mock=<mode>` on the offscreen page. There are twelve modes: `ok`, `nowebgpu`, `nof16`, `intel`, `oom`, `oomall`, `downloadfail`, `empty`, `html`, `slow`, `longprompt` and `crash`.
 
-Do not run `scripts/local-run.mjs` in the days before the viva unless you want new numbers. It downloads the model and writes files into `docs/test-runs`.
+Do not run the real-model scripts in the days before the viva unless you want new numbers. They download the model and write files into `docs/test-runs`.
 
 ## The checklist for the client's laptop
 
-The client's laptop has not been tested. Its graphics chip, memory and free disk were requested and not returned. Use this list on the day, and write the results down.
+Use this list on the day, and write the results down.
 
-1. Run `check-computer.ps1`. Record the Windows version, the processor, the memory, the graphics chips and the free space on drive C.
-2. If the memory is under 8 GB, expect the smaller model by rule. Say so before the demo.
-3. Confirm Chrome is 116 or newer. Run `setup.bat`, then `run.bat`, then load the folder.
-4. Open `chrome://gpu`. WebGPU should say "Hardware accelerated". If it does not, the summary may be very slow or refused. The repository does not test that case.
-5. If the computer has two chips, run `setup.bat --gpu` (or set Chrome by hand in Windows Graphics settings), restart Chrome, and check `chrome://gpu` again.
-6. Download the model once while connected. The popup must say "Downloaded, runs on this computer."
-7. Turn off the network and summarize one short article. Write the time down. The developer's figure was 15.3 s before the label fix, and the client's figure is `[to be measured]`.
-8. Turn the network back on. Undo the separate-card setting if you changed it, with `scripts\set-chrome-gpu.ps1 -Remove`.
+1. Run `check-computer.ps1`. Record the Windows version, the processor, the memory, the graphics chip and the free space on drive C. The known values are in the table above.
+2. Confirm Chrome is 156 or newer, or at least 116. Run `setup.bat`, then `run.bat`, then load the folder.
+3. Open `chrome://gpu`. WebGPU should say "Hardware accelerated". The repository does not say whether that page lists `shader-f16`, and the photos did not show it. The popup's NO_SHADER_F16 message is the real check.
+4. Plug in the mains power. Download the model once while connected, and wait until the popup says "Downloaded, runs on this computer."
+5. Run the timing run described above, in a visible Chrome window, with three summaries in a row on the Lighthouse page, first with Better and then with Fast.
+6. Turn off the network and summarize one short article. Write the time down.
+7. Turn the network back on. `setup.bat --gpu` is not needed on this laptop.
 
 ## Not verified yet
 
-- The client's laptop. Nothing has been run on it.
-- `setup.bat --gpu` against a real Chrome. It was tried only against a throw-away registry key.
-- A click-through in the visible, daily Chrome. Every browser scenario and every real-model run used hidden Chromium.
-- Languages other than English. The model is small and was meant for English text.
-
-## What changed on 24 October 2026
-
-After a failure in the real Chrome, the following changed. The run file above reflects them.
-
-- The answer limit is 10 minutes, not 180 seconds.
-- A part that WebLLM refuses for size is cut in half and summarized again, up to three levels deep. The error CONTEXT_TOO_LONG is shown only if that also fails.
-- Each KEEPALIVE refreshes the running job records, so a long answer is not shown as dead.
-- The popup shows a "Technical detail" line for SERVICE_ERROR and MODEL_LOAD_FAILED.
-- `scripts/local-run.mjs` clears the profile's old service-worker scripts before a real run.
-- The extension must be reloaded on `chrome://extensions` after new code is pulled (step 5a).
+- The extension has not been run on the client's laptop, and it has not been run in a visible Chrome window on mains power.
+- The client's Iris Xe chip has not been checked for `shader-f16`.
+- A second runtime (Transformers.js) has not been tried. The adviser said to try it only if reading is still slow after the visible-window run, and to switch only if it is at least two times faster.
+- Qwen2.5-1.5B was not measured (the benchmark run stopped), and gemma3-1b did not load with this WebLLM version.
+- Languages other than English.
 
 ## What this means in plain words
 
-Setup checks the computer and the files. The launcher opens the extensions page. The first summary downloads the model, which takes minutes, and every later summary runs on the card with the network off. If a message appears, the table says what it means and what to do. The browser scenarios prove the extension's logic on a pretend model, and the saved real-model runs prove the real model on one laptop.
+Setup checks the computer and the files. The launcher opens the extensions page. The first summary downloads about 695 MB, and that takes minutes. Later summaries run on the card with the network off. On built-in graphics a long page is shortened and answered briefly, the popup says how much was read, and the Quality choice is there for anyone who wants speed over accuracy. The client's laptop is the one that matters, and the numbers for it are still to be measured.
