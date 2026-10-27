@@ -102,9 +102,9 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 **Remaining Tasks:**
 
-- The client's laptop details are known (`finalsem/docs/CLIENT_LAPTOP.md`: built-in Intel Iris Xe graphics, 16 GB, Chrome 156). The extension has not yet been run on that laptop, or in a visible Chrome window.
+- The client's laptop details are known (`finalsem/docs/CLIENT_LAPTOP.md`: built-in Intel Iris Xe graphics, 16 GB, Chrome 156). The extension has not yet been run on that laptop. On 28 October it was timed in a visible Chrome window on the developer laptop, not the client's.
 - The optional `setup.bat --gpu` switch has not been tried in a real Chrome installation. It has no use on the client's laptop, which has one graphics chip.
-- A full manual check in the visible Chrome window is still to be done. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
+- A full manual check in a visible Chrome window on the client's laptop is still to be done. The developer laptop was timed in a visible window on 28 October. Apart from that and one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 - No side-by-side comparison of summary quality between Version 1 and Version 2 is recorded in the repository.
 
 **Evaluation:**
@@ -222,7 +222,7 @@ Table: Project objectives and the state of Version 2
 | 5 | Make summaries work with no network. | Delivered for one computer and two pages, with outside websites blocked. The client's laptop is not tested. |
 | 6 | Compare the cloud engine and the local engine on speed, summary quality and memory use. | Partly. Speed was measured for both. Memory use and summary quality were not compared side by side. |
 | 7 | Confirm the client laptop's system, memory and graphics card, because they set the model size. | Details received (`finalsem/docs/CLIENT_LAPTOP.md`): built-in Intel Iris Xe graphics only, 16 GB, Chrome 156. Not yet run on that laptop. |
-| 8 | Make a long page quick enough on built-in graphics, the only graphics the client's laptop has. | Partly. A benchmark on the developer laptop's Intel chip led to a shortened read of long pages: the Wikipedia article on lighthouses went from about 10 minutes to 124.6 seconds. Not yet measured on the client's laptop. |
+| 8 | Make a long page quick enough on built-in graphics, the only graphics the client's laptop has. | Partly. A benchmark on the developer laptop's Intel chip led to a shortened read of long pages: the Wikipedia article on lighthouses went from about 10 minutes to 124.6 seconds in the hidden browser, and to 101.7 to 118.7 seconds in three visible-window runs on 28 October. Not yet measured on the client's laptop. |
 
 ## Scope
 
@@ -245,11 +245,11 @@ Table: Project objectives and the state of Version 2
 - Clearing the saved switch to the smaller model. Once it is saved, it stays until the stored settings are cleared. Closing a tab during the download does not stop the download either.
 - Languages other than English. The model is small and is meant for English text.
 - Chrome's built-in Summarizer API. It was studied as background only.
-- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in the visible Chrome window. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
+- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in a visible Chrome window on the client's laptop. On 28 October the developer laptop's Lighthouse page was timed three times in a visible Chrome window. Apart from that and one page the owner ran in real Chrome on 24 October, the other runs used a hidden Chromium browser.
 
 ## Test machines
 
-The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is an HP Laptop 15 with a 13th Gen Intel Core i7-1355U, 16 GB of memory, Intel Iris Xe graphics built into the processor (no separate card) and Chrome 156. Its facts were read from the client's photos (`finalsem/docs/CLIENT_LAPTOP.md`). The extension has not been run on that laptop or in a visible Chrome window, so the report describes what the developer laptop does and says so wherever a number depends on it.
+The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is an HP Laptop 15 with a 13th Gen Intel Core i7-1355U, 16 GB of memory, Intel Iris Xe graphics built into the processor (no separate card) and Chrome 156. Its facts were read from the client's photos (`finalsem/docs/CLIENT_LAPTOP.md`). The extension has not been run on that laptop, and it was timed in a visible Chrome window only on the developer laptop (28 October), so the report describes what the developer laptop does and says so wherever a number depends on it.
 
 ## How to read this report
 
@@ -664,7 +664,7 @@ Reading the screenshot: a real-model capture made after the label fix. The model
 
 Reading the screenshot: a real-model capture of the short article. The summary is a title line and a numbered list of points. The footer reads "1 part · 1 request · 17.5 s · Llama 3.2 1B".
 
-These tests ran on one computer, with two pages, in a hidden browser. They did not run on the client's laptop or in the visible Chrome window. They show that the stored model works with outside websites blocked on this computer.
+These tests ran on one computer, with two pages, in a hidden browser. They did not run on the client's laptop or in a visible Chrome window. The visible-window timing of 28 October was on the developer laptop with the default model, and it was not an offline run. They show that the stored model works with outside websites blocked on this computer.
 
 **What this means in plain words.** After the first download, the summary runs from the stored model on the laptop. The internet is not needed for later summaries, which was shown on the developer laptop with outside websites blocked.
 
@@ -703,7 +703,7 @@ The model files are kept in IndexedDB, in the browser's storage for the extensio
 No. It has one graphics chip, so there is no separate card to choose. On the developer laptop Chrome used the built-in chip by default, and the opt-in switch moved it to the NVIDIA card. The extension does not force either choice, and it keeps the 1B model on the built-in chip.
 
 **Does the extension work offline?**
-Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in the visible Chrome window.
+Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in a visible Chrome window. The developer laptop's default model was timed in a visible window on 28 October, but that run was not offline.
 
 
 <div style="page-break-after: always"></div>
@@ -757,9 +757,9 @@ Table: Non-functional requirements for Version 2
 | NF6 | Nothing opens in a new tab. | No tab-opening or options-page call in the Version 2 code. Scenario V24 passes. Not checked in the visible Chrome | Partly |
 | NF7 | No key. | No key box, key storage or key styles remain in the Version 2 code. No test asserts it | Met by reading |
 | NF8 | Chrome desktop, Manifest V3, loaded unpacked. | `manifest.json` (`manifest_version` 3). `run.bat` shows the load steps, because branded Chrome no longer accepts the load flag (DEVLOG, 20 October). 15 batch-script checks (B1 to B10c). `set-chrome-gpu.ps1 -Remove` works without a Chrome path. A manual load in the installed Chrome is still needed | Partly |
-| NF9 | Works on the client's laptop. | The client's details came back (`docs/CLIENT_LAPTOP.md`): HP Laptop 15-fd0xxx, Core i7-1355U, 16 GB, Intel Iris Xe built into the processor, 363 GB free, Chrome 156 with WebGPU hardware accelerated. Those photos do not show the `shader-f16` feature. The extension has not been run on that laptop or in a visible Chrome window | Not verified |
+| NF9 | Works on the client's laptop. | The client's details came back (`docs/CLIENT_LAPTOP.md`): HP Laptop 15-fd0xxx, Core i7-1355U, 16 GB, Intel Iris Xe built into the processor, 363 GB free, Chrome 156 with WebGPU hardware accelerated. Those photos do not show the `shader-f16` feature. The extension has not been run on that laptop; a visible-window timing was made on the developer laptop on 28 October | Not verified |
 | NF10 | Summaries good enough for a busy reader (abstract goal 6). | No formal quality check. Copied page markers are now removed from answers. The saved Intel summary and its screenshot were recorded before that fix and still show the marker. The Llama summary of the short article calls the thick single lens "the original Fresnel lighthouse", which the page does not say. The Intel Wikipedia summaries have not been checked against the page, and the summary of the old-code second try contains invented facts | Not verified |
-| NF11 | Speed on built-in graphics (the client's laptop): a long page in about 2 minutes once the model is warm. The target is the one given by the second opinion of 26 October; the PRD sets no number. | The default model is Llama 3.2 1B. A long page is shortened to a 6,000-character reading budget (`src/core/condense.js`), answers are kept short on built-in graphics (`brief`), and a stored model is preloaded when the popup opens. The whole-page option is slower. Measured on the developer laptop's Intel chip (hidden Chromium): Lighthouse article 124.6 s, long fixture article 103.8 s, first use 200.6 s including the 695 MB download. Not measured on the client's laptop | Partly. Measured on the developer's laptop only. The client's laptop has not been run |
+| NF11 | Speed on built-in graphics (the client's laptop): a long page in about 2 minutes once the model is warm. The target is the one given by the second opinion of 26 October; the PRD sets no number. | The default model is Llama 3.2 1B. A long page is shortened to a 6,000-character reading budget (`src/core/condense.js`), answers are kept short on built-in graphics (`brief`), and a stored model is preloaded when the popup opens. The whole-page option is slower. Measured on the developer laptop's Intel chip (hidden Chromium): Lighthouse article 124.6 s, long fixture article 103.8 s, first use 200.6 s including the 695 MB download. In a visible Chrome window on 28 October the Lighthouse article took 118.7 s, 101.7 s and 116.7 s, so the hidden window is not the cause. Not measured on the client's laptop | Partly. Target met on the developer's laptop (visible window, 28 October). The client's laptop has not been run |
 
 **What this means in plain words.** The privacy and offline claims rest on reading the code and on offline runs, with no network capture behind them. The speed numbers come from one laptop. Quality has not been measured, and the saved samples show faults, one of which has since been fixed in the code.
 
@@ -785,7 +785,7 @@ Table: Requirements that differ from Version 1
 
 ## Parts only partly verified, or not verified
 
-- **The client's laptop has not been run.** Its details came back (`docs/CLIENT_LAPTOP.md`), but the extension has not been run on it or in a visible Chrome window. Its speed is the open question.
+- **The client's laptop has not been run.** Its details came back (`docs/CLIENT_LAPTOP.md`), but the extension has not been run on it. A visible-window timing was made on the developer laptop on 28 October. Its speed is the open question.
 - **Both measured chips are on one laptop**: an Intel built-in chip and an NVIDIA RTX 3050 with 6 GB, Chrome 155 and 15.7 GB of memory (DECISIONS.md, D1).
 - **`setup.bat --gpu`** was tried only against a throw-away registry key, not a real Chrome. It has nothing to switch on the client's laptop, which has one graphics chip.
 - **The real Chrome** showed a failure on 24 October. The project owner's run of the Wikipedia article on the Intel chip ended with "Something went wrong inside the extension. Try again." and no reason. The cause and the changes are in chapter 6. No full manual click-through is recorded, and the browser scenarios ran hidden.
@@ -793,7 +793,7 @@ Table: Requirements that differ from Version 1
 - **Real-model runs.** Eleven run files exist. Two were added on 26 October: `v2-local-intel-better` (the new default, Llama 3.2 1B) and `v2-local-intel-fast` (Quality: Fast, made before the fix that removes a repeated safety sentence). The other nine: Six were made before 24 October, and three Intel Wikipedia runs were added that day (one failed with TIMEOUT under the old code, one finished under the old code, and one under the new code). Of the six older runs, four are clean: the first NVIDIA run, the NVIDIA offline run before the label fix, the Intel run, and the NVIDIA offline run after the label fix. Two were done while other programs were using the processor and are kept as records.
 - **Test counts.** The current code has 93 unit tests, 31 browser scenarios and 15 batch-script checks. The unit and scenario counts match the test files; the batch count comes from the change notes. `run-1.md` records three full browser runs made before the later fixes.
 
-**What this means in plain words.** Every claim about the client's own laptop, the visible browser and summary quality is still open. The results so far come from one developer's machine.
+**What this means in plain words.** Every claim about the client's own laptop and summary quality is still open. The visible-window timing covers the developer laptop only. The results so far come from one developer's machine.
 
 ## Questions this chapter answers
 
@@ -810,7 +810,7 @@ On the developer's laptop, yes. Clean runs with outside websites blocked gave su
 On the NVIDIA chip the first use took about 197 s, most of it the download. A short article took 15.3 s to 17.7 s once the model was stored. On the built-in Intel chip the Lighthouse article took 124.6 s with the default model after shortening, against about 10 minutes before 26 October. The PRD sets no target, and the client's own laptop has not been timed, so the speed requirement is only partly met.
 
 **Which requirements are still open?**
-The client's laptop (its speed, the first download and the shader-f16 feature, none of which has been run there), the visible Chrome check, the setup script against a real Chrome, and summary quality. None of these has a result in the repository yet, so each stays marked as not verified or partly verified above.
+The client's laptop (its speed, the first download and the shader-f16 feature, none of which has been run there), a visible-window timing on the client's laptop, the setup script against a real Chrome, and summary quality. None of these has a result in the repository yet, so each stays marked as not verified or partly verified above.
 
 
 <div style="page-break-after: always"></div>
@@ -1251,7 +1251,7 @@ Table: Speed on the client's laptop: the five answers and what was done (from DE
 | 1 | Default model on built-in graphics | Llama 3.2 1B (accurate, 2.4 times slower per part). Do not show a model choice on the main screen; put "Quality: Better / Fast" under Settings | Done. The popup has a closed Settings section. The automatic switch to SmolLM2 (D3) is removed; SmolLM2 is used on built-in graphics only when the person chooses Fast, or after a memory failure |
 | 2 | How much of a page to read on built-in graphics | Keep 6,000 characters (exactly one part, so no merge request). Aim for about 2 minutes warm and 3 minutes with the first-answer warm-up | Done (`readBudgetIntegrated` 6000, `src/core/condense.js`) |
 | 3 | Shorter answers | 3 sentences for a single part (130 tokens), 2 per part (90), 4 to 5 for the merge (180), and every cut-off answer ends at its last full stop | Done for built-in graphics only |
-| 4 | A different runtime (Transformers.js or ONNX Runtime Web) | First run the same benchmark in a visible Chrome window on mains power. Try a different runtime only if reading is still slow, for half a day at most, and switch only if reading is at least 2 times faster | **Not done.** Everything measured so far ran in a hidden Chromium; the visible-window run was not made |
+| 4 | A different runtime (Transformers.js or ONNX Runtime Web) | First run the same benchmark in a visible Chrome window on mains power. Try a different runtime only if reading is still slow, for half a day at most, and switch only if reading is at least 2 times faster | **Visible-window run made on 28 October** on the developer laptop (118.7, 101.7 and 116.7 s). The Transformers.js test was not started |
 | 5 | Biggest risk | No number is from the client's chip or a real Chrome window. First action: run the extension on the client's laptop with a timing log for both models on the same page | **Open.** See the manual smoke test notes in `docs/MANUAL_SMOKE_TEST.md` |
 
 The benchmark behind the answers ran on the developer laptop's Intel chip in hidden Chromium, with one realistic part of 6,000 characters:
@@ -1273,10 +1273,11 @@ The measured result on the developer laptop's Intel chip (`docs/test-runs/v2-loc
 - The long fixture article took 103.8 s, with 5,302 of 10,532 characters read.
 - A first use, with the 695 MB download and the warm-up, took 200.6 s; the warm-up took about 28 s.
 - The three summaries are described as accurate and fluent in the run notes. No second reader has checked them against the pages.
+- **Visible window, 28 October.** The Lighthouse page, three times in a row in a visible Chrome window on mains power: 118.7 s, 101.7 s and 116.7 s (the first includes loading the stored model, 9.3 s), against 124.6 s in the hidden browser. Reading and writing speed were the same, so the hidden window is not the cause of the slow reading; the chip is. Three runs showed no slowdown from heat on the developer's 45-watt laptop. The target of about 2 minutes is met there.
 
 The Quality: Fast choice (SmolLM2) took 39.5 s for the short article with the model stored, and 64.7 s for the Lighthouse article. That Lighthouse summary was a failed answer, which only repeated the prompt's safety sentence and an empty "Summary:" label. The run was made before that repeat was removed, so it is kept as a record and not as a summary.
 
-**Not done, and still open.** The visible-window timing run on mains power has not been made, so no speed has been measured on the client's laptop, whose Iris Xe graphics shares memory and runs at 15 watts. A different runtime has not been tried. The whole-page option with Llama 3.2 1B has not been measured, and the earlier whole-page runs used SmolLM2 (616.4 s and 704.5 s, before 26 October).
+**Not done, and still open.** No speed has been measured on the client's laptop, whose Iris Xe graphics shares memory and runs at 15 watts, and the effect of heat over repeated runs is unknown there. A different runtime (Transformers.js) has not been tried; it is the next step only if a shorter time is wanted. The whole-page option with Llama 3.2 1B has not been measured, and the earlier whole-page runs used SmolLM2 (616.4 s and 704.5 s, before 26 October).
 
 **What this means in plain words.** The default now reads less of a long page and writes shorter answers, so the Lighthouse article takes about two minutes instead of about ten. The accurate model stays the default. The speed on the client's own laptop is still unknown.
 
@@ -1343,7 +1344,7 @@ Table: Problems found in review, and their status
 | SmolLM2 echoed the safety sentence and an empty "Summary:" label | Fixed. Both are removed, and such an answer is EMPTY_ANSWER | Chapter 5, engine seam |
 | The first answer waited 30 to 40 s for the warm-up | Improved. A stored model is preloaded when the popup opens (`PRELOAD_MODEL`) | Chapter 5, later use |
 | Speed on the client's laptop | **Still open.** The extension has not been run there; the Iris Xe speed is unknown. Target: about 2 minutes warm | Chapter 4, NF11; this chapter, D7 |
-| Timing in a visible Chrome window | **Still open.** Not made; the second opinion advised it | This chapter, D7 |
+| Timing in a visible Chrome window | Made on the developer laptop on 28 October (118.7, 101.7 and 116.7 s); the hidden window is not the cause. **Still open** on the client's laptop | This chapter, D7 |
 | A different runtime (Transformers.js or ONNX Runtime Web) | **Not tried.** Only if reading stays slow | This chapter, D7 |
 
 Other points remain open, though none is a code change. `v2-local-nvidia.md` repeats the second NVIDIA attempt. D2's description does not match DECISIONS' "two problems". The download size is quoted as 664 MB in a DEVLOG row and as about 660 MB in a script comment, while the popup reports about 695 MB, which this report uses. The "slower" note on an older offline run holds only for the long article.
@@ -1554,11 +1555,11 @@ Table: The Intel numbers on the developer laptop, by model and date
 | Whole Lighthouse page, 7 parts (Intel Wikipedia runs of 24 October), before 26 October | SmolLM2 360M, automatic | 616.4 s with the new code; 704.5 s on the second try of the old code; the first old-code try timed out after 615.6 s | about 4 tokens a second |
 | Quality: Fast (`v2-local-intel-fast.md`), made before the cleanup fix | SmolLM2 360M, chosen | Short article 39.5 s (model stored); Lighthouse 64.7 s | 4 tokens a second |
 
-On this chip the 1B model reads at 15.6 tokens a second and writes at 2.0. One realistic part of 6,000 characters took 161.6 seconds, against 66.2 seconds for SmolLM2 (`bench-models.md`). Reading the text is about 80 percent of the time of a part. The first use downloads the 695 MB model once, and it also includes the warm-up. The Lighthouse page reads about a fifth of its text, and the popup says so.
+On this chip the 1B model reads at 15.6 tokens a second and writes at 2.0. One realistic part of 6,000 characters took 161.6 seconds, against 66.2 seconds for SmolLM2 (`bench-models.md`). Reading the text is about 80 percent of the time of a part. The first use downloads the 695 MB model once, and it also includes the warm-up. The Lighthouse page reads about a fifth of its text, and the popup says so. In a visible Chrome window, on mains power, the same page took 118.7, 101.7 and 116.7 seconds in three runs in a row (the first includes loading the stored model, 9.3 s), about 10 percent quicker than the hidden run's 124.6 seconds, with no slowdown over the three runs (`v2-local-intel-visible.md`, 28 October).
 
 The Fast Lighthouse answer in its record only repeated the prompt's safety sentence and an empty "Summary:" label. The cleanup fix now reports such an answer as an empty answer ("The model returned no summary for this page."). Its record predates that fix, which is why Fast is a visible choice and not the default.
 
-The client's laptop has a related but different chip: Iris Xe, with more execution units, in a 15-watt processor. No number in this chapter is from the client's laptop, and the extension has not been run there or in a visible Chrome window.
+The client's laptop has a related but different chip: Iris Xe, with more execution units, in a 15-watt processor. No number in this chapter is from the client's laptop, and the extension has not been run there. The visible-window timings below were made on the developer laptop.
 
 **What this means in plain words.** On the developer laptop's Intel chip, the accurate model now takes about two minutes for the Lighthouse page, against about ten minutes before. The client's own speed is still to be measured.
 
@@ -1619,7 +1620,7 @@ The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engi
 - The small model's answers are weaker, and Fast summaries are often muddled or wrong. Chapter 10 covers how good the summaries are.
 - On built-in graphics the 1B model writes about 2 tokens a second. The first use downloads 695 MB, and a long page is read only in part unless the person asks for the whole page.
 - No code path clears `modelOverride`, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
-- The client's laptop details are known from the photos, but the extension has not been run there or in a visible Chrome window. The photos do not show whether its Iris Xe chip offers `shader-f16`.
+- The client's laptop details are known from the photos, but the extension has not been run there. The visible Chrome window timings were made on the developer laptop only. The photos do not show whether its Iris Xe chip offers `shader-f16`.
 - Halving a part that does not fit the model's window is built, up to three levels deep. The real Wikipedia run did not need it, so it is covered by unit tests and scenario V25 only.
 
 ## Questions this chapter answers
@@ -1848,7 +1849,7 @@ The browser test V01 runs the whole first use. It checks that the percentages ne
 - The offline runs do not log requests, and they cover only the short and long fixtures.
 - The after-fix offline load took 11.6 seconds against 6.9 seconds, and the cause is not measured.
 - The warm-up label still says "first time only" in the code, while the code runs the warm-up on every load.
-- The client's laptop details are known from its photos, but the extension has not been run on it or in a visible Chrome window. Every time here is from the developer laptop, in hidden Chromium.
+- The client's laptop details are known from its photos, but the extension has not been run on it. Every time here is from the developer laptop, in hidden Chromium.
 
 ## Questions this chapter answers
 
@@ -2419,7 +2420,7 @@ The same run's long fixture article took 103.8 seconds, with 5,302 of 10,532 cha
 
 The model repeated the prompt's own safety sentence and an empty "Summary:" label, and nothing else. After the fix such an answer is reported as an empty answer (chapter 12). This is why Fast is a visible choice and not the default.
 
-**What is still open.** The shortened summary covers about a fifth of a long page, because it keeps the opening and the first sentences. The better short answer on the fixture article still repeats the misreading "indicating the location of the lighthouse" found in the earlier run. The estimate for a whole page is rough. None of these numbers comes from the client's laptop or from a visible Chrome window. The client's chip has the same family of graphics but is a 15-watt processor, so its speed is still to be measured.
+**What is still open.** The shortened summary covers about a fifth of a long page, because it keeps the opening and the first sentences. The better short answer on the fixture article still repeats the misreading "indicating the location of the lighthouse" found in the earlier run. The estimate for a whole page is rough. The Lighthouse numbers come from the developer laptop: 124.6 s in the hidden browser, and 118.7 s, 101.7 s and 116.7 s in a visible Chrome window on 28 October. None comes from the client's laptop. The client's chip has the same family of graphics but is a 15-watt processor, so its speed is still to be measured.
 
 **What this means in plain words.** On built-in graphics the reader gets the opening and the first sentences of a long page, in about two minutes, from the more accurate model. Reading the whole page is still possible, and it takes several times longer.
 
@@ -2618,7 +2619,7 @@ Several problems were found in review and fixed in the code. The DEVLOG rows dat
 
 ## Limitations
 
-These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. No real run has reached the ten-minute limit, and the halving has not run on a real page. On built-in graphics, the shortened summary covers about a fifth of a long page, and the estimate for a whole page is rough. Nothing has been run on the client's laptop or in a visible Chrome window. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
+These limits are open in the code as it is now. No real-model test of answer quality exists. No test shows whether the real model follows instructions inside a page. The answer cap is not checked for cut-off answers. The merge prompt has no markers, and merged answers can repeat its preamble. Small models make factual slips. No automated test covers the timeout path. No real run has reached the ten-minute limit, and the halving has not run on a real page. On built-in graphics, the shortened summary covers about a fifth of a long page, and the estimate for a whole page is rough. The visible-window timing was made on the developer laptop on 28 October. Nothing has been run on the client's laptop. A second merge round has not run on the real model. The prompt order was never compared with another order. Non-English pages are outside the design: the README says the model is meant for English text.
 
 ### Questions this chapter answers
 
@@ -3223,7 +3224,7 @@ The client's laptop was described from three photos of its screen, which are not
 
 Three things follow for setup. The built-in graphics path is the main path for this client, not an edge case. On the facts in the photos, the setup checks would pass: Chrome is newer than 116, the memory and free disk space are far above what the checks ask for, and WebGPU is hardware accelerated. `setup.bat --gpu` has nothing to switch on, because there is only one graphics chip. The photos do not show whether the chip offers the 16-bit shader feature (`shader-f16`). The developer laptop's Intel chip of the same generation does, and chapter 16 lists this as open.
 
-The first use downloads the main model, about 695 MB, then loads and warms it up. On the developer laptop's Intel chip, the warm-up on the first answer took about 28 to 37 seconds. The extension has not been run on the client's laptop, or in a visible Chrome window, so these are expectations and not measurements (chapter 14).
+The first use downloads the main model, about 695 MB, then loads and warms it up. On the developer laptop's Intel chip, the warm-up on the first answer took about 28 to 37 seconds. The extension has not been run on the client's laptop. A run in a visible Chrome window was made on the developer laptop, not on the client's laptop, so the client's figures are expectations and not measurements (chapter 14).
 
 ### What this means in plain words
 
@@ -3475,7 +3476,7 @@ The script prints `SETUP FAILED.`, the reason, and the fix in plain words, and i
 
 This chapter reports how Version 2 was tested and what the measurements show. Three kinds of evidence are used. Automated tests run the whole chain with a pretend model that can be made to fail on purpose. Windows checks run the batch files. Real-model runs and a speed benchmark measure the actual model.
 
-Every real number in this chapter comes from the developer laptop, in hidden Chromium: its NVIDIA RTX 3050 and its built-in Intel chip. None comes from the client's laptop, and none comes from a visible Chrome window. The client's laptop is described in chapter 13.
+Every real number in this chapter comes from the developer laptop: its NVIDIA RTX 3050 and its built-in Intel chip. Most come from hidden Chromium. One set, the visible-window timing of 28 October, comes from a visible Chrome window on mains power. None comes from the client's laptop, which is described in chapter 13.
 
 Each real-model run appears once, in the table for its case. A run marked **clean** was done with nothing else busy on the laptop, according to its record. A run marked **under load** was done while other programs were using the processor, according to its note. Under-load runs are kept as records, but their numbers are never presented as clean.
 
@@ -3488,7 +3489,7 @@ Table: The test layers
 | Unit tests | `tests/unit` (eight files) | 93 | Each piece of logic, with fakes. No browser, no network |
 | Browser tests | `tests/e2e` (smoke test, V01 to V29 and V18b) | 31 | The whole chain in hidden Chromium, with the pretend model |
 | Windows script checks | `tests/bat` | 15 (B1 to B10c) | `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key |
-| Real-model runs | `scripts/local-run.mjs` | Seven plans | The real model's speed and output on the developer laptop |
+| Real-model runs | `scripts/local-run.mjs` | Eight plans | The real model's speed and output on the developer laptop |
 | Speed benchmark | `scripts/bench-models.mjs` | Seven model versions | Where the time goes on the built-in Intel chip |
 
 The layers answer different questions. The commands are `npm test`, `npm run test:e2e`, the Windows check script, `node scripts/local-run.mjs` with a plan name, and `node scripts/bench-models.mjs`.
@@ -3578,7 +3579,7 @@ The browser tests press the real buttons, but on a fake model. They show that th
 
 ## Real-model runs
 
-The script `scripts/local-run.mjs` measures the real model in hidden Chromium. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
+The script `scripts/local-run.mjs` measures the real model in hidden Chromium, except for the `intel-visible` plan, which runs in a visible window. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
 
 Table: The real-model plans
 
@@ -3591,6 +3592,7 @@ Table: The real-model plans
 | `intel-short` | No flags | `.model-profile-intel` | Short article |
 | `intel-better` | No flags; the default main model, Llama 3.2 1B | `.model-profile-intel-better` | Short article, Wikipedia "Lighthouse" (live), long article |
 | `intel-fast` | No flags; Settings, Quality: Fast (SmolLM2 360M) | `.model-profile-intel` | Short article, Wikipedia "Lighthouse" (live) |
+| `intel-visible` | No flags; a visible window (`HEADED=1`), on mains power | `.model-profile-intel-better` | Wikipedia "Lighthouse" (live), three times in one session |
 
 Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and up to three screenshots. It writes a JSON file and a Markdown table. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting. The Intel runs used no flags, so Chrome chose the built-in chip, as it does on the client's laptop.
 
@@ -3728,7 +3730,7 @@ Table: Intel runs with the current default, Llama 3.2 1B, and with Quality: Fast
 | Whole-page estimate shown in the popup | Not shown | 692 s | 303 s | 372 s | Not shown |
 | Notes | Includes the 695 MB download. Load 149.0 s, warm-up about 28 s | The popup says that the opening was read and offers the whole page | The popup says that the opening was read | Recorded before the echo fix. Its saved summary is the echoed safety sentence, a failed answer | The model was already stored |
 
-The Lighthouse page took 616 seconds with SmolLM2 and the whole text, and it takes 124.6 seconds with the default. Reading all of it, the popup estimated 692 seconds. The whole-page button, Read the whole page, is therefore about 11 to 12 minutes on this chip, and it is the only path that still takes ten minutes or more. The summaries of the three default runs are recorded as accurate and fluent.
+The Lighthouse page took 616 seconds with SmolLM2 and the whole text, and it takes 124.6 seconds with the default. Reading all of it, the popup estimated 692 seconds. The whole-page button, Read the whole page, is therefore about 11 to 12 minutes on this chip, and it is the only path that still takes ten minutes or more. The summaries of the three default runs are recorded as accurate and fluent. On 28 October the same page was run three times in a row in a visible Chrome window, on mains power, with the default model already stored. The times were 118.7, 101.7 and 116.7 seconds (`v2-local-intel-visible.md`). So the hidden window did not cause the slow reading: the chip did, and the visible runs averaged about 112 seconds, about 10 percent less than the hidden run.
 
 ![Popup for the short article on the Intel chip, recorded before 26 October and before the marker fix](../screenshots/v2-intel-short-popup.png)
 
@@ -3795,12 +3797,12 @@ From run 1, the browser tests do not show:
 
 - real summary quality, because the pretend model returns fixed text;
 - real download speed, graphics-card behaviour or shader warm-up, which only the real-model records cover;
-- the visible Chrome the client will use, because every test ran in hidden Chromium.
+- the visible Chrome the client will use, because the automated tests ran in hidden Chromium, and the one visible-window timing was made on the developer laptop.
 
 From the README and the change list, these items are not yet verified:
 
 - the extension on the client's laptop. Its facts are known from photos, but the extension has not been run there, and no number here is from that laptop;
-- a run in a visible Chrome window on mains power, which the advice on the speed question asked for before any other runtime is tried;
+- a visible-window run on mains power on the client's laptop. The developer laptop had one on 28 October (chapter 14), which does not stand in for the client's laptop, and the advice on the speed question asked for this before any other runtime is tried;
 - `setup.bat --gpu` against a real Chrome installation;
 - a manual click-through in the visible Chrome, using the V2 checklist;
 - a real answer timeout, because no automated test triggers the TIMEOUT path;
@@ -3811,7 +3813,7 @@ The real-model records cover two fixture articles and one live Wikipedia page. N
 
 ### What this means in plain words
 
-The tests prove the logic, and the real runs prove the speed on one developer laptop in a hidden browser. They do not prove how the extension runs on the client's laptop, how it looks in a visible Chrome window, or how good the summaries are.
+The tests prove the logic, and the real runs prove the speed on one developer laptop, in a hidden browser and once in a visible one. They do not prove how the extension runs on the client's laptop, how it looks in a visible Chrome window, or how good the summaries are.
 
 ## Questions this chapter answers
 
@@ -4122,7 +4124,7 @@ A vague message is a bug report with nothing in it, so the cause has to be shown
 
 **What was measured.** A benchmark on the developer laptop's Intel chip (`scripts/bench-models.mjs`, `docs/test-runs/bench-models.md`) found that the time goes into reading, not writing. The model reads only 15 to 40 tokens a second on this chip, whatever its size, and reading takes about 80 percent of the time of one part. The 7-part Lighthouse page took 616 seconds with SmolLM2, about ten minutes. The owner said that was far too long, asked for it to be made as fast as possible, and accepted a bigger model if it fits.
 
-**What was decided.** The question went to a second, stronger model (Opus) as a written brief with the numbers. The answer, recorded in `docs/DECISIONS.md` (D7), was to read less rather than to change the chip: keep 6,000 characters as one part, keep the answers short, and keep the accurate Llama 3.2 1B model. It also advised measuring in a visible window on mains power before trying another runtime. That measurement has not been made (chapter 16).
+**What was decided.** The question went to a second, stronger model (Opus) as a written brief with the numbers. The answer, recorded in `docs/DECISIONS.md` (D7), was to read less rather than to change the chip: keep 6,000 characters as one part, keep the answers short, and keep the accurate Llama 3.2 1B model. It also advised measuring in a visible window on mains power before trying another runtime. That measurement was made on the developer laptop on 28 October (chapter 14), not on the client's laptop, which has not been measured (chapter 16).
 
 **What was built.** Back matter, such as See also, References and Bibliography, and markers such as [12] are cut before reading (`src/core/trim-text.js`). On the Lighthouse page this removed 8,788 of 36,752 characters, 24 percent. On built-in graphics a long page is shortened to about 6,000 characters before reading (`src/core/condense.js`): the opening in full, then the first sentences of the paragraphs, spread over the page. The result is one part, so there is no merge request. The popup says that the page was shortened, gives the share that was read, and offers "Read the whole page (slower)" with a time estimate. Answers are shorter on built-in graphics. The main model is the default on every chip. SmolLM2 is used only when the reader picks Fast in Settings, after a memory or load failure, or on a computer with under 8 GB of memory. The model is loaded and warmed up while the popup is open, when it is already stored.
 
@@ -4182,13 +4184,13 @@ No. Three came from the test setup: a leftover popup window, a page from Version
 
 This chapter lists what Version 2 does not yet do or show, and what to do next, in order of value. Each limit points to its source so that a reader can check it. Faults that have been fixed are not listed here; chapter 15 tells how each one was found and fixed.
 
-## Not yet tested on the client's laptop or in a visible window
+## Not yet tested on the client's laptop or in a manual visible-Chrome click-through
 
 **The client's laptop.** The client's photos are in (`docs/CLIENT_LAPTOP.md`). The extension has still not been run on that laptop. No number in chapter 14 comes from it. Its Iris Xe graphics share the main memory and sit in a 15-watt processor, so its speed cannot be promised from the developer laptop's chip. The developer's target, about two minutes warm and about three with the first-answer warm-up, is not measured there.
 
 **Shader support on the client's chip.** The photos do not show whether the Iris Xe chip offers the 16-bit shader feature. If it does not, the extension stops with `NO_SHADER_F16`, and the popup says so. The check has not been made.
 
-**Runs in a visible window.** Every real run was made in hidden Chromium on the developer laptop. The advice on the speed question asked for a run in a visible window on mains power, timing three summaries in a row. That has not been done.
+**Runs in a visible window.** Most real runs were made in hidden Chromium on the developer laptop. The advice on the speed question asked for a run in a visible window on mains power, timing three summaries in a row. That was done on the developer laptop, not on the client's laptop, on 28 October: the Lighthouse page took 118.7, 101.7 and 116.7 seconds (chapter 14). The client's laptop has not been timed this way.
 
 **The graphics switch on a real Chrome.** `setup.bat --gpu` and its undo command work as written and report a failure, but they have been tested only against a throw-away registry key (tests B10, B10b and B10c). On the client's laptop, which has one chip, the switch does nothing. Chapter 13 gives the commands.
 
@@ -4196,14 +4198,14 @@ This chapter lists what Version 2 does not yet do or show, and what to do next, 
 
 ### What this means in plain words
 
-The client's facts are known, but the software has not been run on the client's laptop or in a visible window. Until it has, the speed and the first-run experience there are expectations.
+The client's facts are known, but the software has not been run on the client's laptop. The visible-window run was done on the developer laptop, not on the client's laptop. Until the client's laptop has been run, the speed and the first-run experience there are expectations.
 
 ## Speed and the whole page
 
 - **The whole page takes 11 to 12 minutes on this chip.** The popup estimated 692 seconds to read all of the Lighthouse page with the default model. That estimate is a rough guess from measured speed. The old small model took 616 seconds for the whole text. The whole-page button is the only path that still takes ten minutes or more.
 - **The shortened summary covers about a fifth of a long page.** On the Lighthouse page 5,968 of 27,964 characters were read, about 21 percent. The fixture article was read to about half. The opening and the first sentences of each paragraph are kept, so a fact that sits in the middle of a section can be missed.
 - **Reading is the cost, and it is slow on this chip.** The model reads 15 to 40 tokens a second whatever its size, measured only on the developer laptop's Intel chip. The job statistics do not keep the reading speed of the default runs, so the speed of a real run cannot be read back from the records.
-- **A different runtime has not been tried.** Transformers.js or ONNX Runtime Web was not tested. The advice was to try it only if the visible-window run is still slow, for half a day at most, and to switch only if reading is at least twice as fast.
+- **A different runtime has not been tried.** Transformers.js or ONNX Runtime Web was not tested. The advice was to try it only if the visible-window run is still slow, for half a day at most, and to switch only if reading is at least twice as fast. The visible-window run was done on the developer laptop, not on the client's laptop, and Transformers.js has not been started.
 - **First use is long.** The first use downloads about 695 MB, then loads and warms up the model. The warm-up on the first answer took about 28 to 37 seconds on this chip. The download time depends on the network, which the test did not control. In the offline runs on the same browser profile, the warm-up took about half a second. The cause of that difference is not measured.
 - **Memory is not measured.** The loaded model stays in the offscreen page until it has been idle for five minutes (`idleCloseMs`). A code comment in `offscreen-manager.js` says that closing the page "frees about a gigabyte of graphics memory". No run file measures that, so the figure is [to be measured]. The 879 MB and 376 MB figures in `config.js` are WebLLM's list values, not measured use.
 - **The dead-job rule stays at five minutes.** A running job is refreshed on each heartbeat, which the offscreen page sends every ten seconds while it works, so a long answer is not shown as dead.
@@ -4275,7 +4277,7 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 ## Next steps, in order of value
 
 1. **Run the extension on the client's laptop.** Download the main model in advance, then time one summary of each of two pages with the default model, and record the model line, the first-use time and the stats line. This is the first action of the manual test plan (`docs/MANUAL_SMOKE_TEST.md`).
-2. **Run the benchmark in a visible window on mains power.** Time three summaries in a row for the default. If reading stays near the developer laptop's 15.6 tokens a second or better, no other runtime is needed.
+2. **Run the benchmark in a visible window on mains power on the client's laptop.** The developer laptop's run was done on 28 October (chapter 14). Time three summaries in a row for the default. If reading stays near the developer laptop's 15.6 tokens a second or better, no other runtime is needed.
 3. **Try a different runtime only if reading is still slow.** Test Transformers.js on one page for half a day at most, and switch only if reading is at least twice as fast.
 4. **Run the manual click-through in the visible Chrome.** Cover Load unpacked, pinning, one summary, one offline summary with the network switched off, the notice after a memory failure, and the Settings choice. Keep the screenshots and the checklist results.
 5. **Confirm the shader support on the client's laptop.** Check whether the chip offers the 16-bit shader feature before the first run.
@@ -4290,7 +4292,7 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 
 ### What this means in plain words
 
-The client's laptop comes first, because its numbers decide what the client will experience. The visible-window run and the shader check come next, since they decide whether the default is fast enough there.
+The client's laptop comes first, because its numbers decide what the client will experience. The visible-window run on the client's laptop and the shader check come next, since they decide whether the default is fast enough there.
 
 
 <div style="page-break-after: always"></div>
@@ -4301,13 +4303,13 @@ Version 2 summarizes the page a reader has open with a small language model that
 
 The project is tested at three levels. The 93 unit tests check the logic of each piece without a browser. The 31 browser tests load the extension in a hidden Chromium and press the real button, with a pretend model that can be made to fail on purpose. The 15 Windows checks run the batch files in throw-away copies and the graphics script against a throw-away registry key. Real runs and a speed benchmark measured the actual models on the developer laptop, which has an NVIDIA RTX 3050 and a built-in Intel chip. In the clean runs, a first use on the NVIDIA chip took about 197 seconds, and a short article with the model already stored took 15.3 seconds with no internet, before a popup fix, and 17.7 seconds after it. On the built-in Intel chip the default model summarizes the Lighthouse page in 124.6 seconds, against 616 seconds for the old small model on the whole text. Reading the whole page with the default model is estimated at 11 to 12 minutes.
 
-The client's laptop has only the built-in Intel Iris Xe graphics, so this path is the main path for the client. Its facts are known from photos, but the extension has not been run there, and no number in the report comes from that laptop or from a visible Chrome window.
+The client's laptop has only the built-in Intel Iris Xe graphics, so this path is the main path for the client. Its facts are known from photos, but the extension has not been run there, and no number in the report comes from that laptop. The one visible-window timing was done on the developer laptop, not on the client's laptop.
 
 The main lessons are practical. A library's default storage can fail inside a particular kind of extension page, so each feature has to be tested in the page that uses it. The same laptop can run the model about thirty times faster or slower depending on which chip Chrome chooses, so the speed has to be measured on the path the client will use. A word in a library's message is not proof of what it is doing. A protection for the model, such as the prompt's markers, can leak into the output, and an answer that is only that protection is not a summary. A timeout copied from a fast cloud service does not fit a slow local one. A vague error message is a bug report with nothing in it, so the cause has to be shown. A persistent browser profile can keep old code, so a real run is only as current as the folders it starts from. On a slow chip the lever is how much text is read, not which model: an accurate slow model with a shorter input beat a fast model that invents facts. Each of these lessons came from a fault that a run, a screenshot, a reading of the code, a real Chrome failure or a benchmark exposed, and each is recorded in chapter 15.
 
-The honest state of the work has three parts. The software works in a test browser on one laptop, and the failure cases are covered by tests. The default model is recorded as accurate on the three pages tried, and the Fast choice is quicker but often muddled or wrong. The client's laptop is still untested, so its speed, its first run and its shader support are [to be measured]. Long pages are shortened to about a fifth of their text by default, and the whole page is available only by a slower button. The memory the model holds while loaded has not been measured, a tab closed during the first download does not stop that download, and the timeout path has no automated test. The runs in a visible Chrome window, and the graphics switch on a real Chrome, are still to do.
+The honest state of the work has three parts. The software works in a test browser on one laptop, and the failure cases are covered by tests. The default model is recorded as accurate on the three pages tried, and the Fast choice is quicker but often muddled or wrong. The client's laptop is still untested, so its speed, its first run and its shader support are [to be measured]. Long pages are shortened to about a fifth of their text by default, and the whole page is available only by a slower button. The memory the model holds while loaded has not been measured, a tab closed during the first download does not stop that download, and the timeout path has no automated test. A timing run in a visible Chrome window was done on the developer laptop, not on the client's laptop, and the graphics switch on a real Chrome is still to do.
 
-The next step with the most value is the first run on the client's laptop. Its chip decides how the default model feels to the client: about two minutes for a page that is shortened, and about three with the first-answer warm-up, if the developer's estimate holds there. After that come the visible-window timing on mains power, the shader check on the client's chip, and the reduction of copied wording and invented facts. Version 2 is a working local version with its limits written down, and what remains is to test it where the client will use it.
+The next step with the most value is the first run on the client's laptop. Its chip decides how the default model feels to the client: about two minutes for a page that is shortened, and about three with the first-answer warm-up, if the developer's estimate holds there. After that come the visible-window timing on mains power on the client's laptop (the developer laptop's run is already done), the shader check on the client's chip, and the reduction of copied wording and invented facts. Version 2 is a working local version with its limits written down, and what remains is to test it where the client will use it.
 
 
 <div style="page-break-after: always"></div>
@@ -4367,7 +4369,7 @@ Table: Every file under finalsem/project, with its purpose and its status agains
 | `scripts/check-computer.ps1` | Describes Windows, processor, memory, graphics chips and free disk space on drive C. Exits 1 only when disk space is short. Its built-in note says that a long page is shortened first and that the first use downloads about 695 MB | New |
 | `scripts/check-extension.ps1` | Checks that `manifest.json` parses, is Manifest V3, and names files that exist | Changed |
 | `scripts/dump-page-text.mjs` | Prints what the extension reads from a page: the extracted text, its size and its headings | New |
-| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, with seven plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`, `intel-better`, `intel-fast`). Deletes the profile's old service worker and code cache folders before each launch | New |
+| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, or in a visible window for the `intel-visible` plan, with eight plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`, `intel-better`, `intel-fast`, `intel-visible`). Deletes the profile's old service worker and code cache folders before each launch | New |
 | `scripts/secret-scan.mjs` | Checks the repository for the old Gemini key before a push | Changed |
 | `scripts/set-chrome-gpu.ps1` | Writes or removes the per-user setting that asks Windows for the separate graphics card. Finds Chrome itself, so `-ChromePath` is optional | New |
 | `scripts/shoot-ui-states.mjs` | Takes the pretend-model popup screenshots for the report | New |

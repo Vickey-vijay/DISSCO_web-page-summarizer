@@ -56,7 +56,7 @@ Until 26 October the extension did switch to SmolLM2 by itself on built-in graph
 
 **12. Why not a different runtime, such as Transformers.js?**
 
-Nothing measured so far says the runtime is the cause. The adviser's advice was to measure in a visible Chrome window on mains power first, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, one page with Transformers.js, half a day at most, and switch only if it reads at least two times faster. That test has not been made. Switching runtimes now would also mean new code and new tests, which the project has not budgeted for.
+Nothing measured so far says the runtime is the cause. The adviser's advice was to measure in a visible Chrome window on mains power first. That was done on the developer's laptop on 28 October: three runs in a row took 118.7 s, 101.7 s and 116.7 s, against 124.6 s in the hidden browser, so the hidden window is not the cause. A Transformers.js test, half a day at most, is needed only if a shorter time is wanted, and then only if it reads at least two times faster. That test has not been made. Switching runtimes now would also mean new code and new tests, which the project has not budgeted for.
 
 ## Privacy
 
@@ -84,7 +84,7 @@ The built-in chip reads about 15 tokens a second and writes about 2 with Llama 3
 
 **18. How fast is it on your laptop?**
 
-On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
+On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. In a visible Chrome window on mains power, on 28 October, three runs in a row took 118.7 s, 101.7 s and 116.7 s, so the hidden test browser did not make it slower. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
 
 ![Speed on the two graphics chips from the saved runs: writing speed in tokens a second, and seconds for one summary, before and after 26 October](../figures/V08_speed_chart.png)
 
@@ -138,7 +138,7 @@ The repository does not score summary quality, so the honest answer is that it i
 
 **29. What was not measured?**
 
-Several things. The client's laptop has not been run, and the chip's `shader-f16` support is not confirmed. The extension has not been timed in a visible Chrome window on mains power, which the adviser recommended first, and the timing of three summaries in a row has not been taken. The Transformers.js runtime has not been tried. Qwen2.5 1.5B was not measured, because the benchmark run stopped, and gemma3-1b did not load with this WebLLM version. The estimate for the whole page is a rough guess. Summary quality beyond three pages was not compared with any other model. Closing the tab during a download does not stop the download. No automated scenario covers the 10-minute timeout path, because the pretend model has no timeout. Only English text was tried.
+Several things. The client's laptop has not been run, and the chip's `shader-f16` support is not confirmed. The visible-window timing was made on the developer's laptop on 28 October, with no slowdown over three runs. The client's laptop has not been timed, and its three-run timing has not been taken. The Transformers.js runtime has not been tried. Qwen2.5 1.5B was not measured, because the benchmark run stopped, and gemma3-1b did not load with this WebLLM version. The estimate for the whole page is a rough guess. Summary quality beyond three pages was not compared with any other model. Closing the tab during a download does not stop the download. No automated scenario covers the 10-minute timeout path, because the pretend model has no timeout. Only English text was tried.
 
 **30. Why do the decode speeds differ between documents? The DEVLOG says 63 tokens a second, the saved runs say 34 to 53.**
 
@@ -146,4 +146,4 @@ The 63 tokens a second, and the 600 for reading the prompt, come from an earlier
 
 ## What this means in plain words
 
-The answers come back to three points. The model runs on the laptop, so the page stays private and the summary needs no network after the download. The built-in chip is slow at reading and writing, so the project reads less of a long page and writes short answers, and the popup says what was left out. What is not yet known is the client's laptop, so the timing run in a visible Chrome window comes first, and until it is done you should say so.
+The answers come back to three points. The model runs on the laptop, so the page stays private and the summary needs no network after the download. The built-in chip is slow at reading and writing, so the project reads less of a long page and writes short answers, and the popup says what was left out. What is not yet known is the client's laptop, so its own timing run comes first, and until it is done you should say so.

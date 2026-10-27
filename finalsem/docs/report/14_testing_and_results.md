@@ -2,7 +2,7 @@
 
 This chapter reports how Version 2 was tested and what the measurements show. Three kinds of evidence are used. Automated tests run the whole chain with a pretend model that can be made to fail on purpose. Windows checks run the batch files. Real-model runs and a speed benchmark measure the actual model.
 
-Every real number in this chapter comes from the developer laptop, in hidden Chromium: its NVIDIA RTX 3050 and its built-in Intel chip. None comes from the client's laptop, and none comes from a visible Chrome window. The client's laptop is described in chapter 13.
+Every real number in this chapter comes from the developer laptop: its NVIDIA RTX 3050 and its built-in Intel chip. Most come from hidden Chromium. One set, the visible-window timing of 28 October, comes from a visible Chrome window on mains power. None comes from the client's laptop, which is described in chapter 13.
 
 Each real-model run appears once, in the table for its case. A run marked **clean** was done with nothing else busy on the laptop, according to its record. A run marked **under load** was done while other programs were using the processor, according to its note. Under-load runs are kept as records, but their numbers are never presented as clean.
 
@@ -15,7 +15,7 @@ Table: The test layers
 | Unit tests | `tests/unit` (eight files) | 93 | Each piece of logic, with fakes. No browser, no network |
 | Browser tests | `tests/e2e` (smoke test, V01 to V29 and V18b) | 31 | The whole chain in hidden Chromium, with the pretend model |
 | Windows script checks | `tests/bat` | 15 (B1 to B10c) | `setup.bat` and `run.bat` in throw-away copies, and the graphics script against a throw-away registry key |
-| Real-model runs | `scripts/local-run.mjs` | Seven plans | The real model's speed and output on the developer laptop |
+| Real-model runs | `scripts/local-run.mjs` | Eight plans | The real model's speed and output on the developer laptop |
 | Speed benchmark | `scripts/bench-models.mjs` | Seven model versions | Where the time goes on the built-in Intel chip |
 
 The layers answer different questions. The commands are `npm test`, `npm run test:e2e`, the Windows check script, `node scripts/local-run.mjs` with a plan name, and `node scripts/bench-models.mjs`.
@@ -105,7 +105,7 @@ The browser tests press the real buttons, but on a fake model. They show that th
 
 ## Real-model runs
 
-The script `scripts/local-run.mjs` measures the real model in hidden Chromium. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
+The script `scripts/local-run.mjs` measures the real model in hidden Chromium, except for the `intel-visible` plan, which runs in a visible window. Each plan keeps its own browser profile folder, so the downloaded model is kept between runs.
 
 Table: The real-model plans
 
@@ -118,6 +118,7 @@ Table: The real-model plans
 | `intel-short` | No flags | `.model-profile-intel` | Short article |
 | `intel-better` | No flags; the default main model, Llama 3.2 1B | `.model-profile-intel-better` | Short article, Wikipedia "Lighthouse" (live), long article |
 | `intel-fast` | No flags; Settings, Quality: Fast (SmolLM2 360M) | `.model-profile-intel` | Short article, Wikipedia "Lighthouse" (live) |
+| `intel-visible` | No flags; a visible window (`HEADED=1`), on mains power | `.model-profile-intel-better` | Wikipedia "Lighthouse" (live), three times in one session |
 
 Each run records the popup's text with time stamps, the wall time from the click to the result, the job's own statistics and up to three screenshots. It writes a JSON file and a Markdown table. The wall time is always a little longer than the job's own time in the saved pairs. The NVIDIA runs used the test flag `--force_high_performance_gpu`, not the Windows setting that `setup.bat --gpu` writes. Chapter 13 covers that setting. The Intel runs used no flags, so Chrome chose the built-in chip, as it does on the client's laptop.
 
@@ -255,7 +256,7 @@ Table: Intel runs with the current default, Llama 3.2 1B, and with Quality: Fast
 | Whole-page estimate shown in the popup | Not shown | 692 s | 303 s | 372 s | Not shown |
 | Notes | Includes the 695 MB download. Load 149.0 s, warm-up about 28 s | The popup says that the opening was read and offers the whole page | The popup says that the opening was read | Recorded before the echo fix. Its saved summary is the echoed safety sentence, a failed answer | The model was already stored |
 
-The Lighthouse page took 616 seconds with SmolLM2 and the whole text, and it takes 124.6 seconds with the default. Reading all of it, the popup estimated 692 seconds. The whole-page button, Read the whole page, is therefore about 11 to 12 minutes on this chip, and it is the only path that still takes ten minutes or more. The summaries of the three default runs are recorded as accurate and fluent.
+The Lighthouse page took 616 seconds with SmolLM2 and the whole text, and it takes 124.6 seconds with the default. Reading all of it, the popup estimated 692 seconds. The whole-page button, Read the whole page, is therefore about 11 to 12 minutes on this chip, and it is the only path that still takes ten minutes or more. The summaries of the three default runs are recorded as accurate and fluent. On 28 October the same page was run three times in a row in a visible Chrome window, on mains power, with the default model already stored. The times were 118.7, 101.7 and 116.7 seconds (`v2-local-intel-visible.md`). So the hidden window did not cause the slow reading: the chip did, and the visible runs averaged about 112 seconds, about 10 percent less than the hidden run.
 
 ![Popup for the short article on the Intel chip, recorded before 26 October and before the marker fix](../screenshots/v2-intel-short-popup.png)
 
@@ -322,12 +323,12 @@ From run 1, the browser tests do not show:
 
 - real summary quality, because the pretend model returns fixed text;
 - real download speed, graphics-card behaviour or shader warm-up, which only the real-model records cover;
-- the visible Chrome the client will use, because every test ran in hidden Chromium.
+- the visible Chrome the client will use, because the automated tests ran in hidden Chromium, and the one visible-window timing was made on the developer laptop.
 
 From the README and the change list, these items are not yet verified:
 
 - the extension on the client's laptop. Its facts are known from photos, but the extension has not been run there, and no number here is from that laptop;
-- a run in a visible Chrome window on mains power, which the advice on the speed question asked for before any other runtime is tried;
+- a visible-window run on mains power on the client's laptop. The developer laptop had one on 28 October (chapter 14), which does not stand in for the client's laptop, and the advice on the speed question asked for this before any other runtime is tried;
 - `setup.bat --gpu` against a real Chrome installation;
 - a manual click-through in the visible Chrome, using the V2 checklist;
 - a real answer timeout, because no automated test triggers the TIMEOUT path;
@@ -338,7 +339,7 @@ The real-model records cover two fixture articles and one live Wikipedia page. N
 
 ### What this means in plain words
 
-The tests prove the logic, and the real runs prove the speed on one developer laptop in a hidden browser. They do not prove how the extension runs on the client's laptop, how it looks in a visible Chrome window, or how good the summaries are.
+The tests prove the logic, and the real runs prove the speed on one developer laptop, in a hidden browser and once in a visible one. They do not prove how the extension runs on the client's laptop, how it looks in a visible Chrome window, or how good the summaries are.
 
 ## Questions this chapter answers
 

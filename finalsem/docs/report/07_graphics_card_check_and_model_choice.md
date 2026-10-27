@@ -162,11 +162,11 @@ Table: The Intel numbers on the developer laptop, by model and date
 | Whole Lighthouse page, 7 parts (Intel Wikipedia runs of 24 October), before 26 October | SmolLM2 360M, automatic | 616.4 s with the new code; 704.5 s on the second try of the old code; the first old-code try timed out after 615.6 s | about 4 tokens a second |
 | Quality: Fast (`v2-local-intel-fast.md`), made before the cleanup fix | SmolLM2 360M, chosen | Short article 39.5 s (model stored); Lighthouse 64.7 s | 4 tokens a second |
 
-On this chip the 1B model reads at 15.6 tokens a second and writes at 2.0. One realistic part of 6,000 characters took 161.6 seconds, against 66.2 seconds for SmolLM2 (`bench-models.md`). Reading the text is about 80 percent of the time of a part. The first use downloads the 695 MB model once, and it also includes the warm-up. The Lighthouse page reads about a fifth of its text, and the popup says so.
+On this chip the 1B model reads at 15.6 tokens a second and writes at 2.0. One realistic part of 6,000 characters took 161.6 seconds, against 66.2 seconds for SmolLM2 (`bench-models.md`). Reading the text is about 80 percent of the time of a part. The first use downloads the 695 MB model once, and it also includes the warm-up. The Lighthouse page reads about a fifth of its text, and the popup says so. In a visible Chrome window, on mains power, the same page took 118.7, 101.7 and 116.7 seconds in three runs in a row (the first includes loading the stored model, 9.3 s), about 10 percent quicker than the hidden run's 124.6 seconds, with no slowdown over the three runs (`v2-local-intel-visible.md`, 28 October).
 
 The Fast Lighthouse answer in its record only repeated the prompt's safety sentence and an empty "Summary:" label. The cleanup fix now reports such an answer as an empty answer ("The model returned no summary for this page."). Its record predates that fix, which is why Fast is a visible choice and not the default.
 
-The client's laptop has a related but different chip: Iris Xe, with more execution units, in a 15-watt processor. No number in this chapter is from the client's laptop, and the extension has not been run there or in a visible Chrome window.
+The client's laptop has a related but different chip: Iris Xe, with more execution units, in a 15-watt processor. No number in this chapter is from the client's laptop, and the extension has not been run there. The visible-window timings below were made on the developer laptop.
 
 **What this means in plain words.** On the developer laptop's Intel chip, the accurate model now takes about two minutes for the Lighthouse page, against about ten minutes before. The client's own speed is still to be measured.
 
@@ -227,7 +227,7 @@ The unit tests in `tests/unit/gpu-and-errors.test.js` and `tests/unit/local-engi
 - The small model's answers are weaker, and Fast summaries are often muddled or wrong. Chapter 10 covers how good the summaries are.
 - On built-in graphics the 1B model writes about 2 tokens a second. The first use downloads 695 MB, and a long page is read only in part unless the person asks for the whole page.
 - No code path clears `modelOverride`, and the notice for `MODEL_LOAD_FAILED` says "did not fit" even when memory is not the cause.
-- The client's laptop details are known from the photos, but the extension has not been run there or in a visible Chrome window. The photos do not show whether its Iris Xe chip offers `shader-f16`.
+- The client's laptop details are known from the photos, but the extension has not been run there. The visible Chrome window timings were made on the developer laptop only. The photos do not show whether its Iris Xe chip offers `shader-f16`.
 - Halving a part that does not fit the model's window is built, up to three levels deep. The real Wikipedia run did not need it, so it is covered by unit tests and scenario V25 only.
 
 ## Questions this chapter answers

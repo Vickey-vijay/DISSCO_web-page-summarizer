@@ -60,7 +60,7 @@ Table: Project objectives and the state of Version 2
 | 5 | Make summaries work with no network. | Delivered for one computer and two pages, with outside websites blocked. The client's laptop is not tested. |
 | 6 | Compare the cloud engine and the local engine on speed, summary quality and memory use. | Partly. Speed was measured for both. Memory use and summary quality were not compared side by side. |
 | 7 | Confirm the client laptop's system, memory and graphics card, because they set the model size. | Details received (`finalsem/docs/CLIENT_LAPTOP.md`): built-in Intel Iris Xe graphics only, 16 GB, Chrome 156. Not yet run on that laptop. |
-| 8 | Make a long page quick enough on built-in graphics, the only graphics the client's laptop has. | Partly. A benchmark on the developer laptop's Intel chip led to a shortened read of long pages: the Wikipedia article on lighthouses went from about 10 minutes to 124.6 seconds. Not yet measured on the client's laptop. |
+| 8 | Make a long page quick enough on built-in graphics, the only graphics the client's laptop has. | Partly. A benchmark on the developer laptop's Intel chip led to a shortened read of long pages: the Wikipedia article on lighthouses went from about 10 minutes to 124.6 seconds in the hidden browser, and to 101.7 to 118.7 seconds in three visible-window runs on 28 October. Not yet measured on the client's laptop. |
 
 ## Scope
 
@@ -83,11 +83,11 @@ Table: Project objectives and the state of Version 2
 - Clearing the saved switch to the smaller model. Once it is saved, it stays until the stored settings are cleared. Closing a tab during the download does not stop the download either.
 - Languages other than English. The model is small and is meant for English text.
 - Chrome's built-in Summarizer API. It was studied as background only.
-- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in the visible Chrome window. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
+- A test on the client's laptop, a test of the `setup.bat --gpu` option in a real Chrome installation, and a full manual click-through in a visible Chrome window on the client's laptop. On 28 October the developer laptop's Lighthouse page was timed three times in a visible Chrome window. Apart from that and one page the owner ran in real Chrome on 24 October, the other runs used a hidden Chromium browser.
 
 ## Test machines
 
-The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is an HP Laptop 15 with a 13th Gen Intel Core i7-1355U, 16 GB of memory, Intel Iris Xe graphics built into the processor (no separate card) and Chrome 156. Its facts were read from the client's photos (`finalsem/docs/CLIENT_LAPTOP.md`). The extension has not been run on that laptop or in a visible Chrome window, so the report describes what the developer laptop does and says so wherever a number depends on it.
+The developer laptop is an Acer Aspire Lite with an Intel Core i5-12450H processor, 15.7 GB of memory, a built-in Intel graphics chip and a separate NVIDIA GeForce RTX 3050 with 6 GB of graphics memory. The Chrome version on it was 155 (`DECISIONS.md`, D1). The Version 2 numbers in this report were measured on that laptop, with Chrome's graphics setting used in two ways: the NVIDIA chip forced by a test flag, and the built-in Intel chip with no change. The client's laptop is an HP Laptop 15 with a 13th Gen Intel Core i7-1355U, 16 GB of memory, Intel Iris Xe graphics built into the processor (no separate card) and Chrome 156. Its facts were read from the client's photos (`finalsem/docs/CLIENT_LAPTOP.md`). The extension has not been run on that laptop, and it was timed in a visible Chrome window only on the developer laptop (28 October), so the report describes what the developer laptop does and says so wherever a number depends on it.
 
 ## How to read this report
 

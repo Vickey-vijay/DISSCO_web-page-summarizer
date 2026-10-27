@@ -2,13 +2,13 @@
 
 This chapter lists what Version 2 does not yet do or show, and what to do next, in order of value. Each limit points to its source so that a reader can check it. Faults that have been fixed are not listed here; chapter 15 tells how each one was found and fixed.
 
-## Not yet tested on the client's laptop or in a visible window
+## Not yet tested on the client's laptop or in a manual visible-Chrome click-through
 
 **The client's laptop.** The client's photos are in (`docs/CLIENT_LAPTOP.md`). The extension has still not been run on that laptop. No number in chapter 14 comes from it. Its Iris Xe graphics share the main memory and sit in a 15-watt processor, so its speed cannot be promised from the developer laptop's chip. The developer's target, about two minutes warm and about three with the first-answer warm-up, is not measured there.
 
 **Shader support on the client's chip.** The photos do not show whether the Iris Xe chip offers the 16-bit shader feature. If it does not, the extension stops with `NO_SHADER_F16`, and the popup says so. The check has not been made.
 
-**Runs in a visible window.** Every real run was made in hidden Chromium on the developer laptop. The advice on the speed question asked for a run in a visible window on mains power, timing three summaries in a row. That has not been done.
+**Runs in a visible window.** Most real runs were made in hidden Chromium on the developer laptop. The advice on the speed question asked for a run in a visible window on mains power, timing three summaries in a row. That was done on the developer laptop, not on the client's laptop, on 28 October: the Lighthouse page took 118.7, 101.7 and 116.7 seconds (chapter 14). The client's laptop has not been timed this way.
 
 **The graphics switch on a real Chrome.** `setup.bat --gpu` and its undo command work as written and report a failure, but they have been tested only against a throw-away registry key (tests B10, B10b and B10c). On the client's laptop, which has one chip, the switch does nothing. Chapter 13 gives the commands.
 
@@ -16,14 +16,14 @@ This chapter lists what Version 2 does not yet do or show, and what to do next, 
 
 ### What this means in plain words
 
-The client's facts are known, but the software has not been run on the client's laptop or in a visible window. Until it has, the speed and the first-run experience there are expectations.
+The client's facts are known, but the software has not been run on the client's laptop. The visible-window run was done on the developer laptop, not on the client's laptop. Until the client's laptop has been run, the speed and the first-run experience there are expectations.
 
 ## Speed and the whole page
 
 - **The whole page takes 11 to 12 minutes on this chip.** The popup estimated 692 seconds to read all of the Lighthouse page with the default model. That estimate is a rough guess from measured speed. The old small model took 616 seconds for the whole text. The whole-page button is the only path that still takes ten minutes or more.
 - **The shortened summary covers about a fifth of a long page.** On the Lighthouse page 5,968 of 27,964 characters were read, about 21 percent. The fixture article was read to about half. The opening and the first sentences of each paragraph are kept, so a fact that sits in the middle of a section can be missed.
 - **Reading is the cost, and it is slow on this chip.** The model reads 15 to 40 tokens a second whatever its size, measured only on the developer laptop's Intel chip. The job statistics do not keep the reading speed of the default runs, so the speed of a real run cannot be read back from the records.
-- **A different runtime has not been tried.** Transformers.js or ONNX Runtime Web was not tested. The advice was to try it only if the visible-window run is still slow, for half a day at most, and to switch only if reading is at least twice as fast.
+- **A different runtime has not been tried.** Transformers.js or ONNX Runtime Web was not tested. The advice was to try it only if the visible-window run is still slow, for half a day at most, and to switch only if reading is at least twice as fast. The visible-window run was done on the developer laptop, not on the client's laptop, and Transformers.js has not been started.
 - **First use is long.** The first use downloads about 695 MB, then loads and warms up the model. The warm-up on the first answer took about 28 to 37 seconds on this chip. The download time depends on the network, which the test did not control. In the offline runs on the same browser profile, the warm-up took about half a second. The cause of that difference is not measured.
 - **Memory is not measured.** The loaded model stays in the offscreen page until it has been idle for five minutes (`idleCloseMs`). A code comment in `offscreen-manager.js` says that closing the page "frees about a gigabyte of graphics memory". No run file measures that, so the figure is [to be measured]. The 879 MB and 376 MB figures in `config.js` are WebLLM's list values, not measured use.
 - **The dead-job rule stays at five minutes.** A running job is refreshed on each heartbeat, which the offscreen page sends every ten seconds while it works, so a long answer is not shown as dead.
@@ -95,7 +95,7 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 ## Next steps, in order of value
 
 1. **Run the extension on the client's laptop.** Download the main model in advance, then time one summary of each of two pages with the default model, and record the model line, the first-use time and the stats line. This is the first action of the manual test plan (`docs/MANUAL_SMOKE_TEST.md`).
-2. **Run the benchmark in a visible window on mains power.** Time three summaries in a row for the default. If reading stays near the developer laptop's 15.6 tokens a second or better, no other runtime is needed.
+2. **Run the benchmark in a visible window on mains power on the client's laptop.** The developer laptop's run was done on 28 October (chapter 14). Time three summaries in a row for the default. If reading stays near the developer laptop's 15.6 tokens a second or better, no other runtime is needed.
 3. **Try a different runtime only if reading is still slow.** Test Transformers.js on one page for half a day at most, and switch only if reading is at least twice as fast.
 4. **Run the manual click-through in the visible Chrome.** Cover Load unpacked, pinning, one summary, one offline summary with the network switched off, the notice after a memory failure, and the Settings choice. Keep the screenshots and the checklist results.
 5. **Confirm the shader support on the client's laptop.** Check whether the chip offers the 16-bit shader feature before the first run.
@@ -110,4 +110,4 @@ The first run on the client's laptop. If the chip reads far slower than the deve
 
 ### What this means in plain words
 
-The client's laptop comes first, because its numbers decide what the client will experience. The visible-window run and the shader check come next, since they decide whether the default is fast enough there.
+The client's laptop comes first, because its numbers decide what the client will experience. The visible-window run on the client's laptop and the shader check come next, since they decide whether the default is fast enough there.

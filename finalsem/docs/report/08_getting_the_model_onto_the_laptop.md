@@ -207,7 +207,7 @@ The browser test V01 runs the whole first use. It checks that the percentages ne
 - The offline runs do not log requests, and they cover only the short and long fixtures.
 - The after-fix offline load took 11.6 seconds against 6.9 seconds, and the cause is not measured.
 - The warm-up label still says "first time only" in the code, while the code runs the warm-up on every load.
-- The client's laptop details are known from its photos, but the extension has not been run on it or in a visible Chrome window. Every time here is from the developer laptop, in hidden Chromium.
+- The client's laptop details are known from its photos, but the extension has not been run on it. Every time here is from the developer laptop, in hidden Chromium.
 
 ## Questions this chapter answers
 

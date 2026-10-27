@@ -159,8 +159,8 @@ Where a number appears, it comes from `DECISIONS.md`, `DEVLOG.md`, the saved tes
 | 1 | Default model on built-in graphics | Llama 3.2 1B, accurate and 2.4 times slower per part. Do not show a model choice on the main screen; put Quality under Settings. | Done. The automatic switch to SmolLM2 is removed. Quality: Better or Fast is under Settings. |
 | 2 | How much of a page to read | Keep 6,000 characters, exactly one part, so no merge request. Aim for about 2 minutes warm and 3 with the first-answer warm-up. | Done. `readBudgetIntegrated` is 6,000, and the page is shortened in `condense.js`. |
 | 3 | Shorter answers | 3 sentences for a single part (130 tokens), 2 per part (90), 4 or 5 for the merge (180), and every cut answer ends at its last full stop. | Done for built-in graphics only. |
-| 4 | A different runtime | Not now. First run the same benchmark in a visible Chrome window on mains power, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, try Transformers.js on one page, half a day at most, and switch only if reading is at least two times faster. | Not done. Everything measured so far ran in a hidden Chromium. |
-| 5 | Biggest risk | None of the numbers is from the client's chip or a visible Chrome window. First action: run the extension on the client's laptop with a timing log for both models on the same page, which also downloads the 695 MB model in advance. | Open. See the timing run in chapter 03. |
+| 4 | A different runtime | Not now. First run the same benchmark in a visible Chrome window on mains power, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, try Transformers.js on one page, half a day at most, and switch only if reading is at least two times faster. | Visible-window run done on the developer's laptop on 28 October: 118.7 s, 101.7 s and 116.7 s, against 124.6 s hidden, with no slowdown. Transformers.js not tried. |
+| 5 | Biggest risk | None of the numbers is from the client's chip. First action: run the extension on the client's laptop with a timing log for both models on the same page, which also downloads the 695 MB model in advance. | Open. See the timing run in chapter 03. |
 
 **Also built, from the same advice:** the model is loaded and warmed while the popup is open, when it is already stored; back matter and markers are cut before reading; the popup says when a page was shortened and offers "Read the whole page (slower)" with a rough time estimate; the Quality choice is in Settings.
 
@@ -168,7 +168,7 @@ Where a number appears, it comes from `DECISIONS.md`, `DEVLOG.md`, the saved tes
 
 **The trade-off.** The shortened summary covers about a fifth of a long page, and the whole page takes 5 to 12 minutes on built-in graphics. The estimate for the whole page is a rough guess from the measured speed.
 
-**What is still open.** The client's laptop has not been timed, and the visible-window run on mains power has not been made. Transformers.js has not been tried.
+**What is still open.** The client's laptop has not been timed. The visible-window run on mains power was made on the developer's laptop on 28 October, with no slowdown over three runs. Transformers.js has not been tried, and is needed only if a shorter time is wanted.
 
 **What you can say.** "The slow chip reads about 15 tokens a second, so the project reads less of a long page and writes short answers. The main model stays, and the person decides whether to trade accuracy for speed."
 

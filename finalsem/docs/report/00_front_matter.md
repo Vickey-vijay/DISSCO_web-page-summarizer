@@ -102,9 +102,9 @@ Version 2 of the AI-Powered Web Page Summarizer keeps the Chrome extension of Ve
 
 **Remaining Tasks:**
 
-- The client's laptop details are known (`finalsem/docs/CLIENT_LAPTOP.md`: built-in Intel Iris Xe graphics, 16 GB, Chrome 156). The extension has not yet been run on that laptop, or in a visible Chrome window.
+- The client's laptop details are known (`finalsem/docs/CLIENT_LAPTOP.md`: built-in Intel Iris Xe graphics, 16 GB, Chrome 156). The extension has not yet been run on that laptop. On 28 October it was timed in a visible Chrome window on the developer laptop, not the client's.
 - The optional `setup.bat --gpu` switch has not been tried in a real Chrome installation. It has no use on the client's laptop, which has one graphics chip.
-- A full manual check in the visible Chrome window is still to be done. Apart from one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
+- A full manual check in a visible Chrome window on the client's laptop is still to be done. The developer laptop was timed in a visible window on 28 October. Apart from that and one page the project owner ran in the real Chrome on 24 October, every run used a hidden Chromium browser.
 - No side-by-side comparison of summary quality between Version 1 and Version 2 is recorded in the repository.
 
 **Evaluation:**

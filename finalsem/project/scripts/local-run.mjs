@@ -31,6 +31,8 @@ const PLANS = {
   'intel-short': { profile: '.model-profile-intel', args: [], online: true, cases: ['short'] },
   // The default on built-in graphics since 26 October: the main model (Llama 3.2 1B), long pages shortened. The first case includes the download and the warm-up.
   'intel-better': { profile: '.model-profile-intel-better', args: [], online: true, cases: ['short', 'wikipedia', 'long'] },
+  // Timing in a VISIBLE window (run with HEADED=1 SLOWMO=0, on mains power): the Lighthouse page three times in a row with the default settings.
+  'intel-visible': { profile: '.model-profile-intel-better', args: [], online: true, cases: ['wikipedia', 'wikipedia', 'wikipedia'] },
   'intel-fast': { profile: '.model-profile-intel', args: [], online: true, cases: ['short', 'wikipedia'], settings: { quality: 'fast' } },
 };
 const plan = PLANS[mode];

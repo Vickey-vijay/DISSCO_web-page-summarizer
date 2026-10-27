@@ -1,0 +1,178 @@
+{
+  "date": "2026-10-27T21:07:45.197Z",
+  "mode": "intel-visible",
+  "plan": {
+    "args": [],
+    "online": true
+  },
+  "results": [
+    {
+      "mode": "intel-visible",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-27T21:01:51.086Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 118.7,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 2.6,
+          "text": "Loading the model into the graphics card: 0%"
+        },
+        {
+          "s": 6.2,
+          "text": "Loading the model into the graphics card: 21%"
+        },
+        {
+          "s": 6.6,
+          "text": "Loading the model into the graphics card: 35%"
+        },
+        {
+          "s": 7,
+          "text": "Loading the model into the graphics card: 50%"
+        },
+        {
+          "s": 7.4,
+          "text": "Loading the model into the graphics card: 61%"
+        },
+        {
+          "s": 7.8,
+          "text": "Loading the model into the graphics card: 74%"
+        },
+        {
+          "s": 8.3,
+          "text": "Loading the model into the graphics card: 89%"
+        },
+        {
+          "s": 8.7,
+          "text": "Warming up the model (first time can take about 30 seconds)..."
+        },
+        {
+          "s": 10.5,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": true,
+        "decodeTps": 2.004743426857423,
+        "elapsedMs": 118462,
+        "estimateFullSeconds": 620,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 9323,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 5968,
+        "textChars": 27964,
+        "trimmedChars": 8788
+      },
+      "summary": "Lighthouses are towers or buildings that emit light from a system of lamps and lenses to serve as beacons for navigational aid. They were originally used to guide mariners by fires built on hilltops, but have since declined due to maintenance costs and the advent of electronic navigation systems."
+    },
+    {
+      "mode": "intel-visible",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-27T21:03:56.330Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 101.7,
+      "timeline": [
+        {
+          "s": 0.1,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 3.2,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": true,
+        "decodeTps": 2.028882266233853,
+        "elapsedMs": 101625,
+        "estimateFullSeconds": 606,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 0,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 5968,
+        "textChars": 27964,
+        "trimmedChars": 8788
+      },
+      "summary": "Lighthouses are towers or buildings that emit light from a system of lamps and lenses to serve as beacons for navigational aid. They were originally used for guidance and have declined in use due to maintenance and technological advancements."
+    },
+    {
+      "mode": "intel-visible",
+      "id": "wikipedia",
+      "name": "Wikipedia: Lighthouse",
+      "startedAt": "2026-10-27T21:05:42.670Z",
+      "modelLineBefore": "Model: Llama 3.2 1B. Downloaded, runs on this computer.",
+      "gpuNote": "Graphics: Intel (built into the processor). Answers can be slow. A separate graphics card is much faster.",
+      "buttonBefore": "Summarize this page",
+      "wallSeconds": 116.7,
+      "timeline": [
+        {
+          "s": 0.2,
+          "text": "Reading the page..."
+        },
+        {
+          "s": 3.1,
+          "text": "Checking your graphics card..."
+        },
+        {
+          "s": 3.5,
+          "text": "Summarizing..."
+        }
+      ],
+      "outcome": "summary",
+      "stats": {
+        "apiCalls": 1,
+        "chunks": 1,
+        "condensed": true,
+        "decodeTps": 2.0270612679145783,
+        "elapsedMs": 116373,
+        "estimateFullSeconds": 613,
+        "extractMethod": "readability",
+        "gpu": {
+          "architecture": "gen-12lp",
+          "integrated": true,
+          "vendor": "intel"
+        },
+        "halvedParts": 0,
+        "loadMs": 0,
+        "mergeLevels": 0,
+        "model": "Llama 3.2 1B",
+        "modelSwitchReason": null,
+        "readChars": 5968,
+        "textChars": 27964,
+        "trimmedChars": 8788
+      },
+      "summary": "Lighthouses are towers or buildings that emit light from a system of lamps and lenses to serve as beacons for maritime pilots. They were used in ancient times to guide mariners, but their use declined with the advent of electronic navigational systems. Modern lighthouses are used to assist in aerial navigation and are often illuminated by a single stationary flashing light."
+    }
+  ]
+}

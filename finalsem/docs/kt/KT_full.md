@@ -45,10 +45,10 @@ Version 1 is untouched in its own folder, so the midterm submission stays as it 
 ## The five things to remember
 
 1. **The model runs on the laptop.** The page text stays on the computer. The network is used only for the first download, about 695 MB for Llama 3.2 1B.
-2. **The client's laptop has only built-in graphics.** It is an Intel Iris Xe chip on a 15-watt processor. The extension has never been run on that laptop, nor in a visible Chrome window.
+2. **The client's laptop has only built-in graphics.** It is an Intel Iris Xe chip on a 15-watt processor. The extension has never been run on that laptop. On the developer's laptop it was timed in a visible Chrome window on 28 October, with results close to the hidden run.
 3. **Long pages are shortened on built-in graphics.** The default reads the opening of the page and the first sentences of each section, about one part of 6,000 characters. The popup says how much was read, and offers "Read the whole page (slower)". The Wikipedia Lighthouse page took 124.6 s on the developer's built-in chip, against about 10 minutes before.
 4. **Answers are short on built-in graphics, and the big model is the default.** SmolLM2 is available only as a visible choice, Settings > Quality > Fast, because its summaries were often muddled or wrong.
-5. **Some things are not verified.** Timing on the client's laptop, timing in a visible Chrome on mains power, a second runtime, and any language other than English.
+5. **Some things are not verified.** Timing on the client's laptop, a second runtime, and any language other than English.
 
 *If asked about evidence, say: "The numbers come from saved runs on the developer's laptop and from pretend-model scenarios. None of them is from the client's laptop, and the repository does not score summary quality."*
 
@@ -180,6 +180,7 @@ The table lists the saved runs used in this chapter. The NVIDIA and Intel rows, 
 | Wikipedia Lighthouse, stored | NVIDIA RTX 3050 | Llama 3.2 1B | 74.1 | 7 parts, 8 requests | 34 |
 | Wikipedia Lighthouse, whole page, SmolLM2 default (before 26 October) | Intel built-in | SmolLM2 360M | 616.4 | 7 parts, 8 requests | 4 |
 | Wikipedia Lighthouse, shortened (26 October) | Intel built-in | Llama 3.2 1B | 124.6 | 1 part, 1 request, 21% read | 2 |
+| Wikipedia Lighthouse, visible window, developer laptop (28 October, three runs in a row) | Intel built-in | Llama 3.2 1B | 118.7, 101.7, 116.7 | 1 part, 1 request, 21% read | 2 |
 | Long fixture, shortened (26 October) | Intel built-in | Llama 3.2 1B | 103.8 | 1 part, 1 request, 50% read | 2 |
 
 Reading the table: the Intel rows with Llama 3.2 1B are the new default. The 124.6 s run is about five times quicker than the whole-page SmolLM2 run, and its summaries were judged accurate. The popup's estimate for reading all of the Lighthouse text was 692 s, a rough guess from the measured speed. The earlier real run on the full text took 616 s with the small model.
@@ -614,7 +615,7 @@ The client sent photos of the laptop. The facts below are read from the photos (
 | Chrome | 156.0.8078.48 |
 | WebGPU | Hardware accelerated |
 
-Three things are not known. The photos do not show whether the Iris Xe chip has the `shader-f16` feature. If it does not, the popup shows the NO_SHADER_F16 message and Version 2 cannot run there. The speed of this chip has not been measured on that laptop, and the processor is a 15-watt part whose sustained speed is not known. And the extension has not been run on that laptop, nor in a visible Chrome window. The developer's Intel chip is of the same generation (Gen 12), and its numbers are the nearest guide, not a promise. `setup.bat --gpu` has nothing to switch on there, because the laptop has one graphics chip.
+Three things are not known. The photos do not show whether the Iris Xe chip has the `shader-f16` feature. If it does not, the popup shows the NO_SHADER_F16 message and Version 2 cannot run there. The speed of this chip has not been measured on that laptop, and the processor is a 15-watt part whose sustained speed is not known. And the extension has not been run on that laptop. The visible-window timing was made only on the developer's laptop. The developer's Intel chip is of the same generation (Gen 12), and its numbers are the nearest guide, not a promise. `setup.bat --gpu` has nothing to switch on there, because the laptop has one graphics chip.
 
 ## Step by step on a fresh computer
 
@@ -664,9 +665,9 @@ Caption: real model, NVIDIA card, the Wikipedia Lighthouse article, from a run b
 
 Cautions. Do not demo the first download on stage. Do not quote the 616 s or 704 s runs as current; they used the SmolLM2 default before 26 October. Do not quote the 15.3 s offline figure as a current measurement of the built-in chip; it was made on the NVIDIA card before a label fix. The Lighthouse summary on built-in graphics is short and checked for accuracy, but its text is not the same as the whole article's.
 
-## The timing run in a visible Chrome (on mains power)
+## The visible-window timing (developer laptop done; client's to do)
 
-No timing has yet been made in a visible Chrome window on mains power, which was the first step an outside adviser (Opus) recommended on 26 October. The run below is what to do, and what to write down, for both the developer's laptop and the client's.
+The visible-window timing was made on the developer's laptop on 28 October, on mains power, with the Lighthouse page three times in a row: 118.7 s, 101.7 s and 116.7 s, against 124.6 s in the hidden browser. No slowdown showed over the three runs. The steps below repeat it, and say what to write down on the client's laptop, which still needs its own timing.
 
 1. Plug the laptop into mains power. Close other programs, and keep the same window open.
 2. Open Chrome in the normal window (not the test browser). Load the folder, and reload it if the code changed.
@@ -758,9 +759,9 @@ Use this list on the day, and write the results down.
 
 ## Not verified yet
 
-- The extension has not been run on the client's laptop, and it has not been run in a visible Chrome window on mains power.
+- The extension has not been run on the client's laptop. The visible-window timing was made only on the developer's laptop.
 - The client's Iris Xe chip has not been checked for `shader-f16`.
-- A second runtime (Transformers.js) has not been tried. The adviser said to try it only if reading is still slow after the visible-window run, and to switch only if it is at least two times faster.
+- A second runtime (Transformers.js) has not been tried. The visible-window run showed no slowdown, so it is needed only if a shorter time is wanted, and then only if it is at least two times faster.
 - Qwen2.5-1.5B was not measured (the benchmark run stopped), and gemma3-1b did not load with this WebLLM version.
 - Languages other than English.
 
@@ -932,8 +933,8 @@ Where a number appears, it comes from `DECISIONS.md`, `DEVLOG.md`, the saved tes
 | 1 | Default model on built-in graphics | Llama 3.2 1B, accurate and 2.4 times slower per part. Do not show a model choice on the main screen; put Quality under Settings. | Done. The automatic switch to SmolLM2 is removed. Quality: Better or Fast is under Settings. |
 | 2 | How much of a page to read | Keep 6,000 characters, exactly one part, so no merge request. Aim for about 2 minutes warm and 3 with the first-answer warm-up. | Done. `readBudgetIntegrated` is 6,000, and the page is shortened in `condense.js`. |
 | 3 | Shorter answers | 3 sentences for a single part (130 tokens), 2 per part (90), 4 or 5 for the merge (180), and every cut answer ends at its last full stop. | Done for built-in graphics only. |
-| 4 | A different runtime | Not now. First run the same benchmark in a visible Chrome window on mains power, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, try Transformers.js on one page, half a day at most, and switch only if reading is at least two times faster. | Not done. Everything measured so far ran in a hidden Chromium. |
-| 5 | Biggest risk | None of the numbers is from the client's chip or a visible Chrome window. First action: run the extension on the client's laptop with a timing log for both models on the same page, which also downloads the 695 MB model in advance. | Open. See the timing run in chapter 03. |
+| 4 | A different runtime | Not now. First run the same benchmark in a visible Chrome window on mains power, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, try Transformers.js on one page, half a day at most, and switch only if reading is at least two times faster. | Visible-window run done on the developer's laptop on 28 October: 118.7 s, 101.7 s and 116.7 s, against 124.6 s hidden, with no slowdown. Transformers.js not tried. |
+| 5 | Biggest risk | None of the numbers is from the client's chip. First action: run the extension on the client's laptop with a timing log for both models on the same page, which also downloads the 695 MB model in advance. | Open. See the timing run in chapter 03. |
 
 **Also built, from the same advice:** the model is loaded and warmed while the popup is open, when it is already stored; back matter and markers are cut before reading; the popup says when a page was shortened and offers "Read the whole page (slower)" with a rough time estimate; the Quality choice is in Settings.
 
@@ -941,7 +942,7 @@ Where a number appears, it comes from `DECISIONS.md`, `DEVLOG.md`, the saved tes
 
 **The trade-off.** The shortened summary covers about a fifth of a long page, and the whole page takes 5 to 12 minutes on built-in graphics. The estimate for the whole page is a rough guess from the measured speed.
 
-**What is still open.** The client's laptop has not been timed, and the visible-window run on mains power has not been made. Transformers.js has not been tried.
+**What is still open.** The client's laptop has not been timed. The visible-window run on mains power was made on the developer's laptop on 28 October, with no slowdown over three runs. Transformers.js has not been tried, and is needed only if a shorter time is wanted.
 
 **What you can say.** "The slow chip reads about 15 tokens a second, so the project reads less of a long page and writes short answers. The main model stays, and the person decides whether to trade accuracy for speed."
 
@@ -1105,7 +1106,7 @@ Until 26 October the extension did switch to SmolLM2 by itself on built-in graph
 
 **12. Why not a different runtime, such as Transformers.js?**
 
-Nothing measured so far says the runtime is the cause. The adviser's advice was to measure in a visible Chrome window on mains power first, because reading at 15.6 tokens a second is far below what the chip should do. Only if reading is still slow, one page with Transformers.js, half a day at most, and switch only if it reads at least two times faster. That test has not been made. Switching runtimes now would also mean new code and new tests, which the project has not budgeted for.
+Nothing measured so far says the runtime is the cause. The adviser's advice was to measure in a visible Chrome window on mains power first. That was done on the developer's laptop on 28 October: three runs in a row took 118.7 s, 101.7 s and 116.7 s, against 124.6 s in the hidden browser, so the hidden window is not the cause. A Transformers.js test, half a day at most, is needed only if a shorter time is wanted, and then only if it reads at least two times faster. That test has not been made. Switching runtimes now would also mean new code and new tests, which the project has not budgeted for.
 
 ## Privacy
 
@@ -1133,7 +1134,7 @@ The built-in chip reads about 15 tokens a second and writes about 2 with Llama 3
 
 **18. How fast is it on your laptop?**
 
-On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
+On the developer's Intel chip, the Lighthouse page took 124.6 s with the model loaded, in one part, with 21 percent of the text read. In a visible Chrome window on mains power, on 28 October, three runs in a row took 118.7 s, 101.7 s and 116.7 s, so the hidden test browser did not make it slower. The long fixture took 103.8 s. On the developer's NVIDIA card, the saved clean runs gave 74.1 s for the seven-part Lighthouse article, 16.5 s for a two-part article offline, and 15.3 s for a short article offline. The client's laptop has a built-in Iris Xe chip and has not been timed, so its figure is `[to be measured]`.
 
 ![Speed on the two graphics chips from the saved runs: writing speed in tokens a second, and seconds for one summary, before and after 26 October](../figures/V08_speed_chart.png)
 
@@ -1187,7 +1188,7 @@ The repository does not score summary quality, so the honest answer is that it i
 
 **29. What was not measured?**
 
-Several things. The client's laptop has not been run, and the chip's `shader-f16` support is not confirmed. The extension has not been timed in a visible Chrome window on mains power, which the adviser recommended first, and the timing of three summaries in a row has not been taken. The Transformers.js runtime has not been tried. Qwen2.5 1.5B was not measured, because the benchmark run stopped, and gemma3-1b did not load with this WebLLM version. The estimate for the whole page is a rough guess. Summary quality beyond three pages was not compared with any other model. Closing the tab during a download does not stop the download. No automated scenario covers the 10-minute timeout path, because the pretend model has no timeout. Only English text was tried.
+Several things. The client's laptop has not been run, and the chip's `shader-f16` support is not confirmed. The visible-window timing was made on the developer's laptop on 28 October, with no slowdown over three runs. The client's laptop has not been timed, and its three-run timing has not been taken. The Transformers.js runtime has not been tried. Qwen2.5 1.5B was not measured, because the benchmark run stopped, and gemma3-1b did not load with this WebLLM version. The estimate for the whole page is a rough guess. Summary quality beyond three pages was not compared with any other model. Closing the tab during a download does not stop the download. No automated scenario covers the 10-minute timeout path, because the pretend model has no timeout. Only English text was tried.
 
 **30. Why do the decode speeds differ between documents? The DEVLOG says 63 tokens a second, the saved runs say 34 to 53.**
 
@@ -1195,5 +1196,5 @@ The 63 tokens a second, and the 600 for reading the prompt, come from an earlier
 
 ## What this means in plain words
 
-The answers come back to three points. The model runs on the laptop, so the page stays private and the summary needs no network after the download. The built-in chip is slow at reading and writing, so the project reads less of a long page and writes short answers, and the popup says what was left out. What is not yet known is the client's laptop, so the timing run in a visible Chrome window comes first, and until it is done you should say so.
+The answers come back to three points. The model runs on the laptop, so the page stays private and the summary needs no network after the download. The built-in chip is slow at reading and writing, so the project reads less of a long page and writes short answers, and the popup says what was left out. What is not yet known is the client's laptop, so its own timing run comes first, and until it is done you should say so.
 

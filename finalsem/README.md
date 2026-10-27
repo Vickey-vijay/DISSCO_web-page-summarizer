@@ -63,6 +63,7 @@ All numbers below were measured in a hidden Chromium (not the daily Chrome windo
 | Reading speed on the built-in Intel chip | 15.6 tokens a second for Llama 3.2 1B, 26 to 29 for SmolLM2 360M (about 600 on the NVIDIA chip). Reading the page is about 80 percent of the time of one part; the speed hardly grows when the model gets smaller ([docs/test-runs/bench-models.md](docs/test-runs/bench-models.md)). |
 | Wikipedia "Lighthouse" on the built-in Intel chip, **before** the speed work (SmolLM2, whole page, 7 parts) | 616.4 s (a failed run with the 3-minute limit and a second try of 704.5 s are also recorded) |
 | Wikipedia "Lighthouse" on the built-in Intel chip, **now** (Llama 3.2 1B, page shortened to 21 percent, one part) | **124.6 s**. The popup says it read about 21 percent and that reading all of it would take roughly 12 minutes. |
+| Wikipedia "Lighthouse" on the built-in Intel chip, now, in a **visible Chrome window** on mains power, three times in a row | 118.7 s, 101.7 s, 116.7 s (the hidden browser gave 124.6 s) |
 | Long fixture article on the built-in Intel chip, now | 103.8 s (about half of the text read) |
 | First use on the built-in Intel chip, now (short article, includes the 695 MB download and the warm-up) | 200.6 s |
 | Quality: Fast (SmolLM2) on the built-in Intel chip | short article 39.5 s, Lighthouse 64.7 s, but its Lighthouse summary was a failure (it repeated the prompt); this is why Fast is not the default |
@@ -72,7 +73,7 @@ All numbers below were measured in a hidden Chromium (not the daily Chrome windo
 ## Not yet verified
 
 - A test on the **client's laptop** itself. Its details are known ([docs/CLIENT_LAPTOP.md](docs/CLIENT_LAPTOP.md)), but every number above is from the developer's laptop in a hidden Chromium. Its Iris Xe chip has more execution units than the developer laptop's built-in chip but runs at 15 watts, so its real speed is to be measured (expected: about 2 minutes for a long page, about 3 minutes the first time).
-- The same benchmark in a **visible Chrome window on mains power** (advised by the decision record D7 in [docs/DECISIONS.md](docs/DECISIONS.md)); a different engine (Transformers.js) was not tried.
+- A different engine (Transformers.js) was not tried (decision record D7 in [docs/DECISIONS.md](docs/DECISIONS.md)). The visible-window check was made on the developer laptop (see the table above); it was not made on the client's laptop.
 - `setup.bat --gpu` against a real Chrome installation.
 - A manual click-through in the real (visible) Chrome, using the checklist for V2. Every test so far ran in hidden Chromium.
 - Languages other than English. The model is small and is meant for English text.

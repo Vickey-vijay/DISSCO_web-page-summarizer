@@ -39,7 +39,7 @@ The client's laptop was described from three photos of its screen, which are not
 
 Three things follow for setup. The built-in graphics path is the main path for this client, not an edge case. On the facts in the photos, the setup checks would pass: Chrome is newer than 116, the memory and free disk space are far above what the checks ask for, and WebGPU is hardware accelerated. `setup.bat --gpu` has nothing to switch on, because there is only one graphics chip. The photos do not show whether the chip offers the 16-bit shader feature (`shader-f16`). The developer laptop's Intel chip of the same generation does, and chapter 16 lists this as open.
 
-The first use downloads the main model, about 695 MB, then loads and warms it up. On the developer laptop's Intel chip, the warm-up on the first answer took about 28 to 37 seconds. The extension has not been run on the client's laptop, or in a visible Chrome window, so these are expectations and not measurements (chapter 14).
+The first use downloads the main model, about 695 MB, then loads and warms it up. On the developer laptop's Intel chip, the warm-up on the first answer took about 28 to 37 seconds. The extension has not been run on the client's laptop. A run in a visible Chrome window was made on the developer laptop, not on the client's laptop, so the client's figures are expectations and not measurements (chapter 14).
 
 ### What this means in plain words
 

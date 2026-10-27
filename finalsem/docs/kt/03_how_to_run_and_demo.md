@@ -31,7 +31,7 @@ The client sent photos of the laptop. The facts below are read from the photos (
 | Chrome | 156.0.8078.48 |
 | WebGPU | Hardware accelerated |
 
-Three things are not known. The photos do not show whether the Iris Xe chip has the `shader-f16` feature. If it does not, the popup shows the NO_SHADER_F16 message and Version 2 cannot run there. The speed of this chip has not been measured on that laptop, and the processor is a 15-watt part whose sustained speed is not known. And the extension has not been run on that laptop, nor in a visible Chrome window. The developer's Intel chip is of the same generation (Gen 12), and its numbers are the nearest guide, not a promise. `setup.bat --gpu` has nothing to switch on there, because the laptop has one graphics chip.
+Three things are not known. The photos do not show whether the Iris Xe chip has the `shader-f16` feature. If it does not, the popup shows the NO_SHADER_F16 message and Version 2 cannot run there. The speed of this chip has not been measured on that laptop, and the processor is a 15-watt part whose sustained speed is not known. And the extension has not been run on that laptop. The visible-window timing was made only on the developer's laptop. The developer's Intel chip is of the same generation (Gen 12), and its numbers are the nearest guide, not a promise. `setup.bat --gpu` has nothing to switch on there, because the laptop has one graphics chip.
 
 ## Step by step on a fresh computer
 
@@ -81,9 +81,9 @@ Caption: real model, NVIDIA card, the Wikipedia Lighthouse article, from a run b
 
 Cautions. Do not demo the first download on stage. Do not quote the 616 s or 704 s runs as current; they used the SmolLM2 default before 26 October. Do not quote the 15.3 s offline figure as a current measurement of the built-in chip; it was made on the NVIDIA card before a label fix. The Lighthouse summary on built-in graphics is short and checked for accuracy, but its text is not the same as the whole article's.
 
-## The timing run in a visible Chrome (on mains power)
+## The visible-window timing (developer laptop done; client's to do)
 
-No timing has yet been made in a visible Chrome window on mains power, which was the first step an outside adviser (Opus) recommended on 26 October. The run below is what to do, and what to write down, for both the developer's laptop and the client's.
+The visible-window timing was made on the developer's laptop on 28 October, on mains power, with the Lighthouse page three times in a row: 118.7 s, 101.7 s and 116.7 s, against 124.6 s in the hidden browser. No slowdown showed over the three runs. The steps below repeat it, and say what to write down on the client's laptop, which still needs its own timing.
 
 1. Plug the laptop into mains power. Close other programs, and keep the same window open.
 2. Open Chrome in the normal window (not the test browser). Load the folder, and reload it if the code changed.
@@ -175,9 +175,9 @@ Use this list on the day, and write the results down.
 
 ## Not verified yet
 
-- The extension has not been run on the client's laptop, and it has not been run in a visible Chrome window on mains power.
+- The extension has not been run on the client's laptop. The visible-window timing was made only on the developer's laptop.
 - The client's Iris Xe chip has not been checked for `shader-f16`.
-- A second runtime (Transformers.js) has not been tried. The adviser said to try it only if reading is still slow after the visible-window run, and to switch only if it is at least two times faster.
+- A second runtime (Transformers.js) has not been tried. The visible-window run showed no slowdown, so it is needed only if a shorter time is wanted, and then only if it is at least two times faster.
 - Qwen2.5-1.5B was not measured (the benchmark run stopped), and gemma3-1b did not load with this WebLLM version.
 - Languages other than English.
 

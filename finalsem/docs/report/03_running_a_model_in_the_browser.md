@@ -126,7 +126,7 @@ Reading the screenshot: a real-model capture made after the label fix. The model
 
 Reading the screenshot: a real-model capture of the short article. The summary is a title line and a numbered list of points. The footer reads "1 part · 1 request · 17.5 s · Llama 3.2 1B".
 
-These tests ran on one computer, with two pages, in a hidden browser. They did not run on the client's laptop or in the visible Chrome window. They show that the stored model works with outside websites blocked on this computer.
+These tests ran on one computer, with two pages, in a hidden browser. They did not run on the client's laptop or in a visible Chrome window. The visible-window timing of 28 October was on the developer laptop with the default model, and it was not an offline run. They show that the stored model works with outside websites blocked on this computer.
 
 **What this means in plain words.** After the first download, the summary runs from the stored model on the laptop. The internet is not needed for later summaries, which was shown on the developer laptop with outside websites blocked.
 
@@ -165,4 +165,4 @@ The model files are kept in IndexedDB, in the browser's storage for the extensio
 No. It has one graphics chip, so there is no separate card to choose. On the developer laptop Chrome used the built-in chip by default, and the opt-in switch moved it to the NVIDIA card. The extension does not force either choice, and it keeps the 1B model on the built-in chip.
 
 **Does the extension work offline?**
-Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in the visible Chrome window.
+Yes, once the model is stored. The clean offline runs on the NVIDIA card gave summaries in 15.3 and 16.5 seconds with outside websites blocked, and the run made after the label fix gave 17.7 and 16 seconds. These tests covered one computer in a hidden browser. They have not been run on the client's laptop or in a visible Chrome window. The developer laptop's default model was timed in a visible window on 28 October, but that run was not offline.

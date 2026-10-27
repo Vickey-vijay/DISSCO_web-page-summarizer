@@ -123,6 +123,7 @@ The table lists the saved runs used in this chapter. The NVIDIA and Intel rows, 
 | Wikipedia Lighthouse, stored | NVIDIA RTX 3050 | Llama 3.2 1B | 74.1 | 7 parts, 8 requests | 34 |
 | Wikipedia Lighthouse, whole page, SmolLM2 default (before 26 October) | Intel built-in | SmolLM2 360M | 616.4 | 7 parts, 8 requests | 4 |
 | Wikipedia Lighthouse, shortened (26 October) | Intel built-in | Llama 3.2 1B | 124.6 | 1 part, 1 request, 21% read | 2 |
+| Wikipedia Lighthouse, visible window, developer laptop (28 October, three runs in a row) | Intel built-in | Llama 3.2 1B | 118.7, 101.7, 116.7 | 1 part, 1 request, 21% read | 2 |
 | Long fixture, shortened (26 October) | Intel built-in | Llama 3.2 1B | 103.8 | 1 part, 1 request, 50% read | 2 |
 
 Reading the table: the Intel rows with Llama 3.2 1B are the new default. The 124.6 s run is about five times quicker than the whole-page SmolLM2 run, and its summaries were judged accurate. The popup's estimate for reading all of the Lighthouse text was 692 s, a rough guess from the measured speed. The earlier real run on the full text took 616 s with the small model.

@@ -140,7 +140,7 @@ Table: Speed on the client's laptop: the five answers and what was done (from DE
 | 1 | Default model on built-in graphics | Llama 3.2 1B (accurate, 2.4 times slower per part). Do not show a model choice on the main screen; put "Quality: Better / Fast" under Settings | Done. The popup has a closed Settings section. The automatic switch to SmolLM2 (D3) is removed; SmolLM2 is used on built-in graphics only when the person chooses Fast, or after a memory failure |
 | 2 | How much of a page to read on built-in graphics | Keep 6,000 characters (exactly one part, so no merge request). Aim for about 2 minutes warm and 3 minutes with the first-answer warm-up | Done (`readBudgetIntegrated` 6000, `src/core/condense.js`) |
 | 3 | Shorter answers | 3 sentences for a single part (130 tokens), 2 per part (90), 4 to 5 for the merge (180), and every cut-off answer ends at its last full stop | Done for built-in graphics only |
-| 4 | A different runtime (Transformers.js or ONNX Runtime Web) | First run the same benchmark in a visible Chrome window on mains power. Try a different runtime only if reading is still slow, for half a day at most, and switch only if reading is at least 2 times faster | **Not done.** Everything measured so far ran in a hidden Chromium; the visible-window run was not made |
+| 4 | A different runtime (Transformers.js or ONNX Runtime Web) | First run the same benchmark in a visible Chrome window on mains power. Try a different runtime only if reading is still slow, for half a day at most, and switch only if reading is at least 2 times faster | **Visible-window run made on 28 October** on the developer laptop (118.7, 101.7 and 116.7 s). The Transformers.js test was not started |
 | 5 | Biggest risk | No number is from the client's chip or a real Chrome window. First action: run the extension on the client's laptop with a timing log for both models on the same page | **Open.** See the manual smoke test notes in `docs/MANUAL_SMOKE_TEST.md` |
 
 The benchmark behind the answers ran on the developer laptop's Intel chip in hidden Chromium, with one realistic part of 6,000 characters:
@@ -162,10 +162,11 @@ The measured result on the developer laptop's Intel chip (`docs/test-runs/v2-loc
 - The long fixture article took 103.8 s, with 5,302 of 10,532 characters read.
 - A first use, with the 695 MB download and the warm-up, took 200.6 s; the warm-up took about 28 s.
 - The three summaries are described as accurate and fluent in the run notes. No second reader has checked them against the pages.
+- **Visible window, 28 October.** The Lighthouse page, three times in a row in a visible Chrome window on mains power: 118.7 s, 101.7 s and 116.7 s (the first includes loading the stored model, 9.3 s), against 124.6 s in the hidden browser. Reading and writing speed were the same, so the hidden window is not the cause of the slow reading; the chip is. Three runs showed no slowdown from heat on the developer's 45-watt laptop. The target of about 2 minutes is met there.
 
 The Quality: Fast choice (SmolLM2) took 39.5 s for the short article with the model stored, and 64.7 s for the Lighthouse article. That Lighthouse summary was a failed answer, which only repeated the prompt's safety sentence and an empty "Summary:" label. The run was made before that repeat was removed, so it is kept as a record and not as a summary.
 
-**Not done, and still open.** The visible-window timing run on mains power has not been made, so no speed has been measured on the client's laptop, whose Iris Xe graphics shares memory and runs at 15 watts. A different runtime has not been tried. The whole-page option with Llama 3.2 1B has not been measured, and the earlier whole-page runs used SmolLM2 (616.4 s and 704.5 s, before 26 October).
+**Not done, and still open.** No speed has been measured on the client's laptop, whose Iris Xe graphics shares memory and runs at 15 watts, and the effect of heat over repeated runs is unknown there. A different runtime (Transformers.js) has not been tried; it is the next step only if a shorter time is wanted. The whole-page option with Llama 3.2 1B has not been measured, and the earlier whole-page runs used SmolLM2 (616.4 s and 704.5 s, before 26 October).
 
 **What this means in plain words.** The default now reads less of a long page and writes shorter answers, so the Lighthouse article takes about two minutes instead of about ten. The accurate model stays the default. The speed on the client's own laptop is still unknown.
 
@@ -232,7 +233,7 @@ Table: Problems found in review, and their status
 | SmolLM2 echoed the safety sentence and an empty "Summary:" label | Fixed. Both are removed, and such an answer is EMPTY_ANSWER | Chapter 5, engine seam |
 | The first answer waited 30 to 40 s for the warm-up | Improved. A stored model is preloaded when the popup opens (`PRELOAD_MODEL`) | Chapter 5, later use |
 | Speed on the client's laptop | **Still open.** The extension has not been run there; the Iris Xe speed is unknown. Target: about 2 minutes warm | Chapter 4, NF11; this chapter, D7 |
-| Timing in a visible Chrome window | **Still open.** Not made; the second opinion advised it | This chapter, D7 |
+| Timing in a visible Chrome window | Made on the developer laptop on 28 October (118.7, 101.7 and 116.7 s); the hidden window is not the cause. **Still open** on the client's laptop | This chapter, D7 |
 | A different runtime (Transformers.js or ONNX Runtime Web) | **Not tried.** Only if reading stays slow | This chapter, D7 |
 
 Other points remain open, though none is a code change. `v2-local-nvidia.md` repeats the second NVIDIA attempt. D2's description does not match DECISIONS' "two problems". The download size is quoted as 664 MB in a DEVLOG row and as about 660 MB in a script comment, while the popup reports about 695 MB, which this report uses. The "slower" note on an older offline run holds only for the long article.

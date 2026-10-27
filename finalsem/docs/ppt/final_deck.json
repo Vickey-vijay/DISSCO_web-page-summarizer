@@ -600,11 +600,6 @@
           "34"
         ],
         [
-          "Short article, offline, after label fix (NVIDIA)",
-          "17.7",
-          "65"
-        ],
-        [
           "Lighthouse, whole page, SmolLM2 (Intel, before the speed work)",
           "616.4",
           "4"
@@ -625,18 +620,23 @@
           "1.9"
         ],
         [
+          "Lighthouse, shortened, visible window, 3 runs (Intel, now)",
+          "118.7 / 101.7 / 116.7",
+          "2.0"
+        ],
+        [
           "Lighthouse, Fast quality, SmolLM2 (Intel; the summary failed)",
           "64.7",
           "4"
         ]
       ],
       "col_widths": [
-        7.2,
-        1.8,
-        2.8
+        6.6,
+        2.6,
+        2.6
       ],
-      "caption": "All from a hidden test browser on the developer laptop. Not yet measured on the client's laptop. Disturbed runs are left out.",
-      "notes": "These are the clean runs. The first three rows are the NVIDIA card. The fourth row is the old Intel result, before the speed work: ten minutes for the Lighthouse page. The next three rows are the Intel chip with the new defaults: the accurate main model, long pages shortened, and short answers. The Lighthouse page now takes about two minutes. The last row is the Fast setting. It is quicker, but its Lighthouse summary only repeated the prompt, which is why Fast is not the default. None of these numbers comes from the client's laptop. I expect about two minutes there, and I will measure it."
+      "caption": "Developer laptop. Hidden test browser, except the visible-window row. Not yet measured on the client's laptop.",
+      "notes": "These are the clean runs. The first three rows are the NVIDIA card. The fourth row is the old Intel result, before the speed work: ten minutes for the Lighthouse page. The next three rows are the Intel chip with the new defaults: the accurate main model, long pages shortened, and short answers. The Lighthouse page now takes about two minutes. The last row is the Fast setting. It is quicker, but its Lighthouse summary only repeated the prompt, which is why Fast is not the default. None of these numbers comes from the client's laptop. I expect about two minutes there, and I will measure it. I also timed the Lighthouse page three times in a row in a visible Chrome window on mains power: 118.7, 101.7 and 116.7 seconds, a little quicker than the hidden browser's 124.6 seconds, with no slowdown across the three runs. So the hidden test browser is not what makes reading slow; the chip is."
     },
     {
       "layout": "table",
@@ -683,13 +683,13 @@
       "title": "What is not done or not verified",
       "bullets": [
         "Client's laptop: details known (Iris Xe, 16 GB, Chrome 156), but never run there.",
-        "Speed numbers are from a hidden browser on the developer laptop; a visible window may differ.",
+        "Visible window checked on the developer laptop (118.7, 101.7, 116.7 s); not on the client's.",
         "setup.bat --gpu: tested only on a test registry key; not needed on the client's laptop.",
         "A shortened summary covers about a fifth of a long page; the whole page takes 5 to 12 minutes.",
         "English only. Small-model slips. Another engine (Transformers.js) was not tried.",
         "Cutting a long part in half is tested with the pretend model only."
       ],
-      "notes": "Some things are not finished, and I want to be exact about them. The client's laptop details are known, but I have not run the extension on it, so its real speed is not measured. All my speed numbers come from a hidden test browser on the developer laptop, and a visible window might be faster or slower. A shortened summary rests on about a fifth of a long page, and reading the whole page takes five to twelve minutes on this kind of chip. The model is small and made for English. I did not try a different engine, because a stronger model advised me to measure in a visible window first. Cutting a too-long part in half is covered by unit tests and the pretend model, because no real part overflowed the window."
+      "notes": "Some things are not finished, and I want to be exact about them. The client's laptop details are known, but I have not run the extension on it, so its real speed is not measured. Most of my speed numbers come from a hidden test browser on the developer laptop. I also timed a visible window, three runs in a row, and it was about ten percent quicker, but nothing was timed on the client's laptop. A shortened summary rests on about a fifth of a long page, and reading the whole page takes five to twelve minutes on this kind of chip. The model is small and made for English. I did not try a different engine, because a stronger model advised me to measure in a visible window first. Cutting a too-long part in half is covered by unit tests and the pretend model, because no real part overflowed the window."
     },
     {
       "layout": "bullets",

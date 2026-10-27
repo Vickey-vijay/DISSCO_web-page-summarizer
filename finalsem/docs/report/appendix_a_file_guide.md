@@ -28,7 +28,7 @@ Table: Every file under finalsem/project, with its purpose and its status agains
 | `scripts/check-computer.ps1` | Describes Windows, processor, memory, graphics chips and free disk space on drive C. Exits 1 only when disk space is short. Its built-in note says that a long page is shortened first and that the first use downloads about 695 MB | New |
 | `scripts/check-extension.ps1` | Checks that `manifest.json` parses, is Manifest V3, and names files that exist | Changed |
 | `scripts/dump-page-text.mjs` | Prints what the extension reads from a page: the extracted text, its size and its headings | New |
-| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, with seven plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`, `intel-better`, `intel-fast`). Deletes the profile's old service worker and code cache folders before each launch | New |
+| `scripts/local-run.mjs` | Measures the real model in hidden Chromium, or in a visible window for the `intel-visible` plan, with eight plans (`nvidia`, `nvidia-offline`, `intel`, `intel-wikipedia`, `intel-short`, `intel-better`, `intel-fast`, `intel-visible`). Deletes the profile's old service worker and code cache folders before each launch | New |
 | `scripts/secret-scan.mjs` | Checks the repository for the old Gemini key before a push | Changed |
 | `scripts/set-chrome-gpu.ps1` | Writes or removes the per-user setting that asks Windows for the separate graphics card. Finds Chrome itself, so `-ChromePath` is optional | New |
 | `scripts/shoot-ui-states.mjs` | Takes the pretend-model popup screenshots for the report | New |

@@ -45,9 +45,9 @@ Version 1 is untouched in its own folder, so the midterm submission stays as it 
 ## The five things to remember
 
 1. **The model runs on the laptop.** The page text stays on the computer. The network is used only for the first download, about 695 MB for Llama 3.2 1B.
-2. **The client's laptop has only built-in graphics.** It is an Intel Iris Xe chip on a 15-watt processor. The extension has never been run on that laptop, nor in a visible Chrome window.
+2. **The client's laptop has only built-in graphics.** It is an Intel Iris Xe chip on a 15-watt processor. The extension has never been run on that laptop. On the developer's laptop it was timed in a visible Chrome window on 28 October, with results close to the hidden run.
 3. **Long pages are shortened on built-in graphics.** The default reads the opening of the page and the first sentences of each section, about one part of 6,000 characters. The popup says how much was read, and offers "Read the whole page (slower)". The Wikipedia Lighthouse page took 124.6 s on the developer's built-in chip, against about 10 minutes before.
 4. **Answers are short on built-in graphics, and the big model is the default.** SmolLM2 is available only as a visible choice, Settings > Quality > Fast, because its summaries were often muddled or wrong.
-5. **Some things are not verified.** Timing on the client's laptop, timing in a visible Chrome on mains power, a second runtime, and any language other than English.
+5. **Some things are not verified.** Timing on the client's laptop, a second runtime, and any language other than English.
 
 *If asked about evidence, say: "The numbers come from saved runs on the developer's laptop and from pretend-model scenarios. None of them is from the client's laptop, and the repository does not score summary quality."*
